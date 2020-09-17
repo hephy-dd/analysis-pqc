@@ -2,7 +2,7 @@
 
 Analysis for PQC measurements.
 
-# Install
+## Install
 
 Install using pip in a virtual environment.
 
