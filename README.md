@@ -1,2 +1,11 @@
-# analaysis-pqc
-Analysis for PQC measurements
+# analysis-pqc
+
+Analysis for PQC measurements.
+
+# Install
+
+Install using pip in a virtual environment.
+
+```bash
+pip install git+https://github.com/hephy-dd/analysis-pqc.git@0.1.0
+```
