@@ -6,8 +6,7 @@ setup(
     packages=find_packages(exclude=['tests']),
     install_requires=[
         'numpy',
-        'scipy',
-        'matplotlib'
+        'scipy'
     ],
     package_data={},
     entry_points={
