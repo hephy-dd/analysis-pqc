@@ -334,7 +334,7 @@ def analyse_gcd(v, i, cut_param=0.01, debug=0):
     # get regions for indexing
     try:
         idx_acc = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < cut_param and v[i] > v[np.argmax(spl_dev)]) ]
-        idx_dep = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < cut_param and v[i] > v[np.argmax(spl_dev)] - 2.5  and v[i] < v[np.argmax(spl_dev)] + 2.5) ]
+        idx_dep = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) > cut_param and v[i] > v[np.argmax(spl_dev)] - 2.5  and v[i] < v[np.argmax(spl_dev)] + 2.5) ]
         idx_inv = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < cut_param and v[i] < v[np.argmin(spl_dev)]) ]
         v_acc = v[ idx_acc[0]:idx_acc[-1]+1 ]
         v_dep = v[ idx_dep[0]:idx_dep[-1]+1 ]
