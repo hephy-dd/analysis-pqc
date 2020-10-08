@@ -73,7 +73,7 @@ def line_regr_with_cuts(x, y, cut_param, debug=0):
 
     # init
     a = b = x_fit = spl_dev = -1
-    status = "none"
+    status = STATUS_NONE
 
     # get spline fit, requires strictlty increasing array
     y_norm = y / np.max(y)
@@ -372,7 +372,7 @@ def analyse_fet(v, i, debug=0):
     # init
     v_th = -1
     a = b = spl_dev = -1
-    status = "none"
+    status = STATUS_NONE
 
     # get spline fit, requires strictlty increasing array
     y_norm = i / np.max(i)
@@ -527,7 +527,7 @@ def analyse_meander(i, v, w=10, nsq=12835, debug=0):
     rho_sq ... specific resistance per square
     """
 
-    status = "pass"
+    status = STATUS_PASSED
     r = v/i
     rho_sq = np.mean(r * w / nsq)
 
@@ -548,7 +548,7 @@ def analyse_breakdown(v, i, debug=0):
     v_bd  ... breakdown voltage
     """
 
-    status = "pass"
+    status = STATUS_PASSED
     v_bd = v[-1]
 
     return v_bd, status
@@ -569,7 +569,7 @@ def analyse_capacitor(v, c, debug=0):
     c_median ... median capacitance
     """
 
-    status = "pass"
+    status = STATUS_PASSED
     c_mean = np.mean(c)
     c_median = np.median(c)
 
