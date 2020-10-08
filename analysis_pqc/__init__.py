@@ -17,6 +17,8 @@ __all__ = [
     'STATUS_NONE',
     'STATUS_PASSED',
     'STATUS_FAILED',
+    'CARRIER_ELECTRONS',
+    'CARRIER_HOLES',
     'analyse_iv',
     'analyse_cv',
     'analyse_mos',
@@ -35,9 +37,12 @@ __all__ = [
 ## Constants
 ## ------------------------------------
 
-STATUS_NONE = "none"
-STATUS_PASSED = "passed"
-STATUS_FAILED = "failed"
+STATUS_NONE = 'none'
+STATUS_PASSED = 'passed'
+STATUS_FAILED = 'failed'
+
+CARRIER_ELECTRONS = 'electrons'
+CARRIER_HOLES = 'holes'
 
 ## Helper functions
 ## ------------------------------------
@@ -53,7 +58,7 @@ def params(names):
 
 
 @params('a, b, x_fit, spl_dev, status')
-def line_regr_with_cuts(x, y, cut_param, debug=0):
+def line_regr_with_cuts(x, y, cut_param, debug=False):
     """
     Linear Regression with Cuts:
     - Normalise data set
@@ -107,7 +112,7 @@ def line_regr_with_cuts(x, y, cut_param, debug=0):
 ## ------------------------------------
 
 @params('v_max, i_max, i_800, i_600, status')
-def analyse_iv(v, i, debug=0):
+def analyse_iv(v, i, debug=False):
     """
     Diode IV: Extract current in standard situation.
 
@@ -149,7 +154,7 @@ def analyse_iv(v, i, debug=0):
 
 
 @params('v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status')
-def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.03, debug=0):
+def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.03, debug=False):
     """
     Diode CV: Extract depletion voltage and resistivity.
 
@@ -198,9 +203,9 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.03, debug=0)
             a_rise, b_rise = np.polyfit(v_rise, c_rise, 1)
             a_const, b_const = np.polyfit(v_const, c_const, 1)
 
-            if carrier == 'holes':
+            if carrier == CARRIER_HOLES:
                 mu = 450 * 1e-4
-            elif carrier == 'electrons':
+            elif carrier == CARRIER_ELECTRONS:
                 mu = 1350 * 1e-4
             else:
                 raise ValueError('Not a valid type of majority carrier.')
@@ -229,7 +234,7 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.03, debug=0)
 
 
 @params('v_fb1, v_fb2, c_acc, c_inv, t_ox, n_ox, a_acc, b_acc, v_acc, a_dep, b_dep, v_dep, a_inv, b_inv, v_inv,  spl_dev, status')
-def analyse_mos(v, c, cut_param=1e-55, debug=0):
+def analyse_mos(v, c, cut_param=1e-55, debug=False):
     """
     Metal oxide Capacitor: Extract flatband voltage, oxide thickness and charge density.
 
@@ -306,8 +311,9 @@ def analyse_mos(v, c, cut_param=1e-55, debug=0):
 
 
 @params('i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, spl_dev, status')
-def analyse_gcd(v, i, cut_param=0.01, debug=0):
-    """ Gate Controlled Diode: Generation currents.
+def analyse_gcd(v, i, cut_param=0.01, debug=False):
+    """
+    Gate Controlled Diode: Generation currents.
 
     Parameters:
     v ... voltage
@@ -357,7 +363,7 @@ def analyse_gcd(v, i, cut_param=0.01, debug=0):
 
 
 @params('v_th, a, b, spl_dev, status')
-def analyse_fet(v, i, debug=0):
+def analyse_fet(v, i, debug=False):
     """
     Field Effect Transistor: Threshold voltage.
 
@@ -395,7 +401,7 @@ def analyse_fet(v, i, debug=0):
 
 
 @params('r_sheet, a, b, x_fit, spl_dev, status')
-def analyse_van_der_pauw(i, v, cut_param=1e-5, debug=0):
+def analyse_van_der_pauw(i, v, cut_param=1e-5, debug=False):
     """
     Van der Pauw: Extract sheet resistance.
 
@@ -416,7 +422,7 @@ def analyse_van_der_pauw(i, v, cut_param=1e-5, debug=0):
 
 
 @params('r_sheet, a, b, x_fit, spl_dev, status')
-def analyse_cross(i, v, cut_param=1e-5, debug=0):
+def analyse_cross(i, v, cut_param=1e-5, debug=False):
     """
     Cross: Extract sheet resistance.
 
@@ -437,7 +443,7 @@ def analyse_cross(i, v, cut_param=1e-5, debug=0):
 
 
 @params('t_line, a, b, x_fit, spl_dev, status')
-def analyse_linewidth(i, v, r_sheet=-1, cut_param=1e-5, debug=0):
+def analyse_linewidth(i, v, r_sheet=-1, cut_param=1e-5, debug=False):
     """
     Linewidth: Extract linewidth.
 
@@ -462,7 +468,7 @@ def analyse_linewidth(i, v, r_sheet=-1, cut_param=1e-5, debug=0):
 
 
 @params('r_contact, a, b, x_fit, spl_dev, status')
-def analyse_cbkr(i, v, r_sheet=-1, cut_param=1e-5, debug=0):
+def analyse_cbkr(i, v, r_sheet=-1, cut_param=1e-5, debug=False):
     """
     Cross Bridge Kelvin Resistance Structure: Extract contact resistance.
 
@@ -491,7 +497,7 @@ def analyse_cbkr(i, v, r_sheet=-1, cut_param=1e-5, debug=0):
 
 
 @params('r_contact, a, b, x_fit, spl_dev, status')
-def analyse_contact(i, v, cut_param=1e-5, debug=0):
+def analyse_contact(i, v, cut_param=1e-5, debug=False):
     """
     Contact Chain: Extract metal-implant contact resistance.
 
@@ -513,7 +519,7 @@ def analyse_contact(i, v, cut_param=1e-5, debug=0):
 
 
 @params('rho_sq, status')
-def analyse_meander(i, v, w=10, nsq=12835, debug=0):
+def analyse_meander(i, v, w=10, nsq=12835, debug=False):
     """
     Meander: Calculates specific resistance per square.
 
@@ -536,7 +542,7 @@ def analyse_meander(i, v, w=10, nsq=12835, debug=0):
 
 
 @params('v_bd, status')
-def analyse_breakdown(v, i, debug=0):
+def analyse_breakdown(v, i, debug=False):
     """
     Breakdown: Get oxide breakdown.
 
@@ -556,7 +562,7 @@ def analyse_breakdown(v, i, debug=0):
 
 
 @params('c_mean, c_median, status')
-def analyse_capacitor(v, c, debug=0):
+def analyse_capacitor(v, c, debug=False):
     """
     Test capacitors: Get mean capacitance.
 
