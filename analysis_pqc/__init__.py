@@ -11,7 +11,7 @@ import numpy as np
 from scipy.interpolate import CubicSpline
 from collections import namedtuple
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 __all__ = [
     'STATUS_NONE',
@@ -484,13 +484,13 @@ def analyse_cbkr(i, v, r_sheet=-1, cut_param=1e-5, debug=False):
 
     a, b, x_fit, spl_dev, status = line_regr_with_cuts(i, v, cut_param, debug)
 
-    # note: The contact isn't symmetric. It's 12.5 by 13.5 um. Solution for now is to use 13 um.
-    d = 13 # contact size
-    w = 33 # diffusion width
-    r_c = a - (4*r_sheet*d**2) / (3*w**2) * (1 + d/(2*w - 2*d))
-
     if r_sheet == -1:
         r_contact = -1
+    else:
+        # note: The contact isn't symmetric. It's 12.5 by 13.5 um. Solution for now is to use 13 um.
+        d = 13 # contact size
+        w = 33 # diffusion width
+        r_contact = a - (4*r_sheet*d**2) / (3*w**2) * (1 + d/(2*w - 2*d))
 
     return r_contact, a, b, x_fit, spl_dev, status
 

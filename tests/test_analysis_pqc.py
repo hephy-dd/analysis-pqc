@@ -14,7 +14,7 @@ class AnalysisPQCTest(unittest.TestCase):
         self.assertEqual(analysis_pqc.STATUS_FAILED, "failed")
 
     def test_line_regr_with_cuts(self):
-        r = analysis_pqc.line_regr_with_cuts(x, y, cut_param=-1)
+        r = analysis_pqc.line_regr_with_cuts(x, y, cut_param=-.5)
         self.assertEqual(r.status, analysis_pqc.STATUS_PASSED)
 
     def test_analyse_iv(self):
@@ -50,7 +50,9 @@ class AnalysisPQCTest(unittest.TestCase):
         self.assertEqual(r.status, analysis_pqc.STATUS_PASSED)
 
     def test_analyse_cbkr(self):
-        r = analysis_pqc.analyse_cbkr(x, y)
+        r = analysis_pqc.analyse_cbkr(x, y, r_sheet=-1, cut_param=-1)
+        self.assertEqual(r.status, analysis_pqc.STATUS_PASSED)
+        r = analysis_pqc.analyse_cbkr(x, y, r_sheet=1, cut_param=1e-5)
         self.assertEqual(r.status, analysis_pqc.STATUS_PASSED)
 
     def test_analyse_contact(self):
