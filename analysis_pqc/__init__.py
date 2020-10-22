@@ -234,7 +234,7 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.03, debug=Fa
 
 
 @params('v_fb1, v_fb2, c_acc, c_inv, t_ox, n_ox, a_acc, b_acc, v_acc, a_dep, b_dep, v_dep, a_inv, b_inv, v_inv,  spl_dev, status')
-def analyse_mos(v, c, cut_param=1e-55, debug=False):
+def analyse_mos(v, c, cut_param=0.03, debug=False):
     """
     Metal oxide Capacitor: Extract flatband voltage, oxide thickness and charge density.
 
@@ -331,7 +331,7 @@ def analyse_gcd(v, i, cut_param=0.01, debug=False):
     status = STATUS_NONE
 
     # get spline fit, requires strictlty increasing array
-    y_norm = i / np.max(i)
+    y_norm = np.abs(i) / np.max(np.abs(i))
     x_norm = np.arange(len(y_norm))
 
     spl = CubicSpline(x_norm, y_norm)
@@ -339,15 +339,35 @@ def analyse_gcd(v, i, cut_param=0.01, debug=False):
 
     # get regions for indexing
     try:
-        idx_acc = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < cut_param and v[i] > v[np.argmax(spl_dev)]) ]
-        idx_dep = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) > cut_param and v[i] > v[np.argmax(spl_dev)] - 2.5  and v[i] < v[np.argmax(spl_dev)] + 2.5) ]
-        idx_inv = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < cut_param and v[i] < v[np.argmin(spl_dev)]) ]
+        vmin = v[np.argmin(i)]
+        idx_acc = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < 0.03 and v[i] < (vmin - 4.5)) ]
+        idx_dep = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < 0.01 and v[i] > (vmin - 2.5) and v[i] < (vmin + 2.5)) ]
+        idx_inv = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < 0.01 and v[i] > (vmin + 4.5)) ]
         v_acc = v[ idx_acc[0]:idx_acc[-1]+1 ]
         v_dep = v[ idx_dep[0]:idx_dep[-1]+1 ]
         v_inv = v[ idx_inv[0]:idx_inv[-1]+1 ]
         i_acc = i [ idx_acc[0]:idx_acc[-1]+1 ]
         i_dep = i [ idx_dep[0]:idx_dep[-1]+1 ]
         i_inv = i [ idx_inv[0]:idx_inv[-1]+1 ]
+        
+        if (len(v_acc) == 0):
+            v_acc = v[:5]
+            i_acc = i[:5]
+        if (len(v_dep) == 0):
+            v_dep = v[np.argmin(i):(np.argmin(i)+5)]
+            i_dep = i[np.argmin(i):(np.argmin(i)+5)]
+        if (len(v_acc) == 0):
+            v_inv = v[-5:]
+            i_inv = i[-5:]
+        
+        # the selection above is not stable
+        # until this is fixed stay with a simpler selection
+        v_acc = v[:5]
+        i_acc = i[:5]
+        v_dep = v[np.argmin(i):(np.argmin(i)+5)]
+        i_dep = i[np.argmin(i):(np.argmin(i)+5)]
+        v_inv = v[-5:]
+        i_inv = i[-5:]
 
         # surface and bulk generation current
         i_surf = np.mean(i_dep) - np.mean(i_inv)
