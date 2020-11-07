@@ -21,6 +21,7 @@ export PYTHONPATH=$PYTHONPATH:$(pwd)
 ## Run example
 
 ```bash
-python examples/analysis_example.py -f path/to/files
+python pqc_analysis_scripts/pqc_analysis_json.py [path] [analysis]
+python pqc_analysis_scripts/pqc_analysis_txt.py -f path/to/files
 ```
 Note: the above example requires package `matplotlib` to be installed.
