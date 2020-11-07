@@ -1,5 +1,5 @@
 
-from pqc_analyse_functions import *
+from analysis_pqc import *
 import numpy as np
 import os
 import sys

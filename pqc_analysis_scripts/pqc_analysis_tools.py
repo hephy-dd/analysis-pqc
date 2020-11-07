@@ -1,7 +1,7 @@
 import glob
 import json
 import matplotlib.pyplot as plt
-from pqc_analyse_functions import *
+from analysis_pqc import *
 import numpy as np
 import os
 import sys
@@ -17,9 +17,9 @@ def find_most_recent_file(path, test):
 
   path_folder = path
 
-  filedir=[]
+  filedir = []
 
-  files = glob.glob(path_folder + "\*.json")   # get all json files
+  files = glob.glob(path_folder + os.sep + "*.json")    # get all json files
   files.sort(key=os.path.getmtime)             #sort the folders accordind to datetime
 
   for f in files:
