@@ -18,10 +18,31 @@ Set `PYTHONPATH` environment variable to use the local package (if not using an 
 export PYTHONPATH=$PYTHONPATH:$(pwd)
 ```
 
-## Run example
+**Note:** the package requires additional dependencies to be installed.
 
 ```bash
-python pqc_analysis_scripts/pqc_analysis_json.py [path] [analysis]
-python pqc_analysis_scripts/pqc_analysis_txt.py -f path/to/files
+pip install -r requirements.txt
 ```
-Note: the above example requires package `matplotlib` to be installed.
+
+## Run scripts
+
+Analyze JSON
+```bash
+python scripts/pqc_analysis_json.py <path> <analysis>
+```
+
+Analyze text
+```bash
+python scripts/pqc_analysis_txt.py -f <path/to/files>
+```
+
+Convert text to JSON
+```bash
+python scripts/txt2json.py <input.txt> -o <output.json>
+```
+
+**Note:** the above scripts require additional dependencies to be installed.
+
+```bash
+pip install -r scripts/requirements.txt
+```

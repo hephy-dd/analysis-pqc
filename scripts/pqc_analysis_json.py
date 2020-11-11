@@ -1,54 +1,59 @@
+#!/usr/bin/env python3
 
-from analysis_pqc import *
-import numpy as np
+"""This script contains a number of functions which can be used to analyse the
+PQC measurements.
+
+By default it finds the most recent file of the path and the test (e.g iv) that
+you have given as an input in the terminal and analyses the data.
+
+If you select 'all' as an input test, then it finds the most recent file of each
+individual possible test and analyses it.
+
+You may want to test a particular file (which might not be the most recent one).
+In that case, you can just modify the corresponding functions in the
+pqc_analysis_tools.py script and give the file (and the path) as an input in the
+terminal.
+"""
+
+import argparse
+import math
 import os
 import sys
-import math
+
+import numpy as np
+
+from analysis_pqc import *
 from pqc_analysis_tools import *
 
-### This script contains a number of functions which can be used to analyse the PQC measurements.
-### By default it finds the most recent file of the path and the test (e.g iv) that you have given
-### as an input in the terminal and analyses the data.
-### If you select 'all' as an input test, then it finds the most recent file of each individual possible
-### test and analyses it.
-
-### You may want to test a particular file (which might not be the most recent one). In that case,
-### you can just modify the corresponding functions in the pqc_analysis_tools.py script and give
-### the file (and the path) as an input in the terminal.
-
-
-
 def analyse_iv_data(path):
+    test = 'iv'
 
- test ='iv'
+    v = abs(read_json_file(path, test, 'voltage'))
+    i_tot = read_json_file(path, test, 'current_elm')
+    i = abs(read_json_file(path, test, 'current_hvsrc'))
+    temp = read_json_file(path, test, 'temperature_chuck')
+    humidity = read_json_file(path, test, 'humidity_box')
 
- v = abs(read_json_file(path, test, 'voltage'))
- i_tot = read_json_file(path, test, 'current_elm')
- i= abs(read_json_file(path, test, 'current_hvsrc'))
- temp = read_json_file(path, test, 'temperature_chuck')
- humidity = read_json_file(path, test, 'humidity_box')
+    x_loc = 0.3
+    y_loc = 0.65
 
- x_loc= 0.3
- y_loc= 0.65
+    v_norm, v_unit = normalise_parameter(v, 'V')
+    i_norm, i_unit = normalise_parameter(i, 'A')
 
- v_norm, v_unit = normalise_parameter(v, 'V')
- i_norm, i_unit = normalise_parameter(i, 'A')
+    v_max, i_max, i_800, i_600, status = analyse_iv(v_norm, i_norm)
 
- v_max, i_max, i_800, i_600, status = analyse_iv(v_norm, i_norm)
+    lbl = assign_label(path, test)
 
- lbl = assign_label(path, test)
-
- annotate='I$_{max}$' + ': {} {} @ {}{}'.format(round(i_max, 2), i_unit, max(v_norm),v_unit) + '\n\nT$_{avg}$' + ': {:0.2f} $^\circ C$'.format(np.mean(temp)) \
+    annotate = 'I$_{max}$' + ': {} {} @ {}{}'.format(round(i_max, 2), i_unit, max(v_norm),v_unit) + '\n\nT$_{avg}$' + ': {:0.2f} $^\circ C$'.format(np.mean(temp)) \
           + '\n\n H$_{avg}$:' + '{:0.2f}'.format(np.mean(humidity)) + r'$\%$'
 
- fig,ax = plt.subplots(1,1)
- plot_curve(ax, v_norm, i_norm, 'IV Curve', 'Reverse Bias Voltage [{}]'.format(v_unit), 'Current [{}]'.format(i_unit), lbl, annotate, x_loc, y_loc)
-
+    fig,ax = plt.subplots(1,1)
+    plot_curve(ax, v_norm, i_norm, 'IV Curve', 'Reverse Bias Voltage [{}]'.format(v_unit), 'Current [{}]'.format(i_unit), lbl, annotate, x_loc, y_loc)
 
 
 def analyse_cv_data(path):
-
     test = 'cv'
+
     v = abs(read_json_file(path, test, 'voltage_hvsrc'))
     i = read_json_file(path, test, 'current_hvsrc')
     c = read_json_file(path, test, 'capacitance')
@@ -78,10 +83,8 @@ def analyse_cv_data(path):
     plot_curve(ax2, v_norm, inv_c2, 'Full Depletion Voltage Estimation', 'Voltage[{}]'.format(v_unit), '1/C$^{2}$ [F$^{-2}$]', lbl, '', 0, 0 )
 
 
-
 def analyse_mos_data(path):
-
-    test= 'mos'
+    test = 'mos'
 
     v = read_json_file(path, test, 'voltage_hvsrc')
     i = read_json_file(path, test, 'current_hvsrc')
@@ -96,7 +99,7 @@ def analyse_mos_data(path):
 
     v_fb1, v_fb2, c_acc, c_inv, t_ox, n_ox, a_acc, b_acc, v_acc, a_dep, b_dep, v_dep, a_inv, b_inv, v_inv,  spl_dev, status = analyse_mos(v_norm, c_norm)
     lbl = assign_label(path, test)
-    
+
 
     fit_acc = [a_acc*x + b_acc for x in v_norm]
     fit_dep = [a_dep*i+b_dep for i in v_norm]
@@ -112,37 +115,33 @@ def analyse_mos_data(path):
     plot_curve(ax, v_norm,c_norm, 'CV Curve', 'Voltage [V]', 'Capacitance [{}]'.format(c_unit), lbl, annotate, x_loc, y_loc)
 
 
-
 def analyse_gcd_data(path):
-
     test = 'gcd'
 
     v = read_json_file(path, test, 'voltage')
     i_em = read_json_file(path, test, 'current_elm')
     i_src = read_json_file(path, test, 'current_vsrc')
     i_hvsrc = read_json_file(path, test, 'current_hvsrc')
-          
+
 
     i_em_norm, i_em_unit = normalise_parameter(i_em, 'A')
 
     lbl = assign_label(path, test)
-          
+
     i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, spl_dev, status = analyse_gcd(v,i_em_norm)
 
     fig, ax = plt.subplots(1,1)
     plot_curve(ax, v, i_em_norm, 'I-V Curve GCD', 'Voltage [V]', 'Current [{}]'.format(i_em_unit), lbl, '', 0, 0)
 
 
-
 def analyse_fet_data(path):
-
     test = 'fet'
 
     v = read_json_file(path, test, 'voltage')
     i_em = read_json_file(path, test, 'current_elm')
     i_src = read_json_file(path, test, 'current_vsrc')
     i_hvsrc = read_json_file(path, test, 'current_hvsrc')
-       
+
 
     i_em_norm, i_em_unit = normalise_parameter(i_em, 'A')
 
@@ -166,9 +165,7 @@ def analyse_fet_data(path):
     plt.show()
 
 
-
 def analyse_van_der_pauw_data(path):
-
     test = 'van-der-pauw'
 
     v = read_json_file(path, test, 'voltage_vsrc')
@@ -177,15 +174,13 @@ def analyse_van_der_pauw_data(path):
     lbl = assign_label(path, test)
     r_sheet, a, b, x_fit, spl_dev, status = analyse_van_der_pauw(i, v)
     fit = [a*x +b for x in x_fit]
- 
+
     fig, ax = plt.subplots(1,1)
     fit_curve(ax, x_fit, fit, 0)
     plot_curve(ax, i, v, 'IV Curve', 'Current', 'Voltage', lbl, '', 0, 0)
 
 
-
 def analyse_linewidth_data(path):
-
     test = 'linewidth'
 
     v = read_json_file(path, test, 'voltage_vsrc')
@@ -195,7 +190,7 @@ def analyse_linewidth_data(path):
 
     lbl = assign_label(path, test)
     a, b, x_fit, spl_dev, status = analyse_linewidth(i_norm, v, r_sheet=-1, cut_param=0.01, debug=0)
-        
+
     fit = [a*x +b for x in x_fit]
 
     fig, ax = plt.subplots(1, 1)
@@ -203,10 +198,7 @@ def analyse_linewidth_data(path):
     plot_curve(ax, i_norm, v, 'IV Curve', 'Current [{}]'.format(i_unit), 'Voltage [V]', lbl, '', 0, 0)
 
 
-
-
 def analyse_cbkr_data(path, r_sheet=-1):
-
     test = 'cbkr'
 
     v = read_json_file(path, test, 'voltage_vsrc')
@@ -215,7 +207,7 @@ def analyse_cbkr_data(path, r_sheet=-1):
     i_norm, i_unit = normalise_parameter(i, 'A')
 
     lbl = assign_label(path, test)
-        
+
     r_contact, a, b, x_fit, spl_dev, status = analyse_cbkr(i_norm, v, r_sheet, cut_param=0.01, debug=0)
     fit = [a*x +b for x in x_fit]
 
@@ -224,10 +216,7 @@ def analyse_cbkr_data(path, r_sheet=-1):
     plot_curve(ax, i_norm, v, 'IV Curve', 'Current [{}]'.format(i_unit), 'Voltage [V]', lbl, '', 0, 0)
 
 
-
-
 def analyse_contact_data(path):
-
     test= 'cbkr'
 
     v = read_json_file(path, test, 'voltage_vsrc')
@@ -239,12 +228,9 @@ def analyse_contact_data(path):
     r_contact, a, b, x_fit, spl_dev, status = analyse_contact(i, v, cut_param=0.01, debug=0)
 
     fit = [a*x+b for x in x_fit]
-    
-
 
 
 def analyse_meander_data(path):
-
     test = 'meander'
 
     v = read_json_file(path, test, 'voltage_vsrc')
@@ -253,12 +239,11 @@ def analyse_meander_data(path):
     i_norm, i_unit = normalise_parameter(i, 'A')
 
     lbl = assign_label(path, test)
-        
+
     rho_sq, status = analyse_meander(i_norm, v, debug=0)
 
 
 def analyse_breakdown_data(path):
-
     test = 'breakdown'
 
     v = read_json_file(path, test, 'voltage')
@@ -266,7 +251,6 @@ def analyse_breakdown_data(path):
     i_elm = read_json_file(path, test, 'current_elm')
     temp = read_json_file(path, test, 'temperature_chuck')
     humidity = read_json_file(path, test, 'humidity_box')
-
 
     i_elm_norm, i_elm_unit = normalise_parameter(i_elm, 'A')
 
@@ -281,33 +265,38 @@ def analyse_breakdown_data(path):
     plot_curve(ax, v, i_elm_norm, 'IV Curve', 'Voltage [V]', 'Current [{}]'.format(i_elm_unit), lbl, annotate, x_loc, y_loc)
 
 
-
 def analyse_folder(path, test):
+    functions = {
+        'iv': analyse_iv_data,
+        'cv': analyse_cv_data,
+        'fet': analyse_fet_data,
+        'gcd': analyse_gcd_data,
+        'mos': analyse_mos_data,
+        'linewidth': analyse_linewidth_data,
+        'van_der_pauw': analyse_van_der_pauw_data,
+        'breakdown': analyse_breakdown_data
+    }
 
-    functions = [analyse_iv_data, analyse_cv_data, analyse_fet_data, analyse_gcd_data, analyse_mos_data,
-                    analyse_linewidth_data, analyse_van_der_pauw_data, analyse_breakdown_data]
-
-    possible_tests = ['iv', 'cv', 'fet', 'gcd', 'mos', 'linewidth', 'van_der_pauw', 'breakdown', 'all']
-
-    if test == possible_tests[-1]:
-        for f in functions:
+    if test == 'all':
+        for f in functions.values():
             f(path)
+    elif test in functions:
+        functions.get(test)(path)
     else:
-            functions[possible_tests.index(test)](path)
+        raise ValueError(f"no such test: '{test}'")
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('path')
+    parser.add_argument('test')
+    return parser.parse_args()
 
 
 def main():
-
-    if len(sys.argv)<3 :
-        print("Two arguments required as a input: [path] [test_name]")
-
-    path = sys.argv[1]
-    test =sys.argv[2]
-    analyse_folder(path, test)
+    args = parse_args()
+    analyse_folder(args.path, args.test)
 
 
-
-if __name__ =="__main__":   
-  main()
+if __name__ =="__main__":
+    main()
