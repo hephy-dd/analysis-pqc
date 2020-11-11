@@ -115,16 +115,16 @@ def plot_curve(ax, x, y, title, xlabel, ylabel, legend, annotate, x_loc, y_loc):
     plt.show()
 
 
-def fit_curve(ax, x, y1, y2):
+def fit_curve(ax, x, y1, y2=None):
     """This function returns the object which corresponds to the fit function.
     You can plot 2 fit functions with respect to the same x, but if you want
-    just one, then you can type y2=0.
+    just one, then you can omit y2.
 
     This should be modified according to what the user wants.
     """
     ax = plt.gca()
     ax.plot(x, y1, '--r')
-    if y2 is not 0:
+    if y2:
       ax.plot(x, y2, '--r')
 
     return ax
