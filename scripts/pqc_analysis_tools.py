@@ -68,8 +68,9 @@ def assign_label(path, test):
     # assign it as a path through the terminal
     # file = path
 
-    file.split('\\')[-1]
-    lbl = '_'.join(file.split('_')[6:9])
+    lbl_list =[1,2,6,8,9]
+    file = file.split(os.sep)[-1]
+    lbl = '_'.join([file.split('_')[i] for i in lbl_list])
     return lbl
 
 

@@ -26,6 +26,8 @@ import numpy as np
 from analysis_pqc import *
 from pqc_analysis_tools import *
 
+print_results = 1
+
 
 '''
 functions = {
@@ -64,6 +66,11 @@ def analyse_iv_data(path):
     fig,ax = plt.subplots(1,1)
     plot_curve(ax, v_norm, i_norm, 'IV Curve', 'Reverse Bias Voltage [{}]'.format(v_unit), 'Current [{}]'.format(i_unit), lbl, annotate, x_loc, y_loc)
 
+    if print_results:
+        print('%s: IV: i_600: %.2e A\t i_800: %.2e A' % (lbl, i_600, i_800))
+
+    return i_600, i_800
+
 
 def analyse_cv_data(path):
     test = 'cv'
@@ -95,6 +102,11 @@ def analyse_cv_data(path):
     fig2, ax2 = plt.subplots(1,1)
     fit_curve(ax2, v_rise, a_rise * v_rise+ b_rise, 0)
     plot_curve(ax2, v_norm, inv_c2, 'Full Depletion Voltage Estimation', 'Voltage[{}]'.format(v_unit), '1/C$^{2}$ [F$^{-2}$]', lbl, '', 0, 0 )
+
+    if print_results:
+        print('%s: CV: v_fd: %.2e V \t rho: %.2e Ohm\t conc: %.2e cm^-3' % (lbl, v_dep2, rho, conc)) #####Fix the scale of conc, rho
+   
+    return v_dep2 
 
 
 def analyse_mos_data(path):
@@ -128,7 +140,13 @@ def analyse_mos_data(path):
     plt.axvline(x=v_fb2, color='black', linestyle='dashed')
     plot_curve(ax, v_norm,c_norm, 'CV Curve', 'Voltage [V]', 'Capacitance [{}]'.format(c_unit), lbl, annotate, x_loc, y_loc)
 
+    if print_results:
+        print('%s: MOS: v_fb2: %.2e V \t t_ox: %.2e um \t n_ox: %.2e cm^-3' % (lbl, v_fb2, t_ox, n_ox))
+ 
 
+    return v_fb1, v_fb2, t_ox, n_ox
+
+     
 def analyse_gcd_data(path):
     test = 'gcd'
 
@@ -147,6 +165,12 @@ def analyse_gcd_data(path):
     fig, ax = plt.subplots(1,1)
     plot_curve(ax, v, i_em_norm, 'I-V Curve GCD', 'Voltage [V]', 'Current [{}]'.format(i_em_unit), lbl, '', 0, 0)
 
+    if print_results:
+        print('%s: GCD: i_surf: %.2e A\t i_bulk: %.2e A' % (lbl, i_surf, i_bulk))
+  
+    return i_surf, i_bulk
+
+
 
 def analyse_fet_data(path):
     test = 'fet'
@@ -163,6 +187,8 @@ def analyse_fet_data(path):
 
     fit  = [a*i +b for i in v]
 
+    lbl = assign_label(path, test)
+
     fig,ax1 = plt.subplots()
     lns1 = ax1.plot(v,i_em_norm, ls='', marker='s', ms=3, label='transfer characteristics')
     ax1.set_xlabel('V$_{GS}$ [V]')
@@ -178,6 +204,11 @@ def analyse_fet_data(path):
     plt.legend(lns, labs, loc='upper left')
     plt.show()
 
+    if print_results:
+       print('%s: nFet: v_th: %.2e V' % (lbl, v_th))
+ 
+    return v_th
+
 
 def analyse_van_der_pauw_data(path):
     test = 'van-der-pauw'
@@ -192,6 +223,12 @@ def analyse_van_der_pauw_data(path):
     fig, ax = plt.subplots(1,1)
     fit_curve(ax, x_fit, fit, 0)
     plot_curve(ax, i, v, 'IV Curve', 'Current', 'Voltage', lbl, '', 0, 0)
+    
+    if print_results:
+       print('%s: van der Pauw: r_sheet: %.2e Ohm/sq' % (lbl, r_sheet))
+ 
+
+    return r_sheet
 
 
 def analyse_linewidth_data(path):
@@ -203,7 +240,7 @@ def analyse_linewidth_data(path):
     i_norm, i_unit = normalise_parameter(i, 'A')
 
     lbl = assign_label(path, test)
-    tline, a, b, x_fit, spl_dev, status = analyse_linewidth(i_norm, v, r_sheet=-1, cut_param=0.01, debug=0)
+    t_line, a, b, x_fit, spl_dev, status = analyse_linewidth(i_norm, v, r_sheet=-1, cut_param=0.01, debug=0)
 
     fit = [a*x +b for x in x_fit]
 
@@ -211,6 +248,11 @@ def analyse_linewidth_data(path):
     fit_curve(ax, x_fit, fit, 0)
     plot_curve(ax, i_norm, v, 'IV Curve', 'Current [{}]'.format(i_unit), 'Voltage [V]', lbl, '', 0, 0)
 
+    if print_results:
+        print('%s: Linewidth: %.2e um' % (lbl, t_line))
+ 
+    return t_line
+  
 
 def analyse_cbkr_data(path, r_sheet=-1):
     test = 'cbkr'
@@ -228,8 +270,14 @@ def analyse_cbkr_data(path, r_sheet=-1):
     fig, ax = plt.subplots(1, 1)
     fit_curve(ax, x_fit, fit, 0)
     plot_curve(ax, i_norm, v, 'IV Curve', 'Current [{}]'.format(i_unit), 'Voltage [V]', lbl, '', 0, 0)
+   
+    if print_results:
+       print('%s: cbkr: r_contact: %.2e Ohm' % (lbl, r_contact))
+ 
 
+    return r_contact
 
+   
 def analyse_contact_data(path):
     test= 'cbkr'
 
@@ -242,6 +290,12 @@ def analyse_contact_data(path):
     r_contact, a, b, x_fit, spl_dev, status = analyse_contact(i, v, cut_param=0.01, debug=0)
 
     fit = [a*x+b for x in x_fit]
+    
+    if print_results:
+       print('%s: contact: r_contact: %.2e Ohm' % (lbl, r_contact))
+ 
+    return r_contact
+
 
 
 def analyse_meander_data(path):
@@ -255,6 +309,13 @@ def analyse_meander_data(path):
     lbl = assign_label(path, test)
 
     rho_sq, status = analyse_meander(i_norm, v, debug=0)
+    
+    if print_results:
+       print('%s: Meander: rho_sq: %.2e' % (lbl, rho_sq))
+   
+
+    return rho_sq
+
 
 
 def analyse_breakdown_data(path):
@@ -278,6 +339,11 @@ def analyse_breakdown_data(path):
     annotate = 'V$_{{bd}}$: {} V \n\nT$_{{avg}}$ : {} \u00B0C \nH$_{{avg}}$: {} $\%$ '.format(v_bd, round(np.mean(temp),2), round(np.mean(humidity),2))
     plot_curve(ax, v, i_elm_norm, 'IV Curve', 'Voltage [V]', 'Current [{}]'.format(i_elm_unit), lbl, annotate, x_loc, y_loc)
 
+
+    if print_results:
+       print('%s: Breakdown: v_bd: %.2e V' % (lbl, v_bd))
+   
+    return v_bd
 
 
 functions = {
@@ -335,7 +401,7 @@ def main():
         print(test)
         filedir = find_all_files_from_path(args.path, test)
         for f in filedir:
-           print(f)
+         #  print(f)
            analyse_file(f, test)
         plt.show()
 
