@@ -26,6 +26,19 @@ import numpy as np
 from analysis_pqc import *
 from pqc_analysis_tools import *
 
+
+'''
+functions = {
+      'iv': analyse_iv_data,
+      'cv': analyse_cv_data,
+      'fet': analyse_fet_data,
+      'gcd': analyse_gcd_data,
+      'mos': analyse_mos_data,
+      'linewidth': analyse_linewidth_data,
+      'van_der_pauw': analyse_van_der_pauw_data, 
+      'breakdown': analyse_breakdown_data}
+'''
+
 def analyse_iv_data(path):
     test = 'iv'
 
@@ -190,7 +203,7 @@ def analyse_linewidth_data(path):
     i_norm, i_unit = normalise_parameter(i, 'A')
 
     lbl = assign_label(path, test)
-    a, b, x_fit, spl_dev, status = analyse_linewidth(i_norm, v, r_sheet=-1, cut_param=0.01, debug=0)
+    tline, a, b, x_fit, spl_dev, status = analyse_linewidth(i_norm, v, r_sheet=-1, cut_param=0.01, debug=0)
 
     fit = [a*x +b for x in x_fit]
 
@@ -266,8 +279,8 @@ def analyse_breakdown_data(path):
     plot_curve(ax, v, i_elm_norm, 'IV Curve', 'Voltage [V]', 'Current [{}]'.format(i_elm_unit), lbl, annotate, x_loc, y_loc)
 
 
-def analyse_folder(path, test):
-    functions = {
+
+functions = {
         'iv': analyse_iv_data,
         'cv': analyse_cv_data,
         'fet': analyse_fet_data,
@@ -278,13 +291,29 @@ def analyse_folder(path, test):
         'breakdown': analyse_breakdown_data
     }
 
+
+def analyse_file(path, test):
+    '''
+    functions = {
+        'iv': analyse_iv_data,
+        'cv': analyse_cv_data,
+        'fet': analyse_fet_data,
+        'gcd': analyse_gcd_data,
+        'mos': analyse_mos_data,
+        'linewidth': analyse_linewidth_data,
+        'van_der_pauw': analyse_van_der_pauw_data,
+        'breakdown': analyse_breakdown_data
+    }
+    '''
     if test == 'all':
         for f in functions.values():
+            print(f)
             f(path)
     elif test in functions:
         functions.get(test)(path)
     else:
         raise ValueError(f"no such test: '{test}'")
+
 
 
 def parse_args():
@@ -296,7 +325,18 @@ def parse_args():
 
 def main():
     args = parse_args()
-    analyse_folder(args.path, args.test)
+    
+    if args.test == 'all':
+        tests = functions.keys()
+    else:
+        tests = [args.test]
+
+    for test in tests:
+        print(test)
+        filedir = find_all_files_from_path(args.path, test)
+        for f in filedir:
+           print(f)
+           analyse_file(f, test)
 
 
 if __name__ =="__main__":
