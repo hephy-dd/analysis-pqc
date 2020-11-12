@@ -15,6 +15,7 @@ from analysis_pqc import *
 
 __all__ = [
     'find_most_recent_file',
+    'find_all_files_from_path',
     'assign_label',
     'read_json_file',
     'units',
@@ -22,6 +23,20 @@ __all__ = [
     'plot_curve',
     'fit_curve'
 ]
+
+def find_all_files_from_path(path, test):
+
+    path_folder = path
+    filedir =[]
+
+    files = glob.glob(os.path.join(path_folder, "*.json"))
+
+    for f in files:
+        if test in [v.lower() for v in f.split('_')]:
+            filedir.append(f)
+
+    return filedir
+
 
 
 def find_most_recent_file(path, test):
@@ -48,7 +63,7 @@ def assign_label(path, test):
     """This function assigns the ID to the variable lbl which is used in the
     plots.
     """
-    file = find_most_recent_file(path, test)
+    file = path
     # un-comment this in case you want to test a specific file. You have to
     # assign it as a path through the terminal
     # file = path
@@ -62,8 +77,8 @@ def read_json_file(path, test, parameter):
     """This function reads the json file and returns an array of the parameter
     you need.
     """
-    file = find_most_recent_file(path, test)
-    #file = path  #un-comment this out in case you want to test a specific file. You have to assign it as a path through the terminal
+    
+    file = path  #un-comment this out in case you want to test a specific file. You have to assign it as a path through the terminal
 
     with open(file) as f:
         a = json.load(f)
