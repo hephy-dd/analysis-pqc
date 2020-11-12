@@ -337,7 +337,7 @@ def main():
         for f in filedir:
            print(f)
            analyse_file(f, test)
-
+        plt.show()
 
 if __name__ =="__main__":
     main()

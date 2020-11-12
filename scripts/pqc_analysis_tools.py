@@ -119,6 +119,8 @@ def plot_curve(ax, x, y, title, xlabel, ylabel, legend, annotate, x_loc, y_loc):
     etc. ax is an axes object and is necessary to create two or more subplots.
     In that case we want to overlay the curve and the fit.
     """
+
+    #plt.figure()
     ax.plot(x, y, '-o', ms=3, label=legend)
     plt.annotate(annotate, (x_loc, y_loc), xycoords='figure fraction', color='black', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))
     plt.title(title)
@@ -127,7 +129,7 @@ def plot_curve(ax, x, y, title, xlabel, ylabel, legend, annotate, x_loc, y_loc):
     plt.legend(loc='upper left')
     plt.grid(alpha=0.5, linestyle='--', linewidth=1)
     plt.tight_layout()
-    plt.show()
+   # plt.show()
 
 
 def fit_curve(ax, x, y1, y2=None):
