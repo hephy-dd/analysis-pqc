@@ -96,8 +96,8 @@ def analyse_cv_data(path):
     lbl = assign_label(path, test)
     annotate = 'V$_{{fd}}}}$: {} V\n\nT$_{{avg}}$: {} \u00B0C\nH$_{{avg}}$: {}'.format(v_dep2, round(np.mean(temp),2), round(np.mean(humidity),2)) + r'$\%$'
 
-    fig1, ax1 = plt.subplots(1, 1)
-    plot_curve(ax1, v_norm, c_norm, 'CV curve', 'Voltage[{}]'.format(v_unit), 'Capacitance [{}]'.format(c_unit), lbl, annotate, x_loc, y_loc)
+    #fig1, ax1 = plt.subplots(1, 1)
+    #plot_curve(ax1, v_norm, c_norm, 'CV curve', 'Voltage[{}]'.format(v_unit), 'Capacitance [{}]'.format(c_unit), lbl, annotate, x_loc, y_loc)
 
     fig2, ax2 = plt.subplots(1,1)
     fit_curve(ax2, v_rise, a_rise * v_rise+ b_rise, 0)
