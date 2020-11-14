@@ -67,7 +67,7 @@ def analyse_iv_data(path):
     plot_curve(ax, v_norm, i_norm, 'IV Curve', 'Reverse Bias Voltage [{}]'.format(v_unit), 'Current [{}]'.format(i_unit), lbl, annotate, x_loc, y_loc)
 
     if print_results:
-        print('%s: IV: i_600: %.2e A\t i_800: %.2e A' % (lbl, i_600, i_800))
+        print('%s:  IV:\ti_600: %.3f uA\ti_800: %.3f uA' % (lbl, i_600, i_800))
 
     return i_600, i_800
 
@@ -104,7 +104,8 @@ def analyse_cv_data(path):
     plot_curve(ax2, v_norm, inv_c2, 'Full Depletion Voltage Estimation', 'Voltage[{}]'.format(v_unit), '1/C$^{2}$ [F$^{-2}$]', lbl, '', 0, 0 )
 
     if print_results:
-        print('%s: CV: v_fd: %.2e V \t rho: %.2e Ohm\t conc: %.2e cm^-3' % (lbl, v_dep2, rho, conc)) #####Fix the scale of conc, rho
+    	#print(f"{lbl}: CV: v_fd: {}")
+        print('%s: \tCV: v_fd: %.2e V\trho: %.2e Ohm\tconc: %.2e cm^-3' % (lbl, v_dep2, rho*1e-3, conc*1e-6))
    
     return v_dep2 
 
@@ -141,7 +142,7 @@ def analyse_mos_data(path):
     plot_curve(ax, v_norm,c_norm, 'CV Curve', 'Voltage [V]', 'Capacitance [{}]'.format(c_unit), lbl, annotate, x_loc, y_loc)
 
     if print_results:
-        print('%s: MOS: v_fb2: %.2e V \t t_ox: %.2e um \t n_ox: %.2e cm^-3' % (lbl, v_fb2, t_ox, n_ox))
+        print('%s: \tMOS: v_fb2: %.2e V\tt_ox: %.2e um\tn_ox: %.2e cm^-3' % (lbl, v_fb2, t_ox, n_ox))
  
 
     return v_fb1, v_fb2, t_ox, n_ox
@@ -166,7 +167,7 @@ def analyse_gcd_data(path):
     plot_curve(ax, v, i_em_norm, 'I-V Curve GCD', 'Voltage [V]', 'Current [{}]'.format(i_em_unit), lbl, '', 0, 0)
 
     if print_results:
-        print('%s: GCD: i_surf: %.2e A\t i_bulk: %.2e A' % (lbl, i_surf, i_bulk))
+        print('%s: \tGCD: i_surf: %.2e A\t i_bulk: %.2e A' % (lbl, i_surf, i_bulk))
   
     return i_surf, i_bulk
 
@@ -205,7 +206,7 @@ def analyse_fet_data(path):
     plt.show()
 
     if print_results:
-       print('%s: nFet: v_th: %.2e V' % (lbl, v_th))
+       print('%s: \tnFet: v_th: %.2e V' % (lbl, v_th))
  
     return v_th
 
@@ -225,7 +226,7 @@ def analyse_van_der_pauw_data(path):
     plot_curve(ax, i, v, 'IV Curve', 'Current', 'Voltage', lbl, '', 0, 0)
     
     if print_results:
-       print('%s: van der Pauw: r_sheet: %.2e Ohm/sq' % (lbl, r_sheet))
+       print('%s: \tvan der Pauw: r_sheet: %.2e Ohm/sq' % (lbl, r_sheet))
  
 
     return r_sheet
@@ -249,7 +250,7 @@ def analyse_linewidth_data(path):
     plot_curve(ax, i_norm, v, 'IV Curve', 'Current [{}]'.format(i_unit), 'Voltage [V]', lbl, '', 0, 0)
 
     if print_results:
-        print('%s: Linewidth: %.2e um' % (lbl, t_line))
+        print('%s: \tLinewidth: %.2e um' % (lbl, t_line))
  
     return t_line
   
@@ -272,7 +273,7 @@ def analyse_cbkr_data(path, r_sheet=-1):
     plot_curve(ax, i_norm, v, 'IV Curve', 'Current [{}]'.format(i_unit), 'Voltage [V]', lbl, '', 0, 0)
    
     if print_results:
-       print('%s: cbkr: r_contact: %.2e Ohm' % (lbl, r_contact))
+       print('%s: \tcbkr: r_contact: %.2e Ohm' % (lbl, r_contact))
  
 
     return r_contact
@@ -292,7 +293,7 @@ def analyse_contact_data(path):
     fit = [a*x+b for x in x_fit]
     
     if print_results:
-       print('%s: contact: r_contact: %.2e Ohm' % (lbl, r_contact))
+       print('%s: \tcontact: r_contact: %.2e Ohm' % (lbl, r_contact))
  
     return r_contact
 
@@ -311,7 +312,7 @@ def analyse_meander_data(path):
     rho_sq, status = analyse_meander(i_norm, v, debug=0)
     
     if print_results:
-       print('%s: Meander: rho_sq: %.2e' % (lbl, rho_sq))
+       print('%s: \tMeander: rho_sq: %.2e' % (lbl, rho_sq))
    
 
     return rho_sq
@@ -341,7 +342,7 @@ def analyse_breakdown_data(path):
 
 
     if print_results:
-       print('%s: Breakdown: v_bd: %.2e V' % (lbl, v_bd))
+       print('%s: \tBreakdown: v_bd: %.2e V' % (lbl, v_bd))
    
     return v_bd
 
