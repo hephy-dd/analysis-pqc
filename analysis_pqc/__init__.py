@@ -155,7 +155,7 @@ def analyse_iv(v, i, debug=False):
 
 
 @params('v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status')
-def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.03, debug=False):
+def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_windowsize=21, debug=False):
     """
     Diode CV: Extract depletion voltage and resistivity.
 
@@ -165,6 +165,7 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.03, debug=Fa
     area ... implant size in [m^2]
     carrier ... majority charge carriers ['holes', 'electrons']
     cut_param ... used to cut on 1st derivative to id voltage regions
+    savgol_windowsize ... number of points to calculate the derivative, needs to be odd
 
     Returns:
     v_dep1 ... full depletion voltage via inflection
@@ -186,7 +187,7 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.03, debug=Fa
     x_norm = np.arange(len(y_norm))
     #spl = CubicSpline(x_norm, y_norm)
     #spl_dev = spl(x_norm, 1)
-    spl_dev = scipy.signal.savgol_filter(y_norm, window_length=21, polyorder=1, deriv=1)
+    spl_dev = scipy.signal.savgol_filter(y_norm, window_length=savgol_windowsize, polyorder=1, deriv=1)
     
     # get regions for indexing
     idx_rise = [ i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) > cut_param) ]  # the first and last value seems to be off sometimes
