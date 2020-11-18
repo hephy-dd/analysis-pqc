@@ -91,7 +91,7 @@ def analyse_cv_data(path):
 
     inv_c2 = 1/c**2
 
-    v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status = analyse_cv(v_norm, c_norm)
+    v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status = analyse_cv(v_norm, c_norm, cut_param= 0.008)
 
     lbl = assign_label(path, test)
     annotate = 'V$_{{fd}}}}$: {} V\n\nT$_{{avg}}$: {} \u00B0C\nH$_{{avg}}$: {}'.format(v_dep2, round(np.mean(temp),2), round(np.mean(humidity),2)) + r'$\%$'
@@ -100,8 +100,11 @@ def analyse_cv_data(path):
     #plot_curve(ax1, v_norm, c_norm, 'CV curve', 'Voltage[{}]'.format(v_unit), 'Capacitance [{}]'.format(c_unit), lbl, annotate, x_loc, y_loc)
 
     fig2, ax2 = plt.subplots(1,1)
-    fit_curve(ax2, v_rise, a_rise * v_rise+ b_rise, 0)
-    plot_curve(ax2, v_norm, inv_c2, 'Full Depletion Voltage Estimation', 'Voltage[{}]'.format(v_unit), '1/C$^{2}$ [F$^{-2}$]', lbl, '', 0, 0 )
+    #ax2b = ax2.twinx()
+    fit_curve(ax2, v_rise, a_rise * v_rise+ b_rise, color='ro')
+    fit_curve(ax2, v_const, a_const * v_const+ b_const, color='kx')
+    #fit_curve(ax2b, v_norm, spl_dev, color='mx')
+    plot_curve(ax2, v_norm, 1./c_norm**2, 'Full Depletion Voltage Estimation', 'Voltage[{}]'.format(v_unit), '1/C$^{2}$ [F$^{-2}$] - wrong!', lbl, '', 0, 0 )
 
     if print_results:
     	#print(f"{lbl}: CV: v_fd: {}")

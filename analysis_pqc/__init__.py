@@ -9,6 +9,7 @@ import warnings
 import numpy as np
 
 from scipy.interpolate import CubicSpline
+import scipy.signal
 from collections import namedtuple
 
 __version__ = '0.1.1'
@@ -183,12 +184,13 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.03, debug=Fa
     # get spline fit, requires strictlty increasing array
     y_norm = c / np.max(c)
     x_norm = np.arange(len(y_norm))
-    spl = CubicSpline(x_norm, y_norm)
-    spl_dev = spl(x_norm, 1)
-
+    #spl = CubicSpline(x_norm, y_norm)
+    #spl_dev = spl(x_norm, 1)
+    spl_dev = scipy.signal.savgol_filter(y_norm, window_length=21, polyorder=1, deriv=1)
+    
     # get regions for indexing
-    idx_rise = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) > cut_param) ]
-    idx_const = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < cut_param) ]
+    idx_rise = [ i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) > cut_param) ]  # the first and last value seems to be off sometimes
+    idx_const = [ i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) < cut_param) ]
 
     with warnings.catch_warnings():
         warnings.filterwarnings('error')
