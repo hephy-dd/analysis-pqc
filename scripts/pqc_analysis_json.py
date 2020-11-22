@@ -87,13 +87,22 @@ def analyse_cv_data(path):
     y_loc = 0.65
 
     v_norm, v_unit = normalise_parameter(v, 'V')
-    c_norm, c_unit = normalise_parameter(c, 'F')
-
+    c_norm, c_unit = normalise_parameter(c, 'F')  # then we get this is pF, we don't want that
+    
     inv_c2 = 1/c**2
-
-    v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status = analyse_cv(v_norm, c_norm, cut_param= 0.008)
-
+    
     lbl = assign_label(path, test)
+    if "Flute_1" in path:
+    	area = 1.56e-6  # m^2, quarter
+    elif "Flute_3" in path:
+    	area = 6.25e-6  # m^2, half (but without rounded edges)
+    else:
+    	area = 1
+    	print("WARNING: clould not determine flute number - area dependent values will be wrong!")
+
+    v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status = analyse_cv(v, c, area=area, cut_param= 0.008)
+
+    
     annotate = 'V$_{{fd}}}}$: {} V\n\nT$_{{avg}}$: {} \u00B0C\nH$_{{avg}}$: {}'.format(v_dep2, round(np.mean(temp),2), round(np.mean(humidity),2)) + r'$\%$'
 
     #fig1, ax1 = plt.subplots(1, 1)
@@ -104,11 +113,11 @@ def analyse_cv_data(path):
     fit_curve(ax2, v_rise, a_rise * v_rise+ b_rise, color='ro')
     fit_curve(ax2, v_const, a_const * v_const+ b_const, color='kx')
     #fit_curve(ax2b, v_norm, spl_dev, color='mx')
-    plot_curve(ax2, v_norm, 1./c_norm**2, 'Full Depletion Voltage Estimation', 'Voltage[{}]'.format(v_unit), '1/C$^{2}$ [F$^{-2}$] - wrong!', lbl, '', 0, 0 )
+    plot_curve(ax2, v, 1./c**2, 'Full Depletion Voltage Estimation', 'Voltage[{}]'.format(v_unit), '1/C$^{2}$ [F$^{-2}$]', lbl, '', 0, 0 )
 
     if print_results:
     	#print(f"{lbl}: CV: v_fd: {}")
-        print('%s: \tCV: v_fd: %.2e V\trho: %.2e Ohm\tconc: %.2e cm^-3' % (lbl, v_dep2, rho*1e-3, conc*1e-6))
+        print('%s: \tCV: v_fd: %.2e V\trho: %.2e kOhm\tconc: %.2e cm^-3' % (lbl, v_dep2, rho*1e-3, conc*1e-6))
    
     return v_dep2 
 
