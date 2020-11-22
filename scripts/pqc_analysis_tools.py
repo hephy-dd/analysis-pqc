@@ -30,9 +30,10 @@ def find_all_files_from_path(path, test):
     filedir =[]
 
     files = glob.glob(os.path.join(path_folder, "*.json"))
-
+    
     for f in files:
-        if test in [v.lower() for v in f.split('_')]:
+        #the replace is necessary for van_der_pauw/van-der-pauw
+        if test in [v.lower().replace("-", "_") for v in f.split('_')]:
             filedir.append(f)
 
     return filedir
@@ -59,16 +60,18 @@ def find_most_recent_file(path, test):
     return filedir[-1]
 
 
-def assign_label(path, test):
+def assign_label(path, test, vdp=False):
     """This function assigns the ID to the variable lbl which is used in the
-    plots.
+    plots. if vdp is set to true, only the vdp info is extracted
     """
     file = path
     # un-comment this in case you want to test a specific file. You have to
     # assign it as a path through the terminal
     # file = path
-
-    lbl_list =[1,2,6,8,9]
+    #print(path)
+    lbl_list =[1, 2, 6, 8, 9]
+    if vdp:
+        lbl_list =[10, 11, 12, 13]
     file = file.split(os.sep)[-1]
     lbl = '_'.join([file.split('_')[i] for i in lbl_list])
     return lbl

@@ -117,7 +117,7 @@ def analyse_cv_data(path):
 
     if print_results:
     	#print(f"{lbl}: CV: v_fd: {}")
-        print('%s: \tCV: v_fd: %.2e V\trho: %.2e kOhm\tconc: %.2e cm^-3' % (lbl, v_dep2, rho*1e-3, conc*1e-6))
+        print('%s: \tCV: v_fd: %.2e V\trho: %.2e Ohm\tconc: %.2e cm^-3' % (lbl, v_dep2, rho, conc*1e-6))
    
     return v_dep2 
 
@@ -136,12 +136,12 @@ def analyse_mos_data(path):
     v_norm, v_unit = normalise_parameter(v, 'V')
     c_norm, c_unit = normalise_parameter(c, 'F')
 
-    v_fb1, v_fb2, c_acc, c_inv, t_ox, n_ox, a_acc, b_acc, v_acc, a_dep, b_dep, v_dep, a_inv, b_inv, v_inv,  spl_dev, status = analyse_mos(v_norm, c_norm)
+    v_fb1, v_fb2, c_acc, c_inv, t_ox, n_ox, a_acc, b_acc, v_acc, a_dep, b_dep, v_dep, a_inv, b_inv, v_inv,  spl_dev, status = analyse_mos(v, c)
     lbl = assign_label(path, test)
 
 
-    fit_acc = [a_acc*x + b_acc for x in v_norm]
-    fit_dep = [a_dep*i+b_dep for i in v_norm]
+    fit_acc = [a_acc*x + b_acc for x in v]
+    fit_dep = [a_dep*i+b_dep for i in v]
     annotate = 'V$_{{fb}}$: {} V (via intersection)\nV$_{{fb}}$: {} V (via inflection)\n\nt$_{{ox}}$: {} m\nn$_{{ox}}$: {} cm$^{{-2}}$'.format(round(v_fb2,2), round(v_fb1,2), round(t_ox, 2), round(n_ox, 2))
 
     x_loc = 0.15
@@ -149,9 +149,9 @@ def analyse_mos_data(path):
 
     fig, ax = plt.subplots(1,1)
     plt.ylim(0, 100)
-    fit_curve(ax, v_norm, fit_acc, fit_dep)
+    fit_curve(ax, v, fit_acc, fit_dep)
     plt.axvline(x=v_fb2, color='black', linestyle='dashed')
-    plot_curve(ax, v_norm,c_norm, 'CV Curve', 'Voltage [V]', 'Capacitance [{}]'.format(c_unit), lbl, annotate, x_loc, y_loc)
+    plot_curve(ax, v, c, 'CV Curve', 'Voltage [V]', 'Capacitance [{}]'.format(c_unit), lbl, annotate, x_loc, y_loc)
 
     if print_results:
         print('%s: \tMOS: v_fb2: %.2e V\tt_ox: %.2e um\tn_ox: %.2e cm^-3' % (lbl, v_fb2, t_ox, n_ox))
@@ -227,18 +227,19 @@ def analyse_van_der_pauw_data(path):
     test = 'van-der-pauw'
 
     v = read_json_file(path, test, 'voltage_vsrc')
-    i = abs(read_json_file(path, test, 'current'))
+    i = read_json_file(path, test, 'current')
 
     lbl = assign_label(path, test)
+    lbl_vdp = assign_label(path, test, vdp=True)
     r_sheet, a, b, x_fit, spl_dev, status = analyse_van_der_pauw(i, v)
     fit = [a*x +b for x in x_fit]
 
-    fig, ax = plt.subplots(1,1)
-    fit_curve(ax, x_fit, fit, 0)
-    plot_curve(ax, i, v, 'IV Curve', 'Current', 'Voltage', lbl, '', 0, 0)
+    #fig, ax = plt.subplots(1,1)
+    #fit_curve(ax, x_fit, fit, 0)
+    #plot_curve(ax, i, v, 'IV Curve', 'Current', 'Voltage', lbl, '', 0, 0)
     
     if print_results:
-       print('%s: \tvan der Pauw: r_sheet: %.2e Ohm/sq' % (lbl, r_sheet))
+       print('%s: \tvdp: r_sheet: %.2e Ohm/sq  %s' % (lbl, r_sheet, lbl_vdp))
  
 
     return r_sheet
@@ -413,6 +414,7 @@ def main():
     for test in tests:
         print(test)
         filedir = find_all_files_from_path(args.path, test)
+        filedir = np.sort(filedir)
         for f in filedir:
          #  print(f)
            analyse_file(f, test)
