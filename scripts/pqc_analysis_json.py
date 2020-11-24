@@ -19,6 +19,7 @@ import argparse
 import math
 import os
 import sys
+import glob
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,18 +29,6 @@ from pqc_analysis_tools import *
 
 print_results = 1
 
-
-'''
-functions = {
-      'iv': analyse_iv_data,
-      'cv': analyse_cv_data,
-      'fet': analyse_fet_data,
-      'gcd': analyse_gcd_data,
-      'mos': analyse_mos_data,
-      'linewidth': analyse_linewidth_data,
-      'van_der_pauw': analyse_van_der_pauw_data, 
-      'breakdown': analyse_breakdown_data}
-'''
 
 def analyse_iv_data(path):
     test = 'iv'
@@ -223,31 +212,33 @@ def analyse_fet_data(path):
     return v_th
 
 
-def analyse_van_der_pauw_data(path):
+def analyse_van_der_pauw_data(path, printResults=print_results, plotResults=True):
     test = 'van-der-pauw'
 
     v = read_json_file(path, test, 'voltage_vsrc')
     i = read_json_file(path, test, 'current')
     if(len(v) == 0):
-        return np.nan
+        return np.nan, 0
     
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
     r_sheet, a, b, x_fit, spl_dev, status, r_value = analyse_van_der_pauw(i, v)
     if(abs(r_value) < 0.9):  # r_value is the correlation coefficient
         a = b = np.nan  # the quality of the fit is too bad, we don't want it
+        r_sheet = np.nan
+        r_value = 0
     else:
         fit = [a*x +b for x in x_fit]
-
-        fig, ax = plt.subplots(1,1)
-        fit_curve(ax, x_fit, fit, 0)
-        plot_curve(ax, i, v, 'IV Curve', 'Current', 'Voltage', lbl, '', 0, 0)
+        if plotResults:
+            fig, ax = plt.subplots(1,1)
+            fit_curve(ax, x_fit, fit, 0)
+            plot_curve(ax, i, v, 'IV Curve', 'Current', 'Voltage', lbl, '', 0, 0)
         
-        if print_results:
+        if printResults:
            print('%s: \tvdp: r_sheet: %.2e Ohm/sq, correlation: %.2e  %s' % (lbl, r_sheet, r_value, lbl_vdp))
  
 
-    return r_sheet
+    return r_sheet, r_value
 
 
 def analyse_linewidth_data(path):
@@ -365,6 +356,61 @@ def analyse_breakdown_data(path):
     return v_bd
 
 
+
+def get_vdp_value(pathlist):
+    """helper function to get best vdp result"""
+    r_sheet = np.nan
+    r_value = 0
+    for f in pathlist:
+        #print(f)
+        rs, rv = analyse_van_der_pauw_data(f, printResults=False, plotResults=False)
+        if(rv > r_value):  # we take the best value
+            r_sheet = rs
+            r_value = rv
+    return r_sheet
+    
+    
+    
+
+def analyse_full_line_data(path):
+    """
+    This function is used to analyze various different measurements 
+    and assemble one line (per fluteset) of results to be tabellized
+
+    Parameters:
+    path ... path to parent directory: subdirs for each measurment-set
+    """
+    dirs = glob.glob(os.path.join(path, "*"))
+    dirs.sort()
+    print("# serial                                 \t       vdp_poly                vdp_n                vdp_pstop               vdp_met-clov          vdp_p-cross-bridge")
+    for dirc in dirs:
+        for flute in ["PQCFlutesRight", "PQCFlutesLeft"]:
+            label = dirc.split("/")[-1]
+            vdp_poly_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "Polysilicon"], blacklist=["reverse"]))
+            vdp_poly_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "Polysilicon", "reverse"], blacklist=[]))
+            
+            vdp_n_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "n"], blacklist=["reverse"]))
+            vdp_n_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "n", "reverse"], blacklist=[]))
+            
+            vdp_pstop_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P_stop"], blacklist=["reverse"]))
+            vdp_pstop_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P_stop", "reverse"], blacklist=[]))
+            
+            vdp_metclo_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "metal", "clover"], blacklist=["reverse"]))
+            vdp_metclo_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "metal", "clover", "reverse"], blacklist=[]))
+            
+            vdp_p_cross_bridge_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P", "cross_bridge"], blacklist=["reverse"]))
+            vdp_p_cross_bridge_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P", "cross_bridge", "reverse"], blacklist=[]))
+            
+            line = "{} {}  \t".format(label, flute)
+            line += "{:9.2E}  {:9.2E}    ".format(vdp_poly_f, vdp_poly_r)
+            line += "{:9.2E}  {:9.2E}    ".format(vdp_n_f, vdp_n_r)
+            line += "{:9.2E}  {:9.2E}    ".format(vdp_pstop_f, vdp_pstop_r)
+            line += "{:9.2E}  {:9.2E}    ".format(vdp_metclo_f, vdp_metclo_r)
+            line += "{:9.2E}  {:9.2E}    ".format(vdp_p_cross_bridge_f, vdp_p_cross_bridge_r)
+            print(line)
+    
+    
+
 functions = {
         'iv': analyse_iv_data,
         'cv': analyse_cv_data,
@@ -373,23 +419,11 @@ functions = {
         'mos': analyse_mos_data,
         'linewidth': analyse_linewidth_data,
         'van_der_pauw': analyse_van_der_pauw_data,
-        'breakdown': analyse_breakdown_data
+        'breakdown': analyse_breakdown_data,
     }
 
 
 def analyse_file(path, test):
-    '''
-    functions = {
-        'iv': analyse_iv_data,
-        'cv': analyse_cv_data,
-        'fet': analyse_fet_data,
-        'gcd': analyse_gcd_data,
-        'mos': analyse_mos_data,
-        'linewidth': analyse_linewidth_data,
-        'van_der_pauw': analyse_van_der_pauw_data,
-        'breakdown': analyse_breakdown_data
-    }
-    '''
     if test == 'all':
         for f in functions.values():
             print(f)
@@ -407,11 +441,14 @@ def parse_args():
     parser.add_argument('test')
     return parser.parse_args()
 
-
+    
 def main():
     args = parse_args()
     
-    if args.test == 'all':
+    if args.test == 'full-line':
+        analyse_full_line_data(args.path)
+        return 0
+    elif args.test == 'all':
         tests = functions.keys()
     else:
         tests = [args.test]

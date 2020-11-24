@@ -24,8 +24,15 @@ __all__ = [
     'fit_curve'
 ]
 
-def find_all_files_from_path(path, test):
-
+def find_all_files_from_path(path, test, whitelist=None, blacklist=None):
+    """
+    returns a list of measurements for a given test
+    optionally filters also whitelist an blacklist (all whitelists must match and no blacklist match)
+    eg for forward right poly vdp:
+      whitlelist=["PQCFlutesRight","polyslicon"] and
+      blacklist=["reverse"]
+    """
+    
     path_folder = path
     filedir =[]
 
@@ -33,10 +40,13 @@ def find_all_files_from_path(path, test):
     
     for f in files:
         #the replace is necessary for van_der_pauw/van-der-pauw
-        if test in [v.lower().replace("-", "_") for v in f.split('_')]:
+        segments = [v.lower().replace("-", "_") for v in f.split('_')]
+        if (test in segments) and \
+           (blacklist is None or not any(e.lower() in segments for e in blacklist)) and \
+           (whitelist is None or all(e .lower() in segments for e in whitelist)):
             filedir.append(f)
 
-    return filedir
+    return np.sort(filedir)
 
 
 
