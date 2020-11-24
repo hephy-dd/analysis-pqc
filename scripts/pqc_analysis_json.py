@@ -229,19 +229,22 @@ def analyse_van_der_pauw_data(path):
     v = read_json_file(path, test, 'voltage_vsrc')
     i = read_json_file(path, test, 'current')
     if(len(v) == 0):
-        return 0
+        return np.nan
     
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
-    r_sheet, a, b, x_fit, spl_dev, status = analyse_van_der_pauw(i, v)
-    fit = [a*x +b for x in x_fit]
+    r_sheet, a, b, x_fit, spl_dev, status, r_value = analyse_van_der_pauw(i, v)
+    if(abs(r_value) < 0.9):  # r_value is the correlation coefficient
+        a = b = np.nan  # the quality of the fit is too bad, we don't want it
+    else:
+        fit = [a*x +b for x in x_fit]
 
-    fig, ax = plt.subplots(1,1)
-    fit_curve(ax, x_fit, fit, 0)
-    plot_curve(ax, i, v, 'IV Curve', 'Current', 'Voltage', lbl, '', 0, 0)
-    
-    if print_results:
-       print('%s: \tvdp: r_sheet: %.2e Ohm/sq  %s' % (lbl, r_sheet, lbl_vdp))
+        fig, ax = plt.subplots(1,1)
+        fit_curve(ax, x_fit, fit, 0)
+        plot_curve(ax, i, v, 'IV Curve', 'Current', 'Voltage', lbl, '', 0, 0)
+        
+        if print_results:
+           print('%s: \tvdp: r_sheet: %.2e Ohm/sq, correlation: %.2e  %s' % (lbl, r_sheet, r_value, lbl_vdp))
  
 
     return r_sheet

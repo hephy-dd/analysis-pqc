@@ -9,6 +9,7 @@ import warnings
 import numpy as np
 
 from scipy.interpolate import CubicSpline
+from scipy.stats import linregress
 import scipy.signal
 from collections import namedtuple
 
@@ -58,7 +59,7 @@ def params(names):
 
 
 
-@params('a, b, x_fit, spl_dev, status')
+@params('a, b, x_fit, spl_dev, status, r_value')
 def line_regr_with_cuts(x, y, cut_param, debug=False):
     """
     Linear Regression with Cuts:
@@ -95,7 +96,7 @@ def line_regr_with_cuts(x, y, cut_param, debug=False):
         try:
             x_fit = x[ idx_fit[0]:idx_fit[-1]+1 ]
             y_fit = y[ idx_fit[0]:idx_fit[-1]+1 ]
-            a, b = np.polyfit(x_fit, y_fit, 1)
+            a, b, r_value, p_value, std_err = scipy.stats.linregress(x_fit, y_fit)
             status = STATUS_PASSED
         except np.RankWarning:
             print("The array has too few data points. Try changing the cut_param parameter.")
@@ -104,7 +105,7 @@ def line_regr_with_cuts(x, y, cut_param, debug=False):
             print("The array seems empty. Try changing the cut_param parameter.")
             status = STATUS_FAILED
 
-    return a, b, x_fit, spl_dev, status
+    return a, b, x_fit, spl_dev, status, r_value
 
 
 
@@ -426,7 +427,7 @@ def analyse_fet(v, i, debug=False):
 
 
 
-@params('r_sheet, a, b, x_fit, spl_dev, status')
+@params('r_sheet, a, b, x_fit, spl_dev, status, r_value')
 def analyse_van_der_pauw(i, v, cut_param=1e-5, debug=False):
     """
     Van der Pauw: Extract sheet resistance.
@@ -440,10 +441,9 @@ def analyse_van_der_pauw(i, v, cut_param=1e-5, debug=False):
     r_sheet ... resistance per square
     """
 
-    a, b, x_fit, spl_dev, status = line_regr_with_cuts(i, v, cut_param, debug)
+    a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
     r_sheet = np.pi / np.log(2) * a
-
-    return r_sheet, a, b, x_fit, spl_dev, status
+    return r_sheet, a, b, x_fit, spl_dev, status, r_value
 
 
 
@@ -461,7 +461,7 @@ def analyse_cross(i, v, cut_param=1e-5, debug=False):
     r_sheet ... resistance per square
     """
 
-    a, b, x_fit, spl_dev, status = line_regr_with_cuts(i, v, cut_param, debug)
+    a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
     r_sheet = np.pi / np.log(2) * a
 
     return r_sheet, a, b, x_fit, spl_dev, status
@@ -483,7 +483,7 @@ def analyse_linewidth(i, v, r_sheet=-1, cut_param=1e-5, debug=False):
     t_line ... linewidth in [um]
     """
 
-    a, b, x_fit, spl_dev, status = line_regr_with_cuts(i, v, cut_param, debug)
+    a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
     t_line = r_sheet * 128.5 * 1./a
 
     if r_sheet == -1:
@@ -508,7 +508,7 @@ def analyse_cbkr(i, v, r_sheet=-1, cut_param=1e-5, debug=False):
     r_contact ... contact resistance
     """
 
-    a, b, x_fit, spl_dev, status = line_regr_with_cuts(i, v, cut_param, debug)
+    a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
 
     if r_sheet == -1:
         r_contact = -1
@@ -537,7 +537,7 @@ def analyse_contact(i, v, cut_param=1e-5, debug=False):
     r_contact ... contact resistance
     """
 
-    a, b, x_fit, spl_dev, status = line_regr_with_cuts(i, v, cut_param, debug)
+    a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
     r_contact = a
 
     return r_contact, a, b, x_fit, spl_dev, status
