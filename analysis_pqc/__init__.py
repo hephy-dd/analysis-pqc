@@ -155,14 +155,14 @@ def analyse_iv(v, i, debug=False):
 
 
 @params('v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status')
-def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_windowsize=21, debug=False):
+def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_windowsize=None, debug=False):
     """
     Diode CV: Extract depletion voltage and resistivity.
 
     Parameters:
     v ... voltage
     c ... capacitance
-    area ... implant size in [m^2]
+    area ... implant size in [m^2] - defaults to quarter
     carrier ... majority charge carriers ['holes', 'electrons']
     cut_param ... used to cut on 1st derivative to id voltage regions
     savgol_windowsize ... number of points to calculate the derivative, needs to be odd
@@ -175,9 +175,12 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
     """
 
     # init
-    v_dep1 = v_dep2 = rho = conc = -1
-    a_rise = b_rise = v_rise = a_const = b_const = v_const = -1
+    v_dep1 = v_dep2 = rho = conc = np.nan
+    a_rise = b_rise = v_rise = a_const = b_const = v_const = np.nan
     status = STATUS_NONE
+    
+    if savgol_windowsize is None:
+        savgol_windowsize = int(len(c)/40+1)*2+1  # a suitable off windowsie - making 20 windows among the whole measurement
 
     # invert and square
     c = 1./c**2
