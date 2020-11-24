@@ -83,10 +83,12 @@ def read_json_file(path, test, parameter):
     """
     
     file = path  #un-comment this out in case you want to test a specific file. You have to assign it as a path through the terminal
-
-    with open(file) as f:
-        a = json.load(f)
-    return np.array([i for i in a['series'][parameter]])
+    try:
+        with open(file) as f:
+            a = json.load(f)
+        return np.array([i for i in a['series'][parameter]])
+    except:
+        return []
 
 
 def units(data, unit):

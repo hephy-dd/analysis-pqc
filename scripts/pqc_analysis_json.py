@@ -56,7 +56,7 @@ def analyse_iv_data(path):
     v_norm, v_unit = normalise_parameter(v, 'V')
     i_norm, i_unit = normalise_parameter(i, 'A')
 
-    v_max, i_max, i_800, i_600, status = analyse_iv(v_norm, i_norm)
+    v_max, i_max, i_800, i_600, status = analyse_iv(v, i)
 
     lbl = assign_label(path, test)
 
@@ -67,7 +67,7 @@ def analyse_iv_data(path):
     plot_curve(ax, v_norm, i_norm, 'IV Curve', 'Reverse Bias Voltage [{}]'.format(v_unit), 'Current [{}]'.format(i_unit), lbl, annotate, x_loc, y_loc)
 
     if print_results:
-        print('%s:  IV:\ti_600: %.3f uA\ti_800: %.3f uA' % (lbl, i_600, i_800))
+        print('%s:  IV:\ti_600: %.3f uA\ti_800: %.3f uA' % (lbl, i_600*1e6, i_800*1e6))
 
     return i_600, i_800
 
@@ -173,7 +173,7 @@ def analyse_gcd_data(path):
 
     lbl = assign_label(path, test)
 
-    i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, spl_dev, status = analyse_gcd(v,i_em_norm)
+    i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, spl_dev, status = analyse_gcd(v,i_em)
 
     fig, ax = plt.subplots(1,1)
     plot_curve(ax, v, i_em_norm, 'I-V Curve GCD', 'Voltage [V]', 'Current [{}]'.format(i_em_unit), lbl, '', 0, 0)
@@ -196,7 +196,7 @@ def analyse_fet_data(path):
 
     i_em_norm, i_em_unit = normalise_parameter(i_em, 'A')
 
-    v_th, a, b, spl_dev, status = analyse_fet(v, i_em_norm)
+    v_th, a, b, spl_dev, status = analyse_fet(v, i_em)
 
     fit  = [a*i +b for i in v]
 
@@ -228,15 +228,17 @@ def analyse_van_der_pauw_data(path):
 
     v = read_json_file(path, test, 'voltage_vsrc')
     i = read_json_file(path, test, 'current')
-
+    if(len(v) == 0):
+        return 0
+    
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
     r_sheet, a, b, x_fit, spl_dev, status = analyse_van_der_pauw(i, v)
     fit = [a*x +b for x in x_fit]
 
-    #fig, ax = plt.subplots(1,1)
-    #fit_curve(ax, x_fit, fit, 0)
-    #plot_curve(ax, i, v, 'IV Curve', 'Current', 'Voltage', lbl, '', 0, 0)
+    fig, ax = plt.subplots(1,1)
+    fit_curve(ax, x_fit, fit, 0)
+    plot_curve(ax, i, v, 'IV Curve', 'Current', 'Voltage', lbl, '', 0, 0)
     
     if print_results:
        print('%s: \tvdp: r_sheet: %.2e Ohm/sq  %s' % (lbl, r_sheet, lbl_vdp))
@@ -254,7 +256,7 @@ def analyse_linewidth_data(path):
     i_norm, i_unit = normalise_parameter(i, 'A')
 
     lbl = assign_label(path, test)
-    t_line, a, b, x_fit, spl_dev, status = analyse_linewidth(i_norm, v, r_sheet=-1, cut_param=0.01, debug=0)
+    t_line, a, b, x_fit, spl_dev, status = analyse_linewidth(i, v, r_sheet=-1, cut_param=0.01, debug=0)
 
     fit = [a*x +b for x in x_fit]
 
@@ -278,7 +280,7 @@ def analyse_cbkr_data(path, r_sheet=-1):
 
     lbl = assign_label(path, test)
 
-    r_contact, a, b, x_fit, spl_dev, status = analyse_cbkr(i_norm, v, r_sheet, cut_param=0.01, debug=0)
+    r_contact, a, b, x_fit, spl_dev, status = analyse_cbkr(i, v, r_sheet, cut_param=0.01, debug=0)
     fit = [a*x +b for x in x_fit]
 
     fig, ax = plt.subplots(1, 1)
@@ -322,7 +324,7 @@ def analyse_meander_data(path):
 
     lbl = assign_label(path, test)
 
-    rho_sq, status = analyse_meander(i_norm, v, debug=0)
+    rho_sq, status = analyse_meander(i, v, debug=0)
     
     if print_results:
        print('%s: \tMeander: rho_sq: %.2e' % (lbl, rho_sq))
@@ -347,7 +349,7 @@ def analyse_breakdown_data(path):
     x_loc = 0.3
     y_loc = 0.5
 
-    v_bd, status = analyse_breakdown(v, i_elm_norm, debug=0)
+    v_bd, status = analyse_breakdown(v, i_elm, debug=0)
 
     fig, ax = plt.subplots(1,1)
     annotate = 'V$_{{bd}}$: {} V \n\nT$_{{avg}}$ : {} \u00B0C \nH$_{{avg}}$: {} $\%$ '.format(v_bd, round(np.mean(temp),2), round(np.mean(humidity),2))
