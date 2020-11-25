@@ -587,7 +587,7 @@ def analyse_breakdown(v, i, debug=False):
 
 
 
-@params('c_mean, c_median, status')
+@params('c_mean, c_median, d, status')
 def analyse_capacitor(v, c, debug=False):
     """
     Test capacitors: Get mean capacitance.
@@ -605,4 +605,7 @@ def analyse_capacitor(v, c, debug=False):
     c_mean = np.mean(c)
     c_median = np.median(c)
 
-    return c_mean, c_median, status
+    #oxide thickness
+    d = 3.9*8.85e-12*16900*1e-12/c_median
+
+    return c_mean, c_median, d, status
