@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 
 import os
+
 import numpy as np
 import matplotlib.pyplot as plt
 
 from optparse import OptionParser
 from analysis_pqc import *
 
-
 # TODO:
 # Catch incomplete files
-
-
 
 ## Single Analysis Functions
 ## ------------------------------------
@@ -533,7 +531,8 @@ def analyse_folder(path, debug=0):
                 fet_dict[lbl] = [v_th]
                 if fPrint:
                     print('\nFET: %s' % lbl)
-                    print('\t%.2f V\t%.2f V' % (v_th1, v_th2))
+                    # FIXME: print('\t%.2f V\t%.2f V' % (v_th1, v_th2))
+                    print('\t%.2f V' % v_th)
 
         if 1:
             if 'van-der-pauw' in [v.lower() for v in f.split('_')] or 'cross' in [v.lower() for v in f.split('_')]:
@@ -628,7 +627,6 @@ def main():
             key = path.split('/')[-1]
             print(key)
             res_dict[key] = analyse_folder(path)
-
 
 
 if __name__ == "__main__":
