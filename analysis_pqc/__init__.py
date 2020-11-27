@@ -469,7 +469,7 @@ def analyse_cross(i, v, cut_param=1e-5, debug=False):
 
 
 @params('t_line, a, b, x_fit, spl_dev, status')
-def analyse_linewidth(i, v, r_sheet=-1, cut_param=1e-5, debug=False):
+def analyse_linewidth(i, v, r_sheet=np.nan, cut_param=1e-5, debug=False):
     """
     Linewidth: Extract linewidth.
 
@@ -485,9 +485,6 @@ def analyse_linewidth(i, v, r_sheet=-1, cut_param=1e-5, debug=False):
 
     a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
     t_line = r_sheet * 128.5 * 1./a
-
-    if r_sheet == -1:
-        t_line = -1
 
     return t_line, a, b, x_fit, spl_dev, status
 

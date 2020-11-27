@@ -24,19 +24,21 @@ __all__ = [
     'fit_curve'
 ]
 
-def find_all_files_from_path(path, test, whitelist=None, blacklist=None):
+def find_all_files_from_path(path, test, whitelist=None, blacklist=None, single=False):
     """
     returns a list of measurements for a given test
     optionally filters also whitelist an blacklist (all whitelists must match and no blacklist match)
     eg for forward right poly vdp:
       whitlelist=["PQCFlutesRight","polyslicon"] and
       blacklist=["reverse"]
+    if single is set to true, we expect only one return value (not a list) and it throws an error if there is more
     """
     
     path_folder = path
     filedir =[]
 
     files = glob.glob(os.path.join(path_folder, "*.json"))
+    files.sort(key=os.path.getmtime)
     
     for f in files:
         #the replace is necessary for van_der_pauw/van-der-pauw
@@ -45,6 +47,12 @@ def find_all_files_from_path(path, test, whitelist=None, blacklist=None):
            (blacklist is None or not any(e.lower() in segments for e in blacklist)) and \
            (whitelist is None or all(e .lower() in segments for e in whitelist)):
             filedir.append(f)
+    if single:
+        if len(filedir) > 1:
+            print("Warning: more than one measurement available, taking the most recent one!")
+        if len(filedir) == 0:
+            return None
+        return filedir[-1]  # we sorted it first for time
 
     return np.sort(filedir)
 
@@ -155,7 +163,7 @@ def fit_curve(ax, x, y1, y2=None, color='r'):
 
     This should be modified according to what the user wants.
     """
-    ax = plt.gca()
+    #ax = plt.gca()
     ax.plot(x, y1, '--'+color)
     if y2:
       ax.plot(x, y2, '--'+color)

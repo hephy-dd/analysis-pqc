@@ -111,7 +111,7 @@ def analyse_cv_data(path):
     return v_dep2 
 
 
-def analyse_mos_data(path):
+def analyse_mos_data(path, plotResults=True, printResults=print_results):
     test = 'mos'
 
     v = read_json_file(path, test, 'voltage_hvsrc')
@@ -121,13 +121,16 @@ def analyse_mos_data(path):
     r = read_json_file(path, test, 'resistance')
     temp = read_json_file(path, test, 'temperature_chuck')
     humidity = read_json_file(path, test, 'humidity_box')
+    
+    if(len(v) == 0):
+        return np.nan, np.nan, np.nan, np.nan, np.nan
 
-    v_norm, v_unit = normalise_parameter(v, 'V')
-    c_norm, c_unit = normalise_parameter(c, 'F')
+    #v_norm, v_unit = normalise_parameter(v, 'V')
+    #c_norm, c_unit = normalise_parameter(c, 'F')
 
     v_fb1, v_fb2, c_acc, c_inv, t_ox, n_ox, a_acc, b_acc, v_acc, a_dep, b_dep, v_dep, a_inv, b_inv, v_inv,  spl_dev, status = analyse_mos(v, c)
     lbl = assign_label(path, test)
-
+    c_acc_m = np.mean(c_acc)
 
     fit_acc = [a_acc*x + b_acc for x in v]
     fit_dep = [a_dep*i+b_dep for i in v]
@@ -135,21 +138,21 @@ def analyse_mos_data(path):
 
     x_loc = 0.15
     y_loc = 0.145
+    
+    if plotResults:
+        fig, ax = plt.subplots(1,1)
+        #plt.ylim(0, 100)
+        fit_curve(ax, v, fit_acc, fit_dep)
+        plt.axvline(x=v_fb2, color='black', linestyle='dashed')
+        plot_curve(ax, v, c, 'CV Curve', 'Voltage [V]', 'Capacitance [F]', lbl, annotate, x_loc, y_loc)
 
-    fig, ax = plt.subplots(1,1)
-    plt.ylim(0, 100)
-    fit_curve(ax, v, fit_acc, fit_dep)
-    plt.axvline(x=v_fb2, color='black', linestyle='dashed')
-    plot_curve(ax, v, c, 'CV Curve', 'Voltage [V]', 'Capacitance [{}]'.format(c_unit), lbl, annotate, x_loc, y_loc)
-
-    if print_results:
-        print('%s: \tMOS: v_fb2: %.2e V\tt_ox: %.2e um\tn_ox: %.2e cm^-3' % (lbl, v_fb2, t_ox, n_ox))
- 
-
-    return v_fb1, v_fb2, t_ox, n_ox
+    if printResults:
+        print('%s: \tMOS: v_fb2: %.2e V\tc_acc: %.2e F\tt_ox: %.2e nm\tn_ox: %.2e cm^-2' % (lbl, v_fb2, c_acc_m, t_ox*1e3, n_ox))
+         
+    return v_fb1, v_fb2, t_ox, n_ox, c_acc_m
 
      
-def analyse_gcd_data(path):
+def analyse_gcd_data(path, plotResults=True, printResults=print_results):
     test = 'gcd'
 
     v = read_json_file(path, test, 'voltage')
@@ -157,56 +160,58 @@ def analyse_gcd_data(path):
     i_src = read_json_file(path, test, 'current_vsrc')
     i_hvsrc = read_json_file(path, test, 'current_hvsrc')
 
-
-    i_em_norm, i_em_unit = normalise_parameter(i_em, 'A')
+    if(len(v) == 0):
+        return np.nan, np.nan
 
     lbl = assign_label(path, test)
 
     i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, spl_dev, status = analyse_gcd(v,i_em)
+    
+    if plotResults:
+        fig, ax = plt.subplots(1,1)
+        plot_curve(ax, v, i_em, 'I-V Curve GCD', 'Voltage [V]', 'Current [{}]'.format("A"), lbl, '', 0, 0)
 
-    fig, ax = plt.subplots(1,1)
-    plot_curve(ax, v, i_em_norm, 'I-V Curve GCD', 'Voltage [V]', 'Current [{}]'.format(i_em_unit), lbl, '', 0, 0)
-
-    if print_results:
+    if printResults:
         print('%s: \tGCD: i_surf: %.2e A\t i_bulk: %.2e A' % (lbl, i_surf, i_bulk))
   
     return i_surf, i_bulk
 
 
 
-def analyse_fet_data(path):
+def analyse_fet_data(path, plotResults=True, printResults=print_results):
     test = 'fet'
 
     v = read_json_file(path, test, 'voltage')
     i_em = read_json_file(path, test, 'current_elm')
     i_src = read_json_file(path, test, 'current_vsrc')
     i_hvsrc = read_json_file(path, test, 'current_hvsrc')
-
-
-    i_em_norm, i_em_unit = normalise_parameter(i_em, 'A')
+    
+    if(len(v) == 0):
+        return np.nan
 
     v_th, a, b, spl_dev, status = analyse_fet(v, i_em)
 
     fit  = [a*i +b for i in v]
 
     lbl = assign_label(path, test)
+    
+    if plotResults:
+        fig,ax1 = plt.subplots()
+        lns1 = ax1.plot(v,i_em, ls='', marker='s', ms=3, label='transfer characteristics')
+        ax1.set_xlabel('V$_{GS}$ [V]')
+        ax1.set_ylabel('I$_{D}$ [A]')
+        ax1.set_ylabel(r'I$_\mathrm{D}$ [A]')
+        ax2 = ax1.twinx()
+        lns2 = ax2.plot(v, spl_dev, ls=' ', marker='s', ms=3, color='tab:orange', label="transconductance")
+        ax2.tick_params(axis='y', labelcolor='tab:orange')
+        ax2.set_ylabel(r'g$_\mathrm{m}$ [S]', color='tab:orange')
+        lns3 = ax1.plot(v, fit, '--r', label="tangent")
+        lns = lns1+lns2+lns3
+        labs = [l.get_label() for l in lns]
+        plt.legend(lns, labs, loc='upper left')
+        plt.show()
 
-    fig,ax1 = plt.subplots()
-    lns1 = ax1.plot(v,i_em_norm, ls='', marker='s', ms=3, label='transfer characteristics')
-    ax1.set_xlabel('V$_{GS}$ [V]')
-    ax1.set_ylabel('I$_{D}$ [A]')
-    ax1.set_ylabel(r'I$_\mathrm{D}$ [A]')
-    ax2 = ax1.twinx()
-    lns2 = ax2.plot(v, spl_dev, ls=' ', marker='s', ms=3, color='tab:orange', label="transconductance")
-    ax2.tick_params(axis='y', labelcolor='tab:orange')
-    ax2.set_ylabel(r'g$_\mathrm{m}$ [S]', color='tab:orange')
-    lns3 = ax1.plot(v, fit, '--r', label="tangent")
-    lns = lns1+lns2+lns3
-    labs = [l.get_label() for l in lns]
-    plt.legend(lns, labs, loc='upper left')
-    plt.show()
-
-    if print_results:
+    if printResults:
        print('%s: \tnFet: v_th: %.2e V' % (lbl, v_th))
  
     return v_th
@@ -241,25 +246,27 @@ def analyse_van_der_pauw_data(path, printResults=print_results, plotResults=True
     return r_sheet, r_value
 
 
-def analyse_linewidth_data(path):
+def analyse_linewidth_data(path, r_sheet=np.nan, printResults=print_results, plotResults=True):
     test = 'linewidth'
+    
+    if path is None:
+        return np.nan
 
     v = read_json_file(path, test, 'voltage_vsrc')
     i = read_json_file(path, test, 'current')
 
-    i_norm, i_unit = normalise_parameter(i, 'A')
-
     lbl = assign_label(path, test)
-    t_line, a, b, x_fit, spl_dev, status = analyse_linewidth(i, v, r_sheet=-1, cut_param=0.01, debug=0)
+    lbl_vdp = assign_label(path, test, vdp=True)
+    t_line, a, b, x_fit, spl_dev, status = analyse_linewidth(i, v, r_sheet=r_sheet, cut_param=0.01, debug=0)
 
     fit = [a*x +b for x in x_fit]
+    if plotResults:
+        fig, ax = plt.subplots(1, 1)
+        fit_curve(ax, x_fit, fit, 0)
+        plot_curve(ax, i, v, 'IV Curve', 'Current [A]', 'Voltage [V]', lbl, '', 0, 0)
 
-    fig, ax = plt.subplots(1, 1)
-    fit_curve(ax, x_fit, fit, 0)
-    plot_curve(ax, i_norm, v, 'IV Curve', 'Current [{}]'.format(i_unit), 'Voltage [V]', lbl, '', 0, 0)
-
-    if print_results:
-        print('%s: \tLinewidth: %.2e um' % (lbl, t_line))
+    if printResults:
+        print('%s: \tLinewidth: %.2e um\t%s' % (lbl, t_line, lbl_vdp))
  
     return t_line
   
@@ -369,6 +376,19 @@ def get_vdp_value(pathlist):
             r_value = rv
     return r_sheet
     
+def get_mos_value(pathlist):
+    """helper function to get best vdp result"""
+    r_sheet = np.nan
+    r_value = 0
+    for f in pathlist:
+        #print(f)
+        rs, rv = analyse_van_der_pauw_data(f, printResults=False, plotResults=False)
+        if(rv > r_value):  # we take the best value
+            r_sheet = rs
+            r_value = rv
+    return r_sheet
+    
+    
     
     
 
@@ -382,34 +402,64 @@ def analyse_full_line_data(path):
     """
     dirs = glob.glob(os.path.join(path, "*"))
     dirs.sort()
-    print("# serial                                 \t       vdp_poly                vdp_n                vdp_pstop               vdp_met-clov          vdp_p-cross-bridge")
+    print("# serial                                 \t  vdp_poly/kOhm/sq       vdp_n/Ohm/sq     vdp_pstop/kOhm/sq   lw_n/um    lw_p2/um   lw_p4/um  vdp_p-cr-br/kOhm/sq  lw_cb/um")
+    for dirc in dirs:
+        for flute in ["PQCFlutesRight", "PQCFlutesLeft"]:
+            label = dirc.split("/")[-1]            
+            
+            vdp_poly_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "Polysilicon"], blacklist=["reverse"]))
+            vdp_poly_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "Polysilicon", "reverse"]))
+            
+            vdp_n_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "n"], blacklist=["reverse"]))
+            vdp_n_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "n", "reverse"]))
+            
+            vdp_pstop_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P_stop"], blacklist=["reverse"]))
+            vdp_pstop_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P_stop", "reverse"]))
+            
+            t_line_n = analyse_linewidth_data(find_all_files_from_path(dirc, "linewidth", whitelist=[flute, "n"], single=True), r_sheet=vdp_n_f, printResults=False, plotResults=False)
+            t_line_pstop2 = analyse_linewidth_data(find_all_files_from_path(dirc, "linewidth", whitelist=[flute, "P_stop", "2_wire"], single=True), r_sheet=vdp_pstop_f, printResults=False, plotResults=False)
+            t_line_pstop4 = analyse_linewidth_data(find_all_files_from_path(dirc, "linewidth", whitelist=[flute, "P_stop", "4_wire"], single=True), r_sheet=vdp_pstop_f, printResults=False, plotResults=False)
+            
+            vdp_p_cross_bridge_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P", "cross_bridge"], blacklist=["reverse"]))
+            vdp_p_cross_bridge_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P", "cross_bridge", "reverse"]))
+            t_line_p_cross_bridge = analyse_linewidth_data(find_all_files_from_path(dirc, "linewidth", whitelist=[flute, "P", "cross_bridge"], single=True), r_sheet=vdp_p_cross_bridge_f, printResults=False, plotResults=False)
+            
+            
+            line = "{} {}  \t".format(label, flute)
+            line += "{:8.2f} {:8.2f}    ".format(vdp_poly_f*1e-3, vdp_poly_r*1e-3)
+            line += "{:8.2f} {:8.2f}    ".format(vdp_n_f, vdp_n_r)
+            line += "{:8.2f} {:8.2f}    ".format(vdp_pstop_f*1e-3, vdp_pstop_r*1e-3)
+            line += "{:8.2f} {:8.2f} {:8.2f}     ".format(t_line_n, t_line_pstop2, t_line_pstop4)
+            
+            line += "{:8.2f} {:8.2f}    ".format(vdp_p_cross_bridge_f*1e-3, vdp_p_cross_bridge_r*1e-3)
+            line += "{:8.2f}".format(t_line_p_cross_bridge)
+            
+            print(line)
+    
+    print("")
+    print("")
+    print("# serial                                 \t                    mos                         fet                gcd             vdp_met-clov")
+    print("# serial                                 \t v_fb/V     t_ox/nm    n_ox/cm^-2 c_acc/F     v_th/V       i_surf/A    i_bulk/A")
     for dirc in dirs:
         for flute in ["PQCFlutesRight", "PQCFlutesLeft"]:
             label = dirc.split("/")[-1]
-            vdp_poly_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "Polysilicon"], blacklist=["reverse"]))
-            vdp_poly_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "Polysilicon", "reverse"], blacklist=[]))
             
-            vdp_n_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "n"], blacklist=["reverse"]))
-            vdp_n_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "n", "reverse"], blacklist=[]))
-            
-            vdp_pstop_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P_stop"], blacklist=["reverse"]))
-            vdp_pstop_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P_stop", "reverse"], blacklist=[]))
+            v_fb1, v_fb2, t_ox, n_ox, c_acc_m = analyse_mos_data(find_all_files_from_path(dirc, "mos", whitelist=[flute,], single=True), printResults=False, plotResults=False)
+            v_th = analyse_fet_data(find_all_files_from_path(dirc, "fet", whitelist=[flute,], single=True), printResults=False, plotResults=False)
+            i_surf, i_bulk = analyse_gcd_data(find_all_files_from_path(dirc, "gcd", whitelist=[flute,], single=True), printResults=False, plotResults=False)
             
             vdp_metclo_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "metal", "clover"], blacklist=["reverse"]))
             vdp_metclo_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "metal", "clover", "reverse"], blacklist=[]))
             
-            vdp_p_cross_bridge_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P", "cross_bridge"], blacklist=["reverse"]))
-            vdp_p_cross_bridge_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P", "cross_bridge", "reverse"], blacklist=[]))
+            
             
             line = "{} {}  \t".format(label, flute)
-            line += "{:9.2E}  {:9.2E}    ".format(vdp_poly_f, vdp_poly_r)
-            line += "{:9.2E}  {:9.2E}    ".format(vdp_n_f, vdp_n_r)
-            line += "{:9.2E}  {:9.2E}    ".format(vdp_pstop_f, vdp_pstop_r)
-            line += "{:9.2E}  {:9.2E}    ".format(vdp_metclo_f, vdp_metclo_r)
-            line += "{:9.2E}  {:9.2E}    ".format(vdp_p_cross_bridge_f, vdp_p_cross_bridge_r)
+            line += "{:9.2E}  {:9.2E}  {:9.2E}  {:9.2E}   ".format(v_fb2, t_ox, n_ox, c_acc_m)
+            line += "{:9.2E}    {:9.2E}  {:9.2E}    ".format(v_th, i_surf, i_bulk)
+            line += "{:9.2E}  {:9.2E}   ".format(vdp_metclo_f, vdp_metclo_r)
             print(line)
-    
-    
+            
+            
 
 functions = {
         'iv': analyse_iv_data,
@@ -447,6 +497,7 @@ def main():
     
     if args.test == 'full-line':
         analyse_full_line_data(args.path)
+        plt.show()
         return 0
     elif args.test == 'all':
         tests = functions.keys()
