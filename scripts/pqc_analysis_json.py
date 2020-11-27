@@ -271,32 +271,38 @@ def analyse_linewidth_data(path, r_sheet=np.nan, printResults=print_results, plo
     return t_line
   
 
-def analyse_cbkr_data(path, r_sheet=-1):
+def analyse_cbkr_data(path, r_sheet=np.nan, printResults=print_results, plotResults=True):
     test = 'cbkr'
+    
+    if path is None:
+        return np.nan
 
     v = read_json_file(path, test, 'voltage_vsrc')
     i = read_json_file(path, test, 'current')
-
-    i_norm, i_unit = normalise_parameter(i, 'A')
+    
+    if len(v) == 0:
+        return np.nan
 
     lbl = assign_label(path, test)
+    lbl_vdp = assign_label(path, test, vdp=True)
 
     r_contact, a, b, x_fit, spl_dev, status = analyse_cbkr(i, v, r_sheet, cut_param=0.01, debug=0)
     fit = [a*x +b for x in x_fit]
-
-    fig, ax = plt.subplots(1, 1)
-    fit_curve(ax, x_fit, fit, 0)
-    plot_curve(ax, i_norm, v, 'IV Curve', 'Current [{}]'.format(i_unit), 'Voltage [V]', lbl, '', 0, 0)
+    
+    if plotResults:
+        fig, ax = plt.subplots(1, 1)
+        fit_curve(ax, x_fit, fit, 0)
+        plot_curve(ax, i, v, 'IV Curve', 'Current [A]', 'Voltage [V]', lbl, '', 0, 0)
    
-    if print_results:
-       print('%s: \tcbkr: r_contact: %.2e Ohm' % (lbl, r_contact))
+    if printResults:
+       print('%s: \tcbkr: r_contact: %.2e Ohm\t%s' % (lbl, r_contact, lbl_vdp))
  
 
     return r_contact
 
    
 def analyse_contact_data(path):
-    test= 'cbkr'
+    test= 'contact'
 
     v = read_json_file(path, test, 'voltage_vsrc')
     i = read_json_file(path, test, 'current')
@@ -335,7 +341,7 @@ def analyse_meander_data(path):
 
 
 
-def analyse_breakdown_data(path):
+def analyse_breakdown_data(path, printResults=print_results, plotResults=True):
     test = 'breakdown'
 
     v = read_json_file(path, test, 'voltage')
@@ -351,13 +357,14 @@ def analyse_breakdown_data(path):
     y_loc = 0.5
 
     v_bd, status = analyse_breakdown(v, i_elm, debug=0)
+    
+    if plotResults:
+        fig, ax = plt.subplots(1,1)
+        annotate = 'V$_{{bd}}$: {} V \n\nT$_{{avg}}$ : {} \u00B0C \nH$_{{avg}}$: {} $\%$ '.format(v_bd, round(np.mean(temp),2), round(np.mean(humidity),2))
+        plot_curve(ax, v, i_elm_norm, 'IV Curve', 'Voltage [V]', 'Current [{}]'.format(i_elm_unit), lbl, annotate, x_loc, y_loc)
 
-    fig, ax = plt.subplots(1,1)
-    annotate = 'V$_{{bd}}$: {} V \n\nT$_{{avg}}$ : {} \u00B0C \nH$_{{avg}}$: {} $\%$ '.format(v_bd, round(np.mean(temp),2), round(np.mean(humidity),2))
-    plot_curve(ax, v, i_elm_norm, 'IV Curve', 'Voltage [V]', 'Current [{}]'.format(i_elm_unit), lbl, annotate, x_loc, y_loc)
 
-
-    if print_results:
+    if printResults:
        print('%s: \tBreakdown: v_bd: %.2e V' % (lbl, v_bd))
    
     return v_bd
@@ -376,19 +383,7 @@ def get_vdp_value(pathlist):
             r_value = rv
     return r_sheet
     
-def get_mos_value(pathlist):
-    """helper function to get best vdp result"""
-    r_sheet = np.nan
-    r_value = 0
-    for f in pathlist:
-        #print(f)
-        rs, rv = analyse_van_der_pauw_data(f, printResults=False, plotResults=False)
-        if(rv > r_value):  # we take the best value
-            r_sheet = rs
-            r_value = rv
-    return r_sheet
-    
-    
+
     
     
 
@@ -402,7 +397,7 @@ def analyse_full_line_data(path):
     """
     dirs = glob.glob(os.path.join(path, "*"))
     dirs.sort()
-    print("# serial                                 \t  vdp_poly/kOhm/sq       vdp_n/Ohm/sq     vdp_pstop/kOhm/sq   lw_n/um    lw_p2/um   lw_p4/um  vdp_p-cr-br/kOhm/sq  lw_cb/um")
+    print("# serial                                 \t  vdp_poly/kOhm/sq       vdp_n/Ohm/sq     vdp_pstop/kOhm/sq   lw_n/um    lw_p2/um   lw_p4/um cbkr_poly/kOhm cbkr_n/Ohm")
     for dirc in dirs:
         for flute in ["PQCFlutesRight", "PQCFlutesLeft"]:
             label = dirc.split("/")[-1]            
@@ -420,9 +415,8 @@ def analyse_full_line_data(path):
             t_line_pstop2 = analyse_linewidth_data(find_all_files_from_path(dirc, "linewidth", whitelist=[flute, "P_stop", "2_wire"], single=True), r_sheet=vdp_pstop_f, printResults=False, plotResults=False)
             t_line_pstop4 = analyse_linewidth_data(find_all_files_from_path(dirc, "linewidth", whitelist=[flute, "P_stop", "4_wire"], single=True), r_sheet=vdp_pstop_f, printResults=False, plotResults=False)
             
-            vdp_p_cross_bridge_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P", "cross_bridge"], blacklist=["reverse"]))
-            vdp_p_cross_bridge_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P", "cross_bridge", "reverse"]))
-            t_line_p_cross_bridge = analyse_linewidth_data(find_all_files_from_path(dirc, "linewidth", whitelist=[flute, "P", "cross_bridge"], single=True), r_sheet=vdp_p_cross_bridge_f, printResults=False, plotResults=False)
+            r_contact_n = analyse_cbkr_data(find_all_files_from_path(dirc, "cbkr", whitelist=[flute, "n"], single=True), r_sheet=vdp_n_f, printResults=False, plotResults=False)
+            r_contac_poly = analyse_cbkr_data(find_all_files_from_path(dirc, "cbkr", whitelist=[flute, "Polysilicon"], single=True), r_sheet=vdp_poly_f, printResults=False, plotResults=False)
             
             
             line = "{} {}  \t".format(label, flute)
@@ -430,33 +424,58 @@ def analyse_full_line_data(path):
             line += "{:8.2f} {:8.2f}    ".format(vdp_n_f, vdp_n_r)
             line += "{:8.2f} {:8.2f}    ".format(vdp_pstop_f*1e-3, vdp_pstop_r*1e-3)
             line += "{:8.2f} {:8.2f} {:8.2f}     ".format(t_line_n, t_line_pstop2, t_line_pstop4)
+            line += "{:8.2f} {:8.2f}".format(r_contac_poly*1e-3, r_contact_n)
             
-            line += "{:8.2f} {:8.2f}    ".format(vdp_p_cross_bridge_f*1e-3, vdp_p_cross_bridge_r*1e-3)
-            line += "{:8.2f}".format(t_line_p_cross_bridge)
+            
             
             print(line)
     
     print("")
     print("")
-    print("# serial                                 \t                    mos                         fet                gcd             vdp_met-clov")
+    print("# serial                                 \t fet       vdp_met-clov       vdp_p-cr-br/kOhm/sq  lw_cb/um  v_bd/V")
+    print("# serial                                 \tv_th/V     ")
+    for dirc in dirs:
+        for flute in ["PQCFlutesRight", "PQCFlutesLeft"]:
+            label = dirc.split("/")[-1]
+            
+            v_th = analyse_fet_data(find_all_files_from_path(dirc, "fet", whitelist=[flute,], single=True), printResults=False, plotResults=False)
+            
+            vdp_metclo_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "metal", "clover"], blacklist=["reverse"]))
+            vdp_metclo_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "metal", "clover", "reverse"], blacklist=[]))
+            
+            vdp_p_cross_bridge_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P", "cross_bridge"], blacklist=["reverse"]))
+            vdp_p_cross_bridge_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P", "cross_bridge", "reverse"]))
+            t_line_p_cross_bridge = analyse_linewidth_data(find_all_files_from_path(dirc, "linewidth", whitelist=[flute, "P", "cross_bridge"], single=True), r_sheet=vdp_p_cross_bridge_f, printResults=False, plotResults=False)
+            
+            v_bd = analyse_breakdown_data(find_all_files_from_path(dirc, "breakdown", whitelist=[flute,], single=True), printResults=False, plotResults=False)
+            
+            line = "{} {}  \t".format(label, flute)
+            line += "{:5.2f}  ".format(v_th)
+            line += "{:9.2E}  {:9.2E}   ".format(vdp_metclo_f, vdp_metclo_r)
+            
+            line += "{:8.2f} {:8.2f}    ".format(vdp_p_cross_bridge_f*1e-3, vdp_p_cross_bridge_r*1e-3)
+            line += "{:8.2f}".format(t_line_p_cross_bridge)
+            
+            line += "{:8.2f}".format(v_bd)
+            print(line)
+    
+    print("")
+    print("")
+    print("# serial                                 \t                    mos                         fet                gcd             vdp_met-clov   vdp_p-cr-br/kOhm/sq  lw_cb/um")
     print("# serial                                 \t v_fb/V     t_ox/nm    n_ox/cm^-2 c_acc/F     v_th/V       i_surf/A    i_bulk/A")
     for dirc in dirs:
         for flute in ["PQCFlutesRight", "PQCFlutesLeft"]:
             label = dirc.split("/")[-1]
             
             v_fb1, v_fb2, t_ox, n_ox, c_acc_m = analyse_mos_data(find_all_files_from_path(dirc, "mos", whitelist=[flute,], single=True), printResults=False, plotResults=False)
-            v_th = analyse_fet_data(find_all_files_from_path(dirc, "fet", whitelist=[flute,], single=True), printResults=False, plotResults=False)
+            
             i_surf, i_bulk = analyse_gcd_data(find_all_files_from_path(dirc, "gcd", whitelist=[flute,], single=True), printResults=False, plotResults=False)
-            
-            vdp_metclo_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "metal", "clover"], blacklist=["reverse"]))
-            vdp_metclo_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "metal", "clover", "reverse"], blacklist=[]))
-            
             
             
             line = "{} {}  \t".format(label, flute)
             line += "{:9.2E}  {:9.2E}  {:9.2E}  {:9.2E}   ".format(v_fb2, t_ox, n_ox, c_acc_m)
-            line += "{:9.2E}    {:9.2E}  {:9.2E}    ".format(v_th, i_surf, i_bulk)
-            line += "{:9.2E}  {:9.2E}   ".format(vdp_metclo_f, vdp_metclo_r)
+            line += "{:9.2E}  {:9.2E}    ".format(i_surf, i_bulk)
+
             print(line)
             
             
@@ -470,6 +489,7 @@ functions = {
         'linewidth': analyse_linewidth_data,
         'van_der_pauw': analyse_van_der_pauw_data,
         'breakdown': analyse_breakdown_data,
+        'cbkr': analyse_cbkr_data,
     }
 
 

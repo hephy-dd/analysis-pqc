@@ -89,7 +89,7 @@ def assign_label(path, test, vdp=False):
     #print(path)
     lbl_list =[1, 2, 6, 8, 9]
     if vdp:
-        lbl_list =[10, 11, 12, 13]
+        lbl_list = [10, 11, 12]
     file = file.split(os.sep)[-1]
     lbl = '_'.join([file.split('_')[i] for i in lbl_list])
     return lbl
