@@ -27,21 +27,22 @@ import numpy as np
 from analysis_pqc import *
 from pqc_analysis_tools import *
 
+print_results = 1
 
-def analyse_iv_data(path, plot_results=False, print_results=False):
+
+def analyse_iv_data(path, plotResults=True, printResults=print_results):
     test = 'iv'
-
     if path is None:
         return np.nan, np.nan
 
     series = read_json_file(path).get('series')
     v = abs(series.get('voltage', np.array([])))
-    i_tot = series.get('current_elm')
+    i_tot = series.get('current_elm', np.array([]))
     i = abs(series.get('current_hvsrc', np.array([])))
-    temp = series.get('temperature_chuck')
-    humidity = series.get('humidity_box')
+    temp = series.get('temperature_chuck', np.array([]))
+    humidity = series.get('humidity_box', np.array([]))
 
-    if not len(v):
+    if(len(v) == 0):
         return np.nan, np.nan
 
     x_loc = 0.3
@@ -51,20 +52,20 @@ def analyse_iv_data(path, plot_results=False, print_results=False):
 
     lbl = assign_label(path, test)
 
-    if plot_results:
+    if plotResults:
         annotate = 'I$_{max}$' + ': {} {} @ {}{}'.format(round(i_max, 2), "A", max(v), "V") + '\n\nT$_{avg}$' + ': {:0.2f} $^\circ C$'.format(np.mean(temp)) \
           + '\n\n H$_{avg}$:' + '{:0.2f}'.format(np.mean(humidity)) + r'$\%$'
 
         fig,ax = plt.subplots(1,1)
         plot_curve(ax, v, i, 'IV Curve', 'Reverse Bias Voltage [V]', 'Current [A]', lbl, annotate, x_loc, y_loc)
 
-    if print_results:
+    if printResults:
         print('%s:  IV:\ti_600: %.3f uA\ti_800: %.3f uA' % (lbl, i_600*1e6, i_800*1e6))
 
     return i_600, i_800
 
 
-def analyse_cv_data(path, plot_results=False, print_results=False):
+def analyse_cv_data(path, plotResults=True, printResults=print_results):
     test = 'cv'
 
     if path is None:
@@ -72,14 +73,14 @@ def analyse_cv_data(path, plot_results=False, print_results=False):
 
     series = read_json_file(path).get('series')
     v = abs(series.get('voltage_hvsrc', np.array([])))
-    i = series.get('current_hvsrc')
-    c = series.get('capacitance')
-    c2 = series.get('capacitance2')
-    r = series.get('resistance')
-    temp = series.get('temperature_chuck')
-    humidity = series.get('humidity_box')
+    i = series.get('current_hvsrc', np.array([]))
+    c = series.get('capacitance', np.array([]))
+    c2 = series.get('capacitance2', np.array([]))
+    r = series.get('resistance', np.array([]))
+    temp = series.get('temperature_chuck', np.array([]))
+    humidity = series.get('humidity_box', np.array([]))
 
-    if not len(v):
+    if(len(v) == 0):
         return np.nan, np.nan, np.nan
 
     x_loc = 0.3
@@ -103,7 +104,7 @@ def analyse_cv_data(path, plot_results=False, print_results=False):
 
     #fig1, ax1 = plt.subplots(1, 1)
     #plot_curve(ax1, v_norm, c_norm, 'CV curve', 'Voltage[{}]'.format(v_unit), 'Capacitance [{}]'.format(c_unit), lbl, annotate, x_loc, y_loc)
-    if plot_results:
+    if plotResults:
         fig2, ax2 = plt.subplots(1,1)
         #ax2b = ax2.twinx()
         fit_curve(ax2, v_rise, a_rise * v_rise+ b_rise, color='ro')
@@ -111,26 +112,26 @@ def analyse_cv_data(path, plot_results=False, print_results=False):
         #fit_curve(ax2b, v_norm, spl_dev, color='mx')
         plot_curve(ax2, v, 1./c**2, 'Full Depletion Voltage Estimation', 'Voltage[V]', '1/C$^{2}$ [F$^{-2}$]', lbl, '', 0, 0 )
 
-    if print_results:
+    if printResults:
     	#print(f"{lbl}: CV: v_fd: {}")
         print('%s: \tCV: v_fd: %.2e V\trho: %.2e Ohm\tconc: %.2e cm^-3' % (lbl, v_dep2, rho, conc*1e-6))
 
     return v_dep2, rho, conc
 
 
-def analyse_mos_data(path, plot_results=False, print_results=False):
+def analyse_mos_data(path, plotResults=True, printResults=print_results):
     test = 'mos'
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_hvsrc', np.array([]))
-    i = series.get('current_hvsrc')
-    c = series.get('capacitance')
-    c2 = series.get('capacitance2')
-    r = series.get('resistance')
-    temp = series.get('temperature_chuck')
-    humidity = series.get('humidity_box')
+    i = series.get('current_hvsrc', np.array([]))
+    c = series.get('capacitance', np.array([]))
+    c2 = series.get('capacitance2', np.array([]))
+    r = series.get('resistance', np.array([]))
+    temp = series.get('temperature_chuck', np.array([]))
+    humidity = series.get('humidity_box', np.array([]))
 
-    if not len(v):
+    if(len(v) == 0):
         return np.nan, np.nan, np.nan, np.nan, np.nan
 
     #v_norm, v_unit = normalise_parameter(v, 'V')
@@ -147,59 +148,59 @@ def analyse_mos_data(path, plot_results=False, print_results=False):
     x_loc = 0.15
     y_loc = 0.145
 
-    if plot_results:
+    if plotResults:
         fig, ax = plt.subplots(1,1)
         #plt.ylim(0, 100)
         fit_curve(ax, v, fit_acc, fit_dep)
         plt.axvline(x=v_fb2, color='black', linestyle='dashed')
         plot_curve(ax, v, c, 'CV Curve', 'Voltage [V]', 'Capacitance [F]', lbl, annotate, x_loc, y_loc)
 
-    if print_results:
+    if printResults:
         print('%s: \tMOS: v_fb2: %.2e V\tc_acc: %.2e F\tt_ox: %.3e um\tn_ox: %.2e cm^-2' % (lbl, v_fb2, c_acc_m, t_ox, n_ox))
 
     return v_fb1, v_fb2, t_ox, n_ox, c_acc_m
 
 
-def analyse_gcd_data(path, plot_results=False, print_results=False):
+def analyse_gcd_data(path, plotResults=True, printResults=print_results):
     test = 'gcd'
 
     series = read_json_file(path).get('series')
     v = series.get('voltage', np.array([]))
-    i_em = series.get('current_elm')
-    i_src = series.get('current_vsrc')
-    i_hvsrc = series.get('current_hvsrc')
+    i_em = series.get('current_elm', np.array([]))
+    i_src = series.get('current_vsrc', np.array([]))
+    i_hvsrc = series.get('current_hvsrc', np.array([]))
 
-    if not len(v):
+    if(len(v) == 0):
         return np.nan, np.nan
 
     lbl = assign_label(path, test)
 
     i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, spl_dev, status = analyse_gcd(v,i_em)
 
-    if plot_results and not math.isnan(i_surf) and not math.isnan(i_bulk):
+    if plotResults and not math.isnan(i_surf) and not math.isnan(i_bulk):
         fig, ax = plt.subplots(1,1)
         plot_curve(ax, v, i_em, 'I-V Curve GCD', 'Voltage [V]', 'Current [{}]'.format("A"), lbl, '', 0, 0)
         fit_curve(ax, v_acc, i_acc, color='r')
         fit_curve(ax, v_dep, i_dep, color='k')
         fit_curve(ax, v_inv, i_inv, color='m')
 
-    if print_results:
+    if printResults:
         print('%s: \tGCD: i_surf: %.2e A\t i_bulk: %.2e A' % (lbl, i_surf, i_bulk))
 
     return i_surf, i_bulk
 
 
 
-def analyse_fet_data(path, plot_results=False, print_results=False):
+def analyse_fet_data(path, plotResults=True, printResults=print_results):
     test = 'fet'
 
     series = read_json_file(path).get('series')
     v = series.get('voltage', np.array([]))
-    i_em = series.get('current_elm')
-    i_src = series.get('current_vsrc')
-    i_hvsrc = series.get('current_hvsrc')
+    i_em = series.get('current_elm', np.array([]))
+    i_src = series.get('current_vsrc', np.array([]))
+    i_hvsrc = series.get('current_hvsrc', np.array([]))
 
-    if not len(v):
+    if(len(v) == 0):
         return np.nan
 
     v_th, a, b, spl_dev, status = analyse_fet(v, i_em)
@@ -208,7 +209,7 @@ def analyse_fet_data(path, plot_results=False, print_results=False):
 
     lbl = assign_label(path, test)
 
-    if plot_results:
+    if plotResults:
         fig,ax1 = plt.subplots()
         lns1 = ax1.plot(v,i_em, ls='', marker='s', ms=3, label='transfer characteristics')
         ax1.set_xlabel('V$_{GS}$ [V]')
@@ -224,20 +225,20 @@ def analyse_fet_data(path, plot_results=False, print_results=False):
         plt.legend(lns, labs, loc='upper left')
         plt.show()
 
-    if print_results:
+    if printResults:
        print('%s: \tnFet: v_th: %.2e V' % (lbl, v_th))
 
     return v_th
 
 
-def analyse_van_der_pauw_data(path, plot_results=False, print_results=False):
+def analyse_van_der_pauw_data(path, printResults=print_results, plotResults=True):
     test = 'van-der-pauw'
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc', np.array([]))
-    i = series.get('current')
+    i = series.get('current', np.array([]))
 
-    if not len(v):
+    if(len(v) == 0):
         return np.nan, 0
 
     lbl = assign_label(path, test)
@@ -249,11 +250,11 @@ def analyse_van_der_pauw_data(path, plot_results=False, print_results=False):
         r_value = 0
     else:
         fit = [a*x +b for x in x_fit]
-        if plot_results:
+        if plotResults:
             fig, ax = plt.subplots(1,1)
             fit_curve(ax, x_fit*1e6, fit, 0)
             plot_curve(ax, i*1e6, v, 'IV Curve', 'Current/uA', 'Voltage/V', lbl, '', 0, 0)
-        
+
         if printResults:
            print('%s: \tvdp: r_sheet: %.2e Ohm/sq, correlation: %.2e  %s' % (lbl, r_sheet, r_value, lbl_vdp))
 
@@ -261,7 +262,7 @@ def analyse_van_der_pauw_data(path, plot_results=False, print_results=False):
     return r_sheet, r_value
 
 
-def analyse_linewidth_data(path, r_sheet=np.nan, plot_results=False, print_results=False):
+def analyse_linewidth_data(path, r_sheet=np.nan, printResults=print_results, plotResults=True):
     test = 'linewidth'
 
     if path is None:
@@ -269,28 +270,25 @@ def analyse_linewidth_data(path, r_sheet=np.nan, plot_results=False, print_resul
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc', np.array([]))
-    i = series.get('current')
-
-    if not len(v):
-        return np.nan
+    i = series.get('current', np.array([]))
 
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
     t_line, a, b, x_fit, spl_dev, status = analyse_linewidth(i, v, r_sheet=r_sheet, cut_param=0.01, debug=0)
 
     fit = [a*x +b for x in x_fit]
-    if plot_results:
+    if plotResults:
         fig, ax = plt.subplots(1, 1)
         fit_curve(ax, x_fit, fit, 0)
         plot_curve(ax, i, v, 'IV Curve', 'Current [A]', 'Voltage [V]', lbl, '', 0, 0)
 
-    if print_results:
+    if printResults:
         print('%s: \tLinewidth: %.2e um\t%s' % (lbl, t_line, lbl_vdp))
 
     return t_line
 
 
-def analyse_cbkr_data(path, r_sheet=np.nan, plot_results=False, print_results=False):
+def analyse_cbkr_data(path, r_sheet=np.nan, printResults=print_results, plotResults=True):
     test = 'cbkr'
 
     if path is None:
@@ -298,9 +296,9 @@ def analyse_cbkr_data(path, r_sheet=np.nan, plot_results=False, print_results=Fa
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc', np.array([]))
-    i = series.get('current')
+    i = series.get('current', np.array([]))
 
-    if not len(v):
+    if len(v) == 0:
         return np.nan
 
     lbl = assign_label(path, test)
@@ -309,19 +307,19 @@ def analyse_cbkr_data(path, r_sheet=np.nan, plot_results=False, print_results=Fa
     r_contact, a, b, x_fit, spl_dev, status = analyse_cbkr(i, v, r_sheet, cut_param=0.01, debug=0)
     fit = [a*x +b for x in x_fit]
 
-    if plot_results:
+    if plotResults:
         fig, ax = plt.subplots(1, 1)
         fit_curve(ax, x_fit, fit, 0)
         plot_curve(ax, i, v, 'IV Curve', 'Current [A]', 'Voltage [V]', lbl, '', 0, 0)
 
-    if print_results:
+    if printResults:
        print('%s: \tcbkr: r_contact: %.2e Ohm\t%s' % (lbl, r_contact, lbl_vdp))
 
 
     return r_contact
 
 
-def analyse_contact_data(path, plot_results=False, print_results=False):
+def analyse_contact_data(path):
     test= 'contact'
 
     if path is None:
@@ -329,10 +327,7 @@ def analyse_contact_data(path, plot_results=False, print_results=False):
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc', np.array([]))
-    i = series.get('current')
-
-    if not len(v):
-        return np.nan
+    i = series.get('current', np.array([]))
 
     i_norm, i_unit = normalise_parameter(i, 'A')
 
@@ -347,7 +342,8 @@ def analyse_contact_data(path, plot_results=False, print_results=False):
     return r_contact
 
 
-def analyse_meander_data(path, plot_results=False, print_results=False):
+
+def analyse_meander_data(path):
     test = 'meander'
 
     if path is None:
@@ -355,10 +351,7 @@ def analyse_meander_data(path, plot_results=False, print_results=False):
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc', np.array([]))
-    i = series.get('current')
-
-    if not len(v):
-        return np.nan
+    i = series.get('current', np.array([]))
 
     i_norm, i_unit = normalise_parameter(i, 'A')
 
@@ -374,7 +367,7 @@ def analyse_meander_data(path, plot_results=False, print_results=False):
 
 
 
-def analyse_breakdown_data(path, plot_results=False, print_results=False):
+def analyse_breakdown_data(path, printResults=print_results, plotResults=True):
     test = 'breakdown'
 
     if path is None:
@@ -382,13 +375,11 @@ def analyse_breakdown_data(path, plot_results=False, print_results=False):
 
     series = read_json_file(path).get('series')
     v = series.get('voltage', np.array([]))
-    i = series.get('current_hvsrc')
-    i_elm = series.get('current_elm')
-    temp = series.get('temperature_chuck')
-    humidity = series.get('humidity_box')
+    i = series.get('current_hvsrc', np.array([]))
+    i_elm = series.get('current_elm', np.array([]))
+    temp = series.get('temperature_chuck', np.array([]))
+    humidity = series.get('humidity_box', np.array([]))
 
-    if not len(v):
-        return np.nan
 
     lbl = assign_label(path, test)
     x_loc = 0.3
@@ -396,13 +387,13 @@ def analyse_breakdown_data(path, plot_results=False, print_results=False):
 
     v_bd, status = analyse_breakdown(v, i_elm, debug=0)
 
-    if plot_results:
+    if plotResults:
         fig, ax = plt.subplots(1,1)
         annotate = 'V$_{{bd}}$: {} V \n\nT$_{{avg}}$ : {} \u00B0C \nH$_{{avg}}$: {} $\%$ '.format(v_bd, round(np.mean(temp),2), round(np.mean(humidity),2))
         plot_curve(ax, v, i_elm, 'IV Curve', 'Voltage [V]', 'Current [A]', lbl, annotate, x_loc, y_loc)
 
 
-    if print_results:
+    if printResults:
        print('%s: \tBreakdown: v_bd: %.2e V' % (lbl, v_bd))
 
     return v_bd
@@ -422,7 +413,7 @@ def get_vdp_value(pathlist, printResults=False, plotResults=False):
     return r_sheet
 
 
-def analyse_full_line_data(path, plot_results=False, print_results=False):
+def analyse_full_line_data(path):
     """
     This function is used to analyze various different measurements
     and assemble one line (per fluteset) of results to be tabellized
@@ -474,8 +465,8 @@ def analyse_full_line_data(path, plot_results=False, print_results=False):
 
     print("# serial                                 \t  vdp_poly/kOhm/sq       vdp_n/Ohm/sq     vdp_pstop/kOhm/sq   lw_n/um    lw_p2/um   lw_p4/um cbkr_poly/kOhm cbkr_n/Ohm")
     for i in range(0, len(dirs)):
-        labels[i] = dirs[i].split("/")[-1]            
-        
+        labels[i] = dirs[i].split("/")[-1]
+
         vdp_poly_f[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "Polysilicon"], blacklist=["reverse"]), plotResults=True)
         vdp_poly_r[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "Polysilicon", "reverse"]))
 
@@ -485,12 +476,12 @@ def analyse_full_line_data(path, plot_results=False, print_results=False):
         vdp_pstop_f[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "P_stop"], blacklist=["reverse"]))
         vdp_pstop_r[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "P_stop", "reverse"]))
 
-        t_line_n[i] = analyse_linewidth_data(find_all_files_from_path(dirs[i], "linewidth", whitelist=[flutes[i], "n"], single=True), r_sheet=vdp_n_f[i])
-        t_line_pstop2[i] = analyse_linewidth_data(find_all_files_from_path(dirs[i], "linewidth", whitelist=[flutes[i], "P_stop", "2_wire"], single=True), r_sheet=vdp_pstop_f[i])
-        t_line_pstop4[i] = analyse_linewidth_data(find_all_files_from_path(dirs[i], "linewidth", whitelist=[flutes[i], "P_stop", "4_wire"], single=True), r_sheet=vdp_pstop_f[i])
+        t_line_n[i] = analyse_linewidth_data(find_all_files_from_path(dirs[i], "linewidth", whitelist=[flutes[i], "n"], single=True), r_sheet=vdp_n_f[i], printResults=False, plotResults=False)
+        t_line_pstop2[i] = analyse_linewidth_data(find_all_files_from_path(dirs[i], "linewidth", whitelist=[flutes[i], "P_stop", "2_wire"], single=True), r_sheet=vdp_pstop_f[i], printResults=False, plotResults=False)
+        t_line_pstop4[i] = analyse_linewidth_data(find_all_files_from_path(dirs[i], "linewidth", whitelist=[flutes[i], "P_stop", "4_wire"], single=True), r_sheet=vdp_pstop_f[i], printResults=False, plotResults=False)
 
-        r_contact_n[i] = analyse_cbkr_data(find_all_files_from_path(dirs[i], "cbkr", whitelist=[flutes[i], "n"], single=True), r_sheet=vdp_n_f[i])
-        r_contac_poly[i] = analyse_cbkr_data(find_all_files_from_path(dirs[i], "cbkr", whitelist=[flutes[i], "Polysilicon"], single=True), r_sheet=vdp_poly_f[i])
+        r_contact_n[i] = analyse_cbkr_data(find_all_files_from_path(dirs[i], "cbkr", whitelist=[flutes[i], "n"], single=True), r_sheet=vdp_n_f[i], printResults=False, plotResults=False)
+        r_contac_poly[i] = analyse_cbkr_data(find_all_files_from_path(dirs[i], "cbkr", whitelist=[flutes[i], "Polysilicon"], single=True), r_sheet=vdp_poly_f[i], printResults=False, plotResults=False)
 
 
         line = "{} {}  \t".format(labels[i], flutes[i])
@@ -507,20 +498,20 @@ def analyse_full_line_data(path, plot_results=False, print_results=False):
     print("# serial                                 \t fet       vdp_met-clov       vdp_p-cr-br/kOhm/sq  lw_cb/um  v_bd/V    i600/uA    V_fd/V   rho/kOhm cm   d-conc/cm^-3")
     print("# serial                                 \tv_th/V     ")
     for i in range(0, len(dirs)):
-        v_th[i] = analyse_fet_data(find_all_files_from_path(dirs[i], "fet", whitelist=[flutes[i],], single=True))
+        v_th[i] = analyse_fet_data(find_all_files_from_path(dirs[i], "fet", whitelist=[flutes[i],], single=True), printResults=False, plotResults=False)
 
         vdp_metclo_f[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "metal", "clover"], blacklist=["reverse"]))
         vdp_metclo_r[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "metal", "clover", "reverse"], blacklist=[]))
 
         vdp_p_cross_bridge_f[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "P", "cross_bridge"], blacklist=["reverse"]))
         vdp_p_cross_bridge_r[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "P", "cross_bridge", "reverse"]))
-        t_line_p_cross_bridge[i] = analyse_linewidth_data(find_all_files_from_path(dirs[i], "linewidth", whitelist=[flutes[i], "P", "cross_bridge"], single=True), r_sheet=vdp_p_cross_bridge_f[i])
+        t_line_p_cross_bridge[i] = analyse_linewidth_data(find_all_files_from_path(dirs[i], "linewidth", whitelist=[flutes[i], "P", "cross_bridge"], single=True), r_sheet=vdp_p_cross_bridge_f[i], printResults=False, plotResults=False)
 
-        v_bd[i] = analyse_breakdown_data(find_all_files_from_path(dirs[i], "breakdown", whitelist=[flutes[i],], single=True))
+        v_bd[i] = analyse_breakdown_data(find_all_files_from_path(dirs[i], "breakdown", whitelist=[flutes[i],], single=True), printResults=False, plotResults=False)
 
         # we want this for FLute_3 and not Flute_1
-        i600[i], dummy = analyse_iv_data(find_all_files_from_path(dirs[i], "iv", whitelist=[flutes[i], "3"], single=True))
-        v_fd[i], rho[i], conc[i] = analyse_cv_data(find_all_files_from_path(dirs[i], "cv", whitelist=[flutes[i], "3"], single=True))
+        i600[i], dummy = analyse_iv_data(find_all_files_from_path(dirs[i], "iv", whitelist=[flutes[i], "3"], single=True), printResults=False, plotResults=False)
+        v_fd[i], rho[i], conc[i] = analyse_cv_data(find_all_files_from_path(dirs[i], "cv", whitelist=[flutes[i], "3"], single=True), printResults=False, plotResults=False)
 
         line = "{} {}  \t".format(labels[i], flutes[i])
         line += "{:5.2f}  ".format(v_th[i])
@@ -537,9 +528,9 @@ def analyse_full_line_data(path, plot_results=False, print_results=False):
     print("# serial                                 \t                    mos                        gcd             gcd05")
     print("# serial                                 \t v_fb/V    c_acc/pF   t_ox/um n_ox/1E10cm^-2 i_surf/pA  i_surf/pA   i_bulk/pA")
     for i in range(0, len(dirs)):
-        v_fb1[i], v_fb2[i], t_ox[i], n_ox[i], c_acc_m[i] = analyse_mos_data(find_all_files_from_path(dirs[i], "mos", whitelist=[flutes[i],], single=True))
-        i_surf[i], dummy = analyse_gcd_data(find_all_files_from_path(dirs[i], "gcd", whitelist=[flutes[i],], single=True))  # only i_surf valid
-        i_surf05[i], i_bulk05[i] = analyse_gcd_data(find_all_files_from_path(dirs[i], "gcd05", whitelist=[flutes[i],], single=True))  # for i_bulk
+        v_fb1[i], v_fb2[i], t_ox[i], n_ox[i], c_acc_m[i] = analyse_mos_data(find_all_files_from_path(dirs[i], "mos", whitelist=[flutes[i],], single=True), printResults=False, plotResults=False)
+        i_surf[i], dummy = analyse_gcd_data(find_all_files_from_path(dirs[i], "gcd", whitelist=[flutes[i],], single=True), printResults=False, plotResults=False)  # only i_surf valid
+        i_surf05[i], i_bulk05[i] = analyse_gcd_data(find_all_files_from_path(dirs[i], "gcd05", whitelist=[flutes[i],], single=True), printResults=False, plotResults=False)  # for i_bulk
 
         line = "{} {}  \t".format(labels[i], flutes[i])
         line += "{:8.2f}    {:6.2f}    {:7.3f}  {:9.2f}     ".format(v_fb2[i], c_acc_m[i]*1e12, t_ox[i], n_ox[i]*1e-10)
@@ -572,34 +563,36 @@ functions = {
     'van_der_pauw': analyse_van_der_pauw_data,
     'breakdown': analyse_breakdown_data,
     'cbkr': analyse_cbkr_data,
-    'full-line': analyse_full_line_data
 }
-"""Mapping of available analysis function names."""
 
-def analyse_file(path, test, plot_results, print_results):
+
+def analyse_file(path, test):
     if test == 'all':
         for f in functions.values():
             print(f)
             f(path)
     elif test in functions:
-        functions.get(test)(path, plot_results=plot_results, print_results=print_results)
+        functions.get(test)(path)
     else:
         raise ValueError(f"no such test: '{test}'")
 
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('path', help="path to PQC analysis JSON files")
-    parser.add_argument('test', help="analysis function to run")
+    parser.add_argument('path')
+    parser.add_argument('test')
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    plot_results = True
-    print_results = True
 
-    if args.test == 'all':
+    if args.test == 'full-line':
+        analyse_full_line_data(args.path)
+        plt.show()
+        return 0
+    elif args.test == 'all':
         tests = functions.keys()
     else:
         tests = [args.test]
@@ -609,7 +602,8 @@ def main():
         filedir = find_all_files_from_path(args.path, test)
         filedir = np.sort(filedir)
         for f in filedir:
-            analyse_file(f, test, plot_results, print_results)
+         #  print(f)
+           analyse_file(f, test)
         plt.show()
 
 if __name__ =="__main__":
