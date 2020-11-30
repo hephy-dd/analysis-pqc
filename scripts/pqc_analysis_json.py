@@ -32,17 +32,18 @@ print_results = 1
 
 def analyse_iv_data(path, plotResults=True, printResults=print_results):
     test = 'iv'
+
     if path is None:
         return np.nan, np.nan
 
     series = read_json_file(path).get('series')
-    v = abs(series.get('voltage'))
+    v = abs(series.get('voltage', np.array()))
     i_tot = series.get('current_elm')
-    i = abs(series.get('current_hvsrc'))
+    i = abs(series.get('current_hvsrc', np.array()))
     temp = series.get('temperature_chuck')
     humidity = series.get('humidity_box')
 
-    if(len(v) == 0):
+    if not v:
         return np.nan, np.nan
 
     x_loc = 0.3
@@ -72,7 +73,7 @@ def analyse_cv_data(path, plotResults=True, printResults=print_results):
         return np.nan, np.nan, np.nan
 
     series = read_json_file(path).get('series')
-    v = abs(series.get('voltage_hvsrc'))
+    v = abs(series.get('voltage_hvsrc', np.array()))
     i = series.get('current_hvsrc')
     c = series.get('capacitance')
     c2 = series.get('capacitance2')
@@ -80,7 +81,7 @@ def analyse_cv_data(path, plotResults=True, printResults=print_results):
     temp = series.get('temperature_chuck')
     humidity = series.get('humidity_box')
 
-    if(len(v) == 0):
+    if not v:
         return np.nan, np.nan, np.nan
 
     x_loc = 0.3
@@ -131,7 +132,7 @@ def analyse_mos_data(path, plotResults=True, printResults=print_results):
     temp = series.get('temperature_chuck')
     humidity = series.get('humidity_box')
 
-    if(len(v) == 0):
+    if not v:
         return np.nan, np.nan, np.nan, np.nan, np.nan
 
     #v_norm, v_unit = normalise_parameter(v, 'V')
@@ -170,7 +171,7 @@ def analyse_gcd_data(path, plotResults=True, printResults=print_results):
     i_src = series.get('current_vsrc')
     i_hvsrc = series.get('current_hvsrc')
 
-    if(len(v) == 0):
+    if not v:
         return np.nan, np.nan
 
     lbl = assign_label(path, test)
@@ -200,7 +201,7 @@ def analyse_fet_data(path, plotResults=True, printResults=print_results):
     i_src = series.get('current_vsrc')
     i_hvsrc = series.get('current_hvsrc')
 
-    if(len(v) == 0):
+    if not v:
         return np.nan
 
     v_th, a, b, spl_dev, status = analyse_fet(v, i_em)
@@ -237,7 +238,8 @@ def analyse_van_der_pauw_data(path, printResults=print_results, plotResults=True
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc')
     i = series.get('current')
-    if(len(v) == 0):
+
+    if not v:
         return np.nan, 0
 
     lbl = assign_label(path, test)
@@ -271,6 +273,9 @@ def analyse_linewidth_data(path, r_sheet=np.nan, printResults=print_results, plo
     v = series.get('voltage_vsrc')
     i = series.get('current')
 
+    if not v:
+        return np.nan
+
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
     t_line, a, b, x_fit, spl_dev, status = analyse_linewidth(i, v, r_sheet=r_sheet, cut_param=0.01, debug=0)
@@ -297,7 +302,7 @@ def analyse_cbkr_data(path, r_sheet=np.nan, printResults=print_results, plotResu
     v = series.get('voltage_vsrc')
     i = series.get('current')
 
-    if len(v) == 0:
+    if not v:
         return np.nan
 
     lbl = assign_label(path, test)
@@ -328,6 +333,9 @@ def analyse_contact_data(path):
     v = series.get('voltage_vsrc')
     i = series.get('current')
 
+    if not v:
+        return np.nan
+
     i_norm, i_unit = normalise_parameter(i, 'A')
 
     lbl = assign_label(path, test)
@@ -341,7 +349,6 @@ def analyse_contact_data(path):
     return r_contact
 
 
-
 def analyse_meander_data(path):
     test = 'meander'
 
@@ -351,6 +358,9 @@ def analyse_meander_data(path):
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc')
     i = series.get('current')
+
+    if not v:
+        return np.nan
 
     i_norm, i_unit = normalise_parameter(i, 'A')
 
@@ -379,6 +389,8 @@ def analyse_breakdown_data(path, printResults=print_results, plotResults=True):
     temp = series.get('temperature_chuck')
     humidity = series.get('humidity_box')
 
+    if not v:
+        return np.nan
 
     lbl = assign_label(path, test)
     x_loc = 0.3
@@ -410,9 +422,6 @@ def get_vdp_value(pathlist):
             r_sheet = rs
             r_value = rv
     return r_sheet
-
-
-
 
 
 def analyse_full_line_data(path):
@@ -555,18 +564,18 @@ def analyse_full_line_data(path):
 
 
 functions = {
-        'iv': analyse_iv_data,
-        'cv': analyse_cv_data,
-        'fet': analyse_fet_data,
-        'gcd': analyse_gcd_data,
-        'gcd05': analyse_gcd_data,
-        'mos': analyse_mos_data,
-        'linewidth': analyse_linewidth_data,
-        'van_der_pauw': analyse_van_der_pauw_data,
-        'breakdown': analyse_breakdown_data,
-        'cbkr': analyse_cbkr_data,
-    }
-
+    'iv': analyse_iv_data,
+    'cv': analyse_cv_data,
+    'fet': analyse_fet_data,
+    'gcd': analyse_gcd_data,
+    'gcd05': analyse_gcd_data,
+    'mos': analyse_mos_data,
+    'linewidth': analyse_linewidth_data,
+    'van_der_pauw': analyse_van_der_pauw_data,
+    'breakdown': analyse_breakdown_data,
+    'cbkr': analyse_cbkr_data,
+}
+"""Mapping of available analysis function names."""
 
 def analyse_file(path, test):
     if test == 'all':
@@ -579,11 +588,10 @@ def analyse_file(path, test):
         raise ValueError(f"no such test: '{test}'")
 
 
-
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('path')
-    parser.add_argument('test')
+    parser.add_argument('path', help="path to PQC analysis JSON files")
+    parser.add_argument('test', help="analysis function to run")
     return parser.parse_args()
 
 
