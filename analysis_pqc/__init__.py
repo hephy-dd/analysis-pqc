@@ -246,15 +246,15 @@ def analyse_mos(v, c, cut_param=0.03, debug=False):
     Metal oxide Capacitor: Extract flatband voltage, oxide thickness and charge density.
 
     Parameters:
-    v ... voltage
-    c ... capacitance
+    v ... voltage (V)
+    c ... capacitance (F)
     cut_param ... used to cut on 1st derivative to id voltage regions
 
     Returns:
-    v_fb1 ... flatband voltage via inflection
-    v_fb2 ... flatband voltage via intersection
-    t_ox ... oxide thickness
-    n_ox ... oxide charge density
+    v_fb1 ... flatband voltage via inflection (V)
+    v_fb2 ... flatband voltage via intersection (V)
+    t_ox ... oxide thickness (um)
+    n_ox ... oxide charge density (cm^-2)
     """
 
     ## init
@@ -333,8 +333,8 @@ def analyse_gcd(v, i, cut_param=0.01, debug=False):
     """
 
     # init
-    i_surf = i_bulk = -1
-    i_acc = i_dep = i_inv = v_acc = v_dep = v_inv = spl_dev = -1
+    i_surf = i_bulk = np.nan
+    i_acc = i_dep = i_inv = v_acc = v_dep = v_inv = spl_dev = np.nan
     status = STATUS_NONE
 
     # get spline fit, requires strictlty increasing array
@@ -378,7 +378,7 @@ def analyse_gcd(v, i, cut_param=0.01, debug=False):
 
         # surface and bulk generation current
         i_surf = np.mean(i_dep) - np.mean(i_inv)
-        i_bulk = np.mean(i_inv) - np.mean(i_acc)
+        i_bulk = np.mean(i_acc) - np.mean(i_inv)
         status = STATUS_PASSED
 
     except (ValueError, TypeError, IndexError):

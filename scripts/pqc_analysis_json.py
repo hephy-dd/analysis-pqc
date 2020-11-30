@@ -147,7 +147,7 @@ def analyse_mos_data(path, plotResults=True, printResults=print_results):
         plot_curve(ax, v, c, 'CV Curve', 'Voltage [V]', 'Capacitance [F]', lbl, annotate, x_loc, y_loc)
 
     if printResults:
-        print('%s: \tMOS: v_fb2: %.2e V\tc_acc: %.2e F\tt_ox: %.2e nm\tn_ox: %.2e cm^-2' % (lbl, v_fb2, c_acc_m, t_ox*1e3, n_ox))
+        print('%s: \tMOS: v_fb2: %.2e V\tc_acc: %.2e F\tt_ox: %.3e um\tn_ox: %.2e cm^-2' % (lbl, v_fb2, c_acc_m, t_ox, n_ox))
          
     return v_fb1, v_fb2, t_ox, n_ox, c_acc_m
 
@@ -167,10 +167,13 @@ def analyse_gcd_data(path, plotResults=True, printResults=print_results):
 
     i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, spl_dev, status = analyse_gcd(v,i_em)
     
-    if plotResults:
+    if plotResults and not math.isnan(i_surf) and not math.isnan(i_bulk):
         fig, ax = plt.subplots(1,1)
         plot_curve(ax, v, i_em, 'I-V Curve GCD', 'Voltage [V]', 'Current [{}]'.format("A"), lbl, '', 0, 0)
-
+        fit_curve(ax, v_acc, i_acc, color='r')
+        fit_curve(ax, v_dep, i_dep, color='k')
+        fit_curve(ax, v_inv, i_inv, color='m')
+        
     if printResults:
         print('%s: \tGCD: i_surf: %.2e A\t i_bulk: %.2e A' % (lbl, i_surf, i_bulk))
   
@@ -396,95 +399,133 @@ def analyse_full_line_data(path):
     path ... path to parent directory: subdirs for each measurment-set
     """
     dirs = glob.glob(os.path.join(path, "*"))
+    flutes = ["PQCFlutesRight", "PQCFlutesLeft"]*len(dirs)
+    dirs = dirs*2   # we need to double it for the two flutes
     dirs.sort()
+    
+    labels = ["n/a"]*len(dirs)        
+    default=0
+    vdp_poly_f = [default]*len(dirs)   
+    vdp_poly_r = [default]*len(dirs)   
+    vdp_n_f = [default]*len(dirs)   
+    vdp_n_r = [default]*len(dirs)   
+    vdp_pstop_f = [default]*len(dirs)   
+    vdp_pstop_r = [default]*len(dirs) 
+    t_line_n = [default]*len(dirs)   
+    t_line_pstop2 = [default]*len(dirs)   
+    t_line_pstop4 = [default]*len(dirs)   
+    r_contact_n = [default]*len(dirs)   
+    r_contac_poly = [default]*len(dirs)
+    
+    v_th = [default]*len(dirs)  
+    vdp_metclo_f = [default]*len(dirs)  
+    vdp_metclo_r = [default]*len(dirs)  
+    vdp_p_cross_bridge_f = [default]*len(dirs)  
+    vdp_p_cross_bridge_r = [default]*len(dirs)  
+    t_line_p_cross_bridge = [default]*len(dirs)  
+    v_bd = [default]*len(dirs)  
+    
+    v_fb1 = [default]*len(dirs)  
+    v_fb2 = [default]*len(dirs)  
+    t_ox = [default]*len(dirs)  
+    n_ox = [default]*len(dirs)  
+    c_acc_m = [default]*len(dirs)  
+    i_surf = [default]*len(dirs)  
+    i_surf05 = [default]*len(dirs)  
+    i_bulk05 = [default]*len(dirs)  
+        
+
     print("# serial                                 \t  vdp_poly/kOhm/sq       vdp_n/Ohm/sq     vdp_pstop/kOhm/sq   lw_n/um    lw_p2/um   lw_p4/um cbkr_poly/kOhm cbkr_n/Ohm")
-    for dirc in dirs:
-        for flute in ["PQCFlutesRight", "PQCFlutesLeft"]:
-            label = dirc.split("/")[-1]            
-            
-            vdp_poly_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "Polysilicon"], blacklist=["reverse"]))
-            vdp_poly_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "Polysilicon", "reverse"]))
-            
-            vdp_n_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "n"], blacklist=["reverse"]))
-            vdp_n_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "n", "reverse"]))
-            
-            vdp_pstop_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P_stop"], blacklist=["reverse"]))
-            vdp_pstop_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P_stop", "reverse"]))
-            
-            t_line_n = analyse_linewidth_data(find_all_files_from_path(dirc, "linewidth", whitelist=[flute, "n"], single=True), r_sheet=vdp_n_f, printResults=False, plotResults=False)
-            t_line_pstop2 = analyse_linewidth_data(find_all_files_from_path(dirc, "linewidth", whitelist=[flute, "P_stop", "2_wire"], single=True), r_sheet=vdp_pstop_f, printResults=False, plotResults=False)
-            t_line_pstop4 = analyse_linewidth_data(find_all_files_from_path(dirc, "linewidth", whitelist=[flute, "P_stop", "4_wire"], single=True), r_sheet=vdp_pstop_f, printResults=False, plotResults=False)
-            
-            r_contact_n = analyse_cbkr_data(find_all_files_from_path(dirc, "cbkr", whitelist=[flute, "n"], single=True), r_sheet=vdp_n_f, printResults=False, plotResults=False)
-            r_contac_poly = analyse_cbkr_data(find_all_files_from_path(dirc, "cbkr", whitelist=[flute, "Polysilicon"], single=True), r_sheet=vdp_poly_f, printResults=False, plotResults=False)
-            
-            
-            line = "{} {}  \t".format(label, flute)
-            line += "{:8.2f} {:8.2f}    ".format(vdp_poly_f*1e-3, vdp_poly_r*1e-3)
-            line += "{:8.2f} {:8.2f}    ".format(vdp_n_f, vdp_n_r)
-            line += "{:8.2f} {:8.2f}    ".format(vdp_pstop_f*1e-3, vdp_pstop_r*1e-3)
-            line += "{:8.2f} {:8.2f} {:8.2f}     ".format(t_line_n, t_line_pstop2, t_line_pstop4)
-            line += "{:8.2f} {:8.2f}".format(r_contac_poly*1e-3, r_contact_n)
-            
-            
-            
-            print(line)
+    for i in range(0, len(dirs)):
+        labels[i] = dirs[i].split("/")[-1]            
+        
+        vdp_poly_f[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "Polysilicon"], blacklist=["reverse"]))
+        vdp_poly_r[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "Polysilicon", "reverse"]))
+        
+        vdp_n_f[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "n"], blacklist=["reverse"]))
+        vdp_n_r[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "n", "reverse"]))
+        
+        vdp_pstop_f[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "P_stop"], blacklist=["reverse"]))
+        vdp_pstop_r[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "P_stop", "reverse"]))
+        
+        t_line_n[i] = analyse_linewidth_data(find_all_files_from_path(dirs[i], "linewidth", whitelist=[flutes[i], "n"], single=True), r_sheet=vdp_n_f[i], printResults=False, plotResults=False)
+        t_line_pstop2[i] = analyse_linewidth_data(find_all_files_from_path(dirs[i], "linewidth", whitelist=[flutes[i], "P_stop", "2_wire"], single=True), r_sheet=vdp_pstop_f[i], printResults=False, plotResults=False)
+        t_line_pstop4[i] = analyse_linewidth_data(find_all_files_from_path(dirs[i], "linewidth", whitelist=[flutes[i], "P_stop", "4_wire"], single=True), r_sheet=vdp_pstop_f[i], printResults=False, plotResults=False)
+        
+        r_contact_n[i] = analyse_cbkr_data(find_all_files_from_path(dirs[i], "cbkr", whitelist=[flutes[i], "n"], single=True), r_sheet=vdp_n_f[i], printResults=False, plotResults=False)
+        r_contac_poly[i] = analyse_cbkr_data(find_all_files_from_path(dirs[i], "cbkr", whitelist=[flutes[i], "Polysilicon"], single=True), r_sheet=vdp_poly_f[i], printResults=False, plotResults=False)
+        
+        
+        line = "{} {}  \t".format(labels[i], flutes[i])
+        line += "{:8.2f} {:8.2f}    ".format(vdp_poly_f[i]*1e-3, vdp_poly_r[i]*1e-3)
+        line += "{:8.2f} {:8.2f}    ".format(vdp_n_f[i], vdp_n_r[i])
+        line += "{:8.2f} {:8.2f}    ".format(vdp_pstop_f[i]*1e-3, vdp_pstop_r[i]*1e-3)
+        line += "{:8.2f} {:8.2f} {:8.2f}     ".format(t_line_n[i], t_line_pstop2[i], t_line_pstop4[i])
+        line += "{:8.2f} {:8.2f}".format(r_contac_poly[i]*1e-3, r_contact_n[i])
+
+        print(line)
     
     print("")
     print("")
     print("# serial                                 \t fet       vdp_met-clov       vdp_p-cr-br/kOhm/sq  lw_cb/um  v_bd/V")
     print("# serial                                 \tv_th/V     ")
-    for dirc in dirs:
-        for flute in ["PQCFlutesRight", "PQCFlutesLeft"]:
-            label = dirc.split("/")[-1]
-            
-            v_th = analyse_fet_data(find_all_files_from_path(dirc, "fet", whitelist=[flute,], single=True), printResults=False, plotResults=False)
-            
-            vdp_metclo_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "metal", "clover"], blacklist=["reverse"]))
-            vdp_metclo_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "metal", "clover", "reverse"], blacklist=[]))
-            
-            vdp_p_cross_bridge_f = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P", "cross_bridge"], blacklist=["reverse"]))
-            vdp_p_cross_bridge_r = get_vdp_value(find_all_files_from_path(dirc, "van_der_pauw", whitelist=[flute, "P", "cross_bridge", "reverse"]))
-            t_line_p_cross_bridge = analyse_linewidth_data(find_all_files_from_path(dirc, "linewidth", whitelist=[flute, "P", "cross_bridge"], single=True), r_sheet=vdp_p_cross_bridge_f, printResults=False, plotResults=False)
-            
-            v_bd = analyse_breakdown_data(find_all_files_from_path(dirc, "breakdown", whitelist=[flute,], single=True), printResults=False, plotResults=False)
-            
-            line = "{} {}  \t".format(label, flute)
-            line += "{:5.2f}  ".format(v_th)
-            line += "{:9.2E}  {:9.2E}   ".format(vdp_metclo_f, vdp_metclo_r)
-            
-            line += "{:8.2f} {:8.2f}    ".format(vdp_p_cross_bridge_f*1e-3, vdp_p_cross_bridge_r*1e-3)
-            line += "{:8.2f}".format(t_line_p_cross_bridge)
-            
-            line += "{:8.2f}".format(v_bd)
-            print(line)
+    for i in range(0, len(dirs)):
+        v_th[i] = analyse_fet_data(find_all_files_from_path(dirs[i], "fet", whitelist=[flutes[i],], single=True), printResults=False, plotResults=False)
+        
+        vdp_metclo_f[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "metal", "clover"], blacklist=["reverse"]))
+        vdp_metclo_r[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "metal", "clover", "reverse"], blacklist=[]))
+        
+        vdp_p_cross_bridge_f[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "P", "cross_bridge"], blacklist=["reverse"]))
+        vdp_p_cross_bridge_r[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "P", "cross_bridge", "reverse"]))
+        t_line_p_cross_bridge[i] = analyse_linewidth_data(find_all_files_from_path(dirs[i], "linewidth", whitelist=[flutes[i], "P", "cross_bridge"], single=True), r_sheet=vdp_p_cross_bridge_f[i], printResults=False, plotResults=False)
+        
+        v_bd[i] = analyse_breakdown_data(find_all_files_from_path(dirs[i], "breakdown", whitelist=[flutes[i],], single=True), printResults=False, plotResults=False)
+        
+        
+        line = "{} {}  \t".format(labels[i], flutes[i])
+        line += "{:5.2f}  ".format(v_th[i])
+        line += "{:9.2E}  {:9.2E}   ".format(vdp_metclo_f[i], vdp_metclo_r[i])
+        
+        line += "{:8.2f} {:8.2f}    ".format(vdp_p_cross_bridge_f[i]*1e-3, vdp_p_cross_bridge_r[i]*1e-3)
+        line += "{:8.2f}".format(t_line_p_cross_bridge[i])
+        
+        line += "{:8.2f}".format(v_bd[i])
+        print(line)
+    print("")
+    print("")
+    print("# serial                                 \t                    mos                        gcd             gcd05")
+    print("# serial                                 \t v_fb/V    c_acc/pF   t_ox/um n_ox/1E10cm^-2 i_surf/pA  i_surf/pA   i_bulk/pA")
+    for i in range(0, len(dirs)):
+        v_fb1[i], v_fb2[i], t_ox[i], n_ox[i], c_acc_m[i] = analyse_mos_data(find_all_files_from_path(dirs[i], "mos", whitelist=[flutes[i],], single=True), printResults=False, plotResults=False)
+        i_surf[i], dummy = analyse_gcd_data(find_all_files_from_path(dirs[i], "gcd", whitelist=[flutes[i],], single=True), printResults=False, plotResults=False)  # only i_surf valid
+        i_surf05[i], i_bulk05[i] = analyse_gcd_data(find_all_files_from_path(dirs[i], "gcd05", whitelist=[flutes[i],], single=True), printResults=False, plotResults=False)  # for i_bulk
+        
+        line = "{} {}  \t".format(labels[i], flutes[i])
+        line += "{:8.2f}    {:6.2f}    {:5.3f}  {:9.2f}     ".format(v_fb2[i], c_acc_m[i]*1e12, t_ox[i], n_ox[i]*1e-10)
+        line += "{:8.2f}  {:8.2f}  {:8.2f}    ".format(i_surf[i]*1e12, i_surf05[i]*1e12, i_bulk05[i]*1e12)
+
+        print(line)
     
-    print("")
-    print("")
-    print("# serial                                 \t                    mos                         fet                gcd             vdp_met-clov   vdp_p-cr-br/kOhm/sq  lw_cb/um")
-    print("# serial                                 \t v_fb/V     t_ox/nm    n_ox/cm^-2 c_acc/F     v_th/V       i_surf/A    i_bulk/A")
-    for dirc in dirs:
-        for flute in ["PQCFlutesRight", "PQCFlutesLeft"]:
-            label = dirc.split("/")[-1]
-            
-            v_fb1, v_fb2, t_ox, n_ox, c_acc_m = analyse_mos_data(find_all_files_from_path(dirc, "mos", whitelist=[flute,], single=True), printResults=False, plotResults=False)
-            
-            i_surf, i_bulk = analyse_gcd_data(find_all_files_from_path(dirc, "gcd", whitelist=[flute,], single=True), printResults=False, plotResults=False)
-            
-            
-            line = "{} {}  \t".format(label, flute)
-            line += "{:9.2E}  {:9.2E}  {:9.2E}  {:9.2E}   ".format(v_fb2, t_ox, n_ox, c_acc_m)
-            line += "{:9.2E}  {:9.2E}    ".format(i_surf, i_bulk)
-
-            print(line)
-            
-            
-
+    
+    #outfile = open("outpit.dat",'w')
+    #outfile.write("#serial\tflute\t")
+    #outfile.write("#VdP\trev\t")
+    #
+    #
+    #outfile.write("#---\t---\t")
+    #outfile.write("#\tflute\t")
+    #for i in range(0, len(dirs)):
+    #    outfile.write(lebels[i]+"\t"+flutes[i]+"\t")
+    #    
+    #outfile.close()
+    
+    
 functions = {
         'iv': analyse_iv_data,
         'cv': analyse_cv_data,
         'fet': analyse_fet_data,
         'gcd': analyse_gcd_data,
+        'gcd05': analyse_gcd_data,
         'mos': analyse_mos_data,
         'linewidth': analyse_linewidth_data,
         'van_der_pauw': analyse_van_der_pauw_data,
