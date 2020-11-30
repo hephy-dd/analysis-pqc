@@ -38,8 +38,9 @@ def find_all_files_from_path(path, test, whitelist=None, blacklist=None, single=
     filedir =[]
 
     files = glob.glob(os.path.join(path_folder, "*.json"))
-    files.sort(key=os.path.getmtime)
 
+    files.sort()
+    
     for f in files:
         #the replace is necessary for van_der_pauw/van-der-pauw
         segments = [v.lower().replace("-", "_") for v in f.split('_')]
@@ -50,7 +51,10 @@ def find_all_files_from_path(path, test, whitelist=None, blacklist=None, single=
     if single:
         if len(filedir) > 1:
             #pass
-            print("Warning: more than one measurement available, taking the most recent one!")
+            print("Warning: more than one measurement available, taking the most recent one!:")
+            #for i in filedir:
+            #    print("        "+i)
+            #print("  chosen: "+str(filedir[-1]))
         if len(filedir) == 0:
             return None
         return filedir[-1]  # we sorted it first for time

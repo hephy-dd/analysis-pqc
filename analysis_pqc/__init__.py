@@ -193,6 +193,7 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
     #spl = CubicSpline(x_norm, y_norm)
     #spl_dev = spl(x_norm, 1)
     spl_dev = scipy.signal.savgol_filter(y_norm, window_length=savgol_windowsize, polyorder=1, deriv=1)
+
     
     # get regions for indexing
     idx_rise = [ i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) > cut_param) ]  # the first and last value seems to be off sometimes
@@ -229,6 +230,9 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
             conc = 2. / (1.6e-19 * 11.9 * 8.854e-12 * a_rise * area**2)
             rho = 1. / (mu * 1.6e-19 * conc)
             status = STATUS_PASSED
+        
+            if abs(r_value_rise) < min_correl or abs(r_value_const) < min_correl or status == STATUS_FAILED:
+                status = STATUS_FAILED
 
         except np.RankWarning:
             status = STATUS_FAILED
@@ -238,7 +242,7 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
             status = STATUS_FAILED
             print("The array seems empty. Try changing the cut_param parameter.")
         
-        if abs(r_value_rise) < min_correl or abs(r_value_const) < min_correl or status == STATUS_FAILED:
+        if status == STATUS_FAILED:
             #print("The fit didn't work as expected, returning nan")
             return np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, STATUS_FAILED
     return v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status

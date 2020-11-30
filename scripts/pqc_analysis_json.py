@@ -251,10 +251,10 @@ def analyse_van_der_pauw_data(path, plot_results=False, print_results=False):
         fit = [a*x +b for x in x_fit]
         if plot_results:
             fig, ax = plt.subplots(1,1)
-            fit_curve(ax, x_fit, fit, 0)
-            plot_curve(ax, i, v, 'IV Curve', 'Current', 'Voltage', lbl, '', 0, 0)
-
-        if print_results:
+            fit_curve(ax, x_fit*1e6, fit, 0)
+            plot_curve(ax, i*1e6, v, 'IV Curve', 'Current/uA', 'Voltage/V', lbl, '', 0, 0)
+        
+        if printResults:
            print('%s: \tvdp: r_sheet: %.2e Ohm/sq, correlation: %.2e  %s' % (lbl, r_sheet, r_value, lbl_vdp))
 
 
@@ -409,13 +409,13 @@ def analyse_breakdown_data(path, plot_results=False, print_results=False):
 
 
 
-def get_vdp_value(pathlist):
+def get_vdp_value(pathlist, printResults=False, plotResults=False):
     """helper function to get best vdp result"""
     r_sheet = np.nan
     r_value = 0
     for f in pathlist:
         #print(f)
-        rs, rv = analyse_van_der_pauw_data(f)
+        rs, rv = analyse_van_der_pauw_data(f, printResults=printResults, plotResults=plotResults)
         if(rv > r_value):  # we take the best value
             r_sheet = rs
             r_value = rv
@@ -474,9 +474,9 @@ def analyse_full_line_data(path, plot_results=False, print_results=False):
 
     print("# serial                                 \t  vdp_poly/kOhm/sq       vdp_n/Ohm/sq     vdp_pstop/kOhm/sq   lw_n/um    lw_p2/um   lw_p4/um cbkr_poly/kOhm cbkr_n/Ohm")
     for i in range(0, len(dirs)):
-        labels[i] = dirs[i].split("/")[-1]
-
-        vdp_poly_f[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "Polysilicon"], blacklist=["reverse"]))
+        labels[i] = dirs[i].split("/")[-1]            
+        
+        vdp_poly_f[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "Polysilicon"], blacklist=["reverse"]), plotResults=True)
         vdp_poly_r[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "Polysilicon", "reverse"]))
 
         vdp_n_f[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "n"], blacklist=["reverse"]))
