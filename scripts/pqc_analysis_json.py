@@ -30,38 +30,41 @@ from pqc_analysis_tools import *
 print_results = 1
 
 
-def analyse_iv_data(path):
+def analyse_iv_data(path, plotResults=True, printResults=print_results):
     test = 'iv'
+    if path is None:
+        return np.nan, np.nan
 
     v = abs(read_json_file(path, test, 'voltage'))
     i_tot = read_json_file(path, test, 'current_elm')
     i = abs(read_json_file(path, test, 'current_hvsrc'))
     temp = read_json_file(path, test, 'temperature_chuck')
     humidity = read_json_file(path, test, 'humidity_box')
+    
+    if(len(v) == 0):
+        return np.nan, np.nan
 
     x_loc = 0.3
     y_loc = 0.65
 
-    v_norm, v_unit = normalise_parameter(v, 'V')
-    i_norm, i_unit = normalise_parameter(i, 'A')
-
     v_max, i_max, i_800, i_600, status = analyse_iv(v, i)
 
     lbl = assign_label(path, test)
-
-    annotate = 'I$_{max}$' + ': {} {} @ {}{}'.format(round(i_max, 2), i_unit, max(v_norm),v_unit) + '\n\nT$_{avg}$' + ': {:0.2f} $^\circ C$'.format(np.mean(temp)) \
+    
+    if plotResults:
+        annotate = 'I$_{max}$' + ': {} {} @ {}{}'.format(round(i_max, 2), "A", max(v), "V") + '\n\nT$_{avg}$' + ': {:0.2f} $^\circ C$'.format(np.mean(temp)) \
           + '\n\n H$_{avg}$:' + '{:0.2f}'.format(np.mean(humidity)) + r'$\%$'
 
-    fig,ax = plt.subplots(1,1)
-    plot_curve(ax, v_norm, i_norm, 'IV Curve', 'Reverse Bias Voltage [{}]'.format(v_unit), 'Current [{}]'.format(i_unit), lbl, annotate, x_loc, y_loc)
+        fig,ax = plt.subplots(1,1)
+        plot_curve(ax, v, i, 'IV Curve', 'Reverse Bias Voltage [V]', 'Current [A]', lbl, annotate, x_loc, y_loc)
 
-    if print_results:
+    if printResults:
         print('%s:  IV:\ti_600: %.3f uA\ti_800: %.3f uA' % (lbl, i_600*1e6, i_800*1e6))
 
     return i_600, i_800
 
 
-def analyse_cv_data(path):
+def analyse_cv_data(path, plotResults=True, printResults=print_results):
     test = 'cv'
 
     v = abs(read_json_file(path, test, 'voltage_hvsrc'))
@@ -71,13 +74,13 @@ def analyse_cv_data(path):
     r = read_json_file(path, test, 'resistance')
     temp = read_json_file(path, test, 'temperature_chuck')
     humidity = read_json_file(path, test, 'humidity_box')
+    
+    if(len(v) == 0):
+        return np.nan
 
     x_loc = 0.3
     y_loc = 0.65
 
-    v_norm, v_unit = normalise_parameter(v, 'V')
-    c_norm, c_unit = normalise_parameter(c, 'F')  # then we get this is pF, we don't want that
-    
     inv_c2 = 1/c**2
     
     lbl = assign_label(path, test)
@@ -96,19 +99,19 @@ def analyse_cv_data(path):
 
     #fig1, ax1 = plt.subplots(1, 1)
     #plot_curve(ax1, v_norm, c_norm, 'CV curve', 'Voltage[{}]'.format(v_unit), 'Capacitance [{}]'.format(c_unit), lbl, annotate, x_loc, y_loc)
+    if plotResults:
+        fig2, ax2 = plt.subplots(1,1)
+        #ax2b = ax2.twinx()
+        fit_curve(ax2, v_rise, a_rise * v_rise+ b_rise, color='ro')
+        fit_curve(ax2, v_const, a_const * v_const+ b_const, color='kx')
+        #fit_curve(ax2b, v_norm, spl_dev, color='mx')
+        plot_curve(ax2, v, 1./c**2, 'Full Depletion Voltage Estimation', 'Voltage[V]', '1/C$^{2}$ [F$^{-2}$]', lbl, '', 0, 0 )
 
-    fig2, ax2 = plt.subplots(1,1)
-    #ax2b = ax2.twinx()
-    fit_curve(ax2, v_rise, a_rise * v_rise+ b_rise, color='ro')
-    fit_curve(ax2, v_const, a_const * v_const+ b_const, color='kx')
-    #fit_curve(ax2b, v_norm, spl_dev, color='mx')
-    plot_curve(ax2, v, 1./c**2, 'Full Depletion Voltage Estimation', 'Voltage[{}]'.format(v_unit), '1/C$^{2}$ [F$^{-2}$]', lbl, '', 0, 0 )
-
-    if print_results:
+    if printResults:
     	#print(f"{lbl}: CV: v_fd: {}")
         print('%s: \tCV: v_fd: %.2e V\trho: %.2e Ohm\tconc: %.2e cm^-3' % (lbl, v_dep2, rho, conc*1e-6))
    
-    return v_dep2 
+    return v_dep2, rho, conc
 
 
 def analyse_mos_data(path, plotResults=True, printResults=print_results):
@@ -425,6 +428,11 @@ def analyse_full_line_data(path):
     t_line_p_cross_bridge = [default]*len(dirs)  
     v_bd = [default]*len(dirs)  
     
+    i600 = [default]*len(dirs)  
+    v_fd = [default]*len(dirs)
+    rho = [default]*len(dirs)
+    conc = [default]*len(dirs)
+    
     v_fb1 = [default]*len(dirs)  
     v_fb2 = [default]*len(dirs)  
     t_ox = [default]*len(dirs)  
@@ -467,7 +475,7 @@ def analyse_full_line_data(path):
     
     print("")
     print("")
-    print("# serial                                 \t fet       vdp_met-clov       vdp_p-cr-br/kOhm/sq  lw_cb/um  v_bd/V")
+    print("# serial                                 \t fet       vdp_met-clov       vdp_p-cr-br/kOhm/sq  lw_cb/um  v_bd/V    i600/uA    V_fd/V   rho/kOhm cm   d-conc/cm^-3")
     print("# serial                                 \tv_th/V     ")
     for i in range(0, len(dirs)):
         v_th[i] = analyse_fet_data(find_all_files_from_path(dirs[i], "fet", whitelist=[flutes[i],], single=True), printResults=False, plotResults=False)
@@ -481,6 +489,9 @@ def analyse_full_line_data(path):
         
         v_bd[i] = analyse_breakdown_data(find_all_files_from_path(dirs[i], "breakdown", whitelist=[flutes[i],], single=True), printResults=False, plotResults=False)
         
+        # we want this for FLute_3 and not Flute_1
+        i600[i], dummy = analyse_iv_data(find_all_files_from_path(dirs[i], "iv", whitelist=[flutes[i], "3"], single=True), printResults=False, plotResults=False)
+        v_fd[i], rho[i], conc[i] = analyse_cv_data(find_all_files_from_path(dirs[i], "cv", whitelist=[flutes[i], "3"], single=True), printResults=False, plotResults=False)
         
         line = "{} {}  \t".format(labels[i], flutes[i])
         line += "{:5.2f}  ".format(v_th[i])
@@ -489,7 +500,8 @@ def analyse_full_line_data(path):
         line += "{:8.2f} {:8.2f}    ".format(vdp_p_cross_bridge_f[i]*1e-3, vdp_p_cross_bridge_r[i]*1e-3)
         line += "{:8.2f}".format(t_line_p_cross_bridge[i])
         
-        line += "{:8.2f}".format(v_bd[i])
+        line += "{:8.2f}     ".format(v_bd[i])
+        line += "{:9.2f}  {:9.2f}  {:7.2f}  {:9.2E}   ".format(i600[i]*1e6, v_fd[i], rho[i]*1e-1, conc[i]*1e-6)
         print(line)
     print("")
     print("")
@@ -501,7 +513,7 @@ def analyse_full_line_data(path):
         i_surf05[i], i_bulk05[i] = analyse_gcd_data(find_all_files_from_path(dirs[i], "gcd05", whitelist=[flutes[i],], single=True), printResults=False, plotResults=False)  # for i_bulk
         
         line = "{} {}  \t".format(labels[i], flutes[i])
-        line += "{:8.2f}    {:6.2f}    {:5.3f}  {:9.2f}     ".format(v_fb2[i], c_acc_m[i]*1e12, t_ox[i], n_ox[i]*1e-10)
+        line += "{:8.2f}    {:6.2f}    {:7.3f}  {:9.2f}     ".format(v_fb2[i], c_acc_m[i]*1e12, t_ox[i], n_ox[i]*1e-10)
         line += "{:8.2f}  {:8.2f}  {:8.2f}    ".format(i_surf[i]*1e12, i_surf05[i]*1e12, i_bulk05[i]*1e12)
 
         print(line)

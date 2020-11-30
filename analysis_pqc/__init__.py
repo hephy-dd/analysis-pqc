@@ -129,7 +129,7 @@ def analyse_iv(v, i, debug=False):
     """
 
     ## init
-    v_max = i_max = i_800 = i_600 = -1
+    v_max = i_max = i_800 = i_600 = np.nan
     status = STATUS_NONE
 
     ## init
@@ -141,11 +141,11 @@ def analyse_iv(v, i, debug=False):
     i_600 = np.array([ i[k] for k in range(len(v)) if np.abs(v[k]) == 600 ])
 
     if len(i_800) != 1:
-        i_800 = -1
+        i_800 = np.nan
     else:
         i_800 = i_800[0]
     if len(i_600) != 1:
-        i_600 = -1
+        i_600 = np.nan
     else:
         i_600 = i_600[0]
 
@@ -156,7 +156,7 @@ def analyse_iv(v, i, debug=False):
 
 
 @params('v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status')
-def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_windowsize=None, debug=False):
+def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_windowsize=None, min_correl=0.9, debug=False):
     """
     Diode CV: Extract depletion voltage and resistivity.
 
@@ -167,7 +167,8 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
     carrier ... majority charge carriers ['holes', 'electrons']
     cut_param ... used to cut on 1st derivative to id voltage regions
     savgol_windowsize ... number of points to calculate the derivative, needs to be odd
-
+    min_correl ... minimum correlation coefficient to say that it worked
+    
     Returns:
     v_dep1 ... full depletion voltage via inflection
     v_dep2 ... full depletion voltage via intersection
@@ -207,8 +208,9 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
             c_const = c[ idx_const[0]:idx_const[-1]+1 ]
 
             # line fits to each region
-            a_rise, b_rise = np.polyfit(v_rise, c_rise, 1)
-            a_const, b_const = np.polyfit(v_const, c_const, 1)
+            a_rise, b_rise, r_value_rise, p_value_rise, std_err_rise = scipy.stats.linregress(v_rise, c_rise)
+            a_const, b_const, r_value_const, p_value_const, std_err_const = scipy.stats.linregress(v_const, c_const)
+            #print("c raise {:5.3f}, const {:5.3f}".format(r_value_rise,r_value_const))
 
             if carrier == CARRIER_HOLES:
                 mu = 450 * 1e-4
@@ -235,7 +237,10 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
         except (ValueError, TypeError, IndexError):
             status = STATUS_FAILED
             print("The array seems empty. Try changing the cut_param parameter.")
-
+        
+        if abs(r_value_rise) < min_correl or abs(r_value_const) < min_correl or status == STATUS_FAILED:
+            print("The fit didn't work as expected, returning nan")
+            return np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, STATUS_FAILED
     return v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status
 
 
