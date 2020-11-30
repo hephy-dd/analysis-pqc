@@ -33,11 +33,12 @@ def find_all_files_from_path(path, test, whitelist=None, blacklist=None, single=
       blacklist=["reverse"]
     if single is set to true, we expect only one return value (not a list) and it throws an error if there is more
     """
-    
+
     path_folder = path
     filedir =[]
 
     files = glob.glob(os.path.join(path_folder, "*.json"))
+
     files.sort()
     
     for f in files:
@@ -91,26 +92,28 @@ def assign_label(path, test, vdp=False):
     # assign it as a path through the terminal
     # file = path
     #print(path)
-    lbl_list =[1, 2, 6, 8, 9]
+    lbl_list = [1, 2, 6, 8, 9]
     if vdp:
         lbl_list = [10, 11, 12]
-    file = file.split(os.sep)[-1]
-    lbl = '_'.join([file.split('_')[i] for i in lbl_list])
+    basename = os.path.basename(file)
+    lbl = '_'.join([basename.split('_')[i] for i in lbl_list])
     return lbl
 
 
-def read_json_file(path, test, parameter):
-    """This function reads the json file and returns an array of the parameter
-    you need.
+def read_json_file(filename):
+    """Return a PQC JSON formatted file as dictionary containing numpy arrays.
+
+    >>> series = read_json_file('sample.json').get('series')
+    >>> series.get('voltage')
+    array([0.0, 0.1, 0.2, 0.3])
     """
-    
-    file = path  #un-comment this out in case you want to test a specific file. You have to assign it as a path through the terminal
-    try:
-        with open(file) as f:
-            a = json.load(f)
-        return np.array([i for i in a['series'][parameter]])
-    except:
-        return []
+    with open(filename) as f:
+        data = json.load(f)
+    # convert to numpy arrays
+    series = data.get('series', {})
+    for k, v in series.items():
+        series[k] = np.array(v)
+    return data
 
 
 def units(data, unit):
