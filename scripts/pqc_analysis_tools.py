@@ -49,6 +49,7 @@ def find_all_files_from_path(path, test, whitelist=None, blacklist=None, single=
             filedir.append(f)
     if single:
         if len(filedir) > 1:
+            #pass
             print("Warning: more than one measurement available, taking the most recent one!")
         if len(filedir) == 0:
             return None

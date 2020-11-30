@@ -239,7 +239,7 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
             print("The array seems empty. Try changing the cut_param parameter.")
         
         if abs(r_value_rise) < min_correl or abs(r_value_const) < min_correl or status == STATUS_FAILED:
-            print("The fit didn't work as expected, returning nan")
+            #print("The fit didn't work as expected, returning nan")
             return np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, STATUS_FAILED
     return v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status
 

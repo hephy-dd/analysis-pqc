@@ -66,6 +66,9 @@ def analyse_iv_data(path, plotResults=True, printResults=print_results):
 
 def analyse_cv_data(path, plotResults=True, printResults=print_results):
     test = 'cv'
+    
+    if path is None:
+        return np.nan, np.nan, np.nan
 
     v = abs(read_json_file(path, test, 'voltage_hvsrc'))
     i = read_json_file(path, test, 'current_hvsrc')
@@ -76,7 +79,7 @@ def analyse_cv_data(path, plotResults=True, printResults=print_results):
     humidity = read_json_file(path, test, 'humidity_box')
     
     if(len(v) == 0):
-        return np.nan
+        return np.nan, np.nan, np.nan
 
     x_loc = 0.3
     y_loc = 0.65
@@ -309,6 +312,9 @@ def analyse_cbkr_data(path, r_sheet=np.nan, printResults=print_results, plotResu
    
 def analyse_contact_data(path):
     test= 'contact'
+    
+    if path is None:
+        return np.nan
 
     v = read_json_file(path, test, 'voltage_vsrc')
     i = read_json_file(path, test, 'current')
@@ -329,6 +335,9 @@ def analyse_contact_data(path):
 
 def analyse_meander_data(path):
     test = 'meander'
+    
+    if path is None:
+        return np.nan
 
     v = read_json_file(path, test, 'voltage_vsrc')
     i = read_json_file(path, test, 'current')
@@ -349,14 +358,16 @@ def analyse_meander_data(path):
 
 def analyse_breakdown_data(path, printResults=print_results, plotResults=True):
     test = 'breakdown'
-
+    
+    if path is None:
+        return np.nan
+        
     v = read_json_file(path, test, 'voltage')
     i = read_json_file(path, test, 'current_hvsrc')
     i_elm = read_json_file(path, test, 'current_elm')
     temp = read_json_file(path, test, 'temperature_chuck')
     humidity = read_json_file(path, test, 'humidity_box')
 
-    i_elm_norm, i_elm_unit = normalise_parameter(i_elm, 'A')
 
     lbl = assign_label(path, test)
     x_loc = 0.3
@@ -367,7 +378,7 @@ def analyse_breakdown_data(path, printResults=print_results, plotResults=True):
     if plotResults:
         fig, ax = plt.subplots(1,1)
         annotate = 'V$_{{bd}}$: {} V \n\nT$_{{avg}}$ : {} \u00B0C \nH$_{{avg}}$: {} $\%$ '.format(v_bd, round(np.mean(temp),2), round(np.mean(humidity),2))
-        plot_curve(ax, v, i_elm_norm, 'IV Curve', 'Voltage [V]', 'Current [{}]'.format(i_elm_unit), lbl, annotate, x_loc, y_loc)
+        plot_curve(ax, v, i_elm, 'IV Curve', 'Voltage [V]', 'Current [A]', lbl, annotate, x_loc, y_loc)
 
 
     if printResults:
