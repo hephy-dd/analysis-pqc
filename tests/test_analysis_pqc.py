@@ -4,7 +4,7 @@ import numpy as np
 import analysis_pqc
 
 x = np.array([0., 1., 2., 3., 4., 5.])
-y = np.array([.1, .2, .3, .4, .5, .6])
+y = np.array([.1, .2, .3, .4, .4, .4])
 
 class AnalysisPQCTest(unittest.TestCase):
 
@@ -22,7 +22,7 @@ class AnalysisPQCTest(unittest.TestCase):
         self.assertEqual(r.status, analysis_pqc.STATUS_PASSED)
 
     def test_analyse_cv(self):
-        r = analysis_pqc.analyse_cv(x, y)
+        r = analysis_pqc.analyse_cv(x, y, cut_param=-.005)
         self.assertEqual(r.status, analysis_pqc.STATUS_PASSED)
 
     def test_analyse_mos(self):

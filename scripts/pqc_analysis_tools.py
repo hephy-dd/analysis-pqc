@@ -24,18 +24,38 @@ __all__ = [
     'fit_curve'
 ]
 
-def find_all_files_from_path(path, test):
-
+def find_all_files_from_path(path, test, whitelist=None, blacklist=None, single=False):
+    """
+    returns a list of measurements for a given test
+    optionally filters also whitelist an blacklist (all whitelists must match and no blacklist match)
+    eg for forward right poly vdp:
+      whitlelist=["PQCFlutesRight","polyslicon"] and
+      blacklist=["reverse"]
+    if single is set to true, we expect only one return value (not a list) and it throws an error if there is more
+    """
+    
     path_folder = path
     filedir =[]
 
     files = glob.glob(os.path.join(path_folder, "*.json"))
-
+    files.sort(key=os.path.getmtime)
+    
     for f in files:
-        if test in [v.lower() for v in f.split('_')]:
+        #the replace is necessary for van_der_pauw/van-der-pauw
+        segments = [v.lower().replace("-", "_") for v in f.split('_')]
+        if (test in segments) and \
+           (blacklist is None or not any(e.lower() in segments for e in blacklist)) and \
+           (whitelist is None or all(e .lower() in segments for e in whitelist)):
             filedir.append(f)
+    if single:
+        if len(filedir) > 1:
+            #pass
+            print("Warning: more than one measurement available, taking the most recent one!")
+        if len(filedir) == 0:
+            return None
+        return filedir[-1]  # we sorted it first for time
 
-    return filedir
+    return np.sort(filedir)
 
 
 
@@ -59,16 +79,18 @@ def find_most_recent_file(path, test):
     return filedir[-1]
 
 
-def assign_label(path, test):
+def assign_label(path, test, vdp=False):
     """This function assigns the ID to the variable lbl which is used in the
-    plots.
+    plots. if vdp is set to true, only the vdp info is extracted
     """
     file = path
     # un-comment this in case you want to test a specific file. You have to
     # assign it as a path through the terminal
     # file = path
-
-    lbl_list =[1,2,6,8,9]
+    #print(path)
+    lbl_list =[1, 2, 6, 8, 9]
+    if vdp:
+        lbl_list = [10, 11, 12]
     file = file.split(os.sep)[-1]
     lbl = '_'.join([file.split('_')[i] for i in lbl_list])
     return lbl
@@ -80,10 +102,12 @@ def read_json_file(path, test, parameter):
     """
     
     file = path  #un-comment this out in case you want to test a specific file. You have to assign it as a path through the terminal
-
-    with open(file) as f:
-        a = json.load(f)
-    return np.array([i for i in a['series'][parameter]])
+    try:
+        with open(file) as f:
+            a = json.load(f)
+        return np.array([i for i in a['series'][parameter]])
+    except:
+        return []
 
 
 def units(data, unit):
@@ -133,16 +157,16 @@ def plot_curve(ax, x, y, title, xlabel, ylabel, legend, annotate, x_loc, y_loc):
    # plt.show()
 
 
-def fit_curve(ax, x, y1, y2=None):
+def fit_curve(ax, x, y1, y2=None, color='r'):
     """This function returns the object which corresponds to the fit function.
     You can plot 2 fit functions with respect to the same x, but if you want
     just one, then you can omit y2.
 
     This should be modified according to what the user wants.
     """
-    ax = plt.gca()
-    ax.plot(x, y1, '--r')
+    #ax = plt.gca()
+    ax.plot(x, y1, '--'+color)
     if y2:
-      ax.plot(x, y2, '--r')
+      ax.plot(x, y2, '--'+color)
 
     return ax
