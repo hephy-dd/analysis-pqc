@@ -121,6 +121,9 @@ def analyse_cv_data(path, plotResults=True, printResults=print_results):
 
 def analyse_mos_data(path, plotResults=True, printResults=print_results):
     test = 'mos'
+    
+    if path is None:
+        return np.nan, np.nan, np.nan, np.nan, np.nan
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_hvsrc', np.array([]))
@@ -163,6 +166,9 @@ def analyse_mos_data(path, plotResults=True, printResults=print_results):
 
 def analyse_gcd_data(path, plotResults=True, printResults=print_results):
     test = 'gcd'
+    
+    if path is None:
+        return np.nan, np.nan
 
     series = read_json_file(path).get('series')
     v = series.get('voltage', np.array([]))
@@ -193,6 +199,9 @@ def analyse_gcd_data(path, plotResults=True, printResults=print_results):
 
 def analyse_fet_data(path, plotResults=True, printResults=print_results):
     test = 'fet'
+    
+    if path is None:
+        return np.nan
 
     series = read_json_file(path).get('series')
     v = series.get('voltage', np.array([]))
