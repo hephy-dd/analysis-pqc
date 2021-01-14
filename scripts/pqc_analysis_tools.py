@@ -44,14 +44,14 @@ def find_all_files_from_path(path, test, whitelist=None, blacklist=None, single=
     for f in files:
         #the replace is necessary for van_der_pauw/van-der-pauw
         segments = [v.lower().replace("-", "_") for v in f.split('_')]
-        if (test in segments) and \
+        if (test is None or test in segments) and \
            (blacklist is None or not any(e.lower() in segments for e in blacklist)) and \
            (whitelist is None or all(e .lower() in segments for e in whitelist)):
             filedir.append(f)
     if single:
         if len(filedir) > 1:
-            #pass
-            print("Warning: more than one measurement available, taking the most recent one!:")
+            pass
+            #print("Warning: more than one measurement available, taking the most recent one!:")
             #for i in filedir:
             #    print("        "+i)
             #print("  chosen: "+str(filedir[-1]))
@@ -94,9 +94,12 @@ def assign_label(path, test, vdp=False):
     #print(path)
     lbl_list = [1, 2, 6, 8, 9]
     if vdp:
-        lbl_list = [10, 11, 12]
+        lbl_list = [10, 11, 12, 13]
     basename = os.path.basename(file)
-    lbl = '_'.join([basename.split('_')[i] for i in lbl_list])
+    try:
+        lbl = '_'.join([basename.split('_')[i] for i in lbl_list])
+    except IndexError:
+        return path
     return lbl
 
 
