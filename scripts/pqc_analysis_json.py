@@ -231,7 +231,7 @@ def analyse_fet_data(path, plotResults=True, printResults=print_results):
     return v_th
 
 
-def analyse_van_der_pauw_data(path, printResults=print_results, plotResults=True):
+def analyse_van_der_pauw_data(path, printResults=print_results, plotResults=True, minCorrelation=0.9):
     test = 'van-der-pauw'
 
     series = read_json_file(path).get('series')
@@ -244,7 +244,7 @@ def analyse_van_der_pauw_data(path, printResults=print_results, plotResults=True
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
     r_sheet, a, b, x_fit, spl_dev, status, r_value = analyse_van_der_pauw(i, v)
-    if(abs(r_value) < 0.9):  # r_value is the correlation coefficient
+    if(abs(r_value) < minCorrelation):  # r_value is the correlation coefficient
         a = b = np.nan  # the quality of the fit is too bad, we don't want it
         r_sheet = np.nan
         r_value = 0
@@ -256,8 +256,8 @@ def analyse_van_der_pauw_data(path, printResults=print_results, plotResults=True
             plot_curve(ax, i*1e6, v, 'IV Curve', 'Current/uA', 'Voltage/V', lbl, '', 0, 0)
 
         if printResults:
-           print('%s: \tvdp: r_sheet: %.2e Ohm/sq, correlation: %.2e  %s' % (lbl, r_sheet, r_value, lbl_vdp))
-
+           #print('%s: \tvdp: r_sheet: %.2e Ohm/sq, raw: %.2e Ohm, correlation: %.2e  %s' % (lbl, r_sheet, a, r_value, lbl_vdp))  # lbl_vdp
+            print('%s: \tvdp: r_sheet: %.2e Ohm/sq, raw: %.2e Ohm, correlation: %.2e  %s' % (lbl, r_sheet, a, r_value, lbl_vdp))  # lbl_vdp
 
     return r_sheet, r_value
 
@@ -467,7 +467,7 @@ def analyse_full_line_data(path):
     for i in range(0, len(dirs)):
         labels[i] = dirs[i].split("/")[-1]
 
-        vdp_poly_f[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "Polysilicon"], blacklist=["reverse"]), plotResults=True)
+        vdp_poly_f[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "Polysilicon"], blacklist=["reverse"]), plotResults=False)
         vdp_poly_r[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "Polysilicon", "reverse"]))
 
         vdp_n_f[i] = get_vdp_value(find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[flutes[i], "n"], blacklist=["reverse"]))
@@ -599,7 +599,7 @@ def main():
 
     for test in tests:
         print(test)
-        filedir = find_all_files_from_path(args.path, test)
+        filedir = find_all_files_from_path(args.path, None)
         filedir = np.sort(filedir)
         for f in filedir:
          #  print(f)
