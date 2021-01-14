@@ -415,7 +415,7 @@ def get_vdp_value(pathlist, printResults=False, plotResults=False):
     r_value = 0
     for f in pathlist:
         #print(f)
-        rs, rv = analyse_van_der_pauw_data(f, printResults=printResults, plotResults=plotResults)
+        rs, rv = analyse_van_der_pauw_data(f, printResults=printResults, plotResults=plotResults, minCorrelation=.7)
         if(rv > r_value):  # we take the best value
             r_sheet = rs
             r_value = rv
@@ -431,8 +431,10 @@ def analyse_full_line_data(path):
     path ... path to parent directory: subdirs for each measurment-set
     """
     dirs = glob.glob(os.path.join(path, "*"))
-    flutes = ["PQCFlutesRight", "PQCFlutesLeft"]*len(dirs)
-    dirs = dirs*2   # we need to double it for the two flutes
+    flutelist = ["PQCFlutesRight", "PQCFlutesLeft"]
+    #flutelist = ["PQCFlutesLeft"]
+    flutes = flutelist*len(dirs)
+    dirs = dirs*len(flutelist)   # we need to double it for the two flutes
     dirs.sort()
 
     labels = ["n/a"]*len(dirs)
