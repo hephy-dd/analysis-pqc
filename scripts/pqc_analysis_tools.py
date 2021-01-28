@@ -17,6 +17,7 @@ __all__ = [
     'find_most_recent_file',
     'find_all_files_from_path',
     'assign_label',
+    'find_json_parameter',
     'read_json_file',
     'units',
     'normalise_parameter',
@@ -68,10 +69,23 @@ def assign_label(path, test):
     # assign it as a path through the terminal
     # file = path
 
-    lbl_list =[1,2,6,8,9]
+    lbl_list =[2,5,6, 8,9,10,11]
     file = file.split(os.sep)[-1]
     lbl = '_'.join([file.split('_')[i] for i in lbl_list])
     return lbl
+
+
+def find_json_parameter(path, test, parameter):
+
+    file = path
+    
+    with open(file) as f:
+        a = json.load(f)
+        if parameter in a['series']:
+            condition = True
+        else:
+           condition = False
+    return condition 
 
 
 def read_json_file(path, test, parameter):
@@ -83,7 +97,9 @@ def read_json_file(path, test, parameter):
 
     with open(file) as f:
         a = json.load(f)
-    return np.array([i for i in a['series'][parameter]])
+        if len(a['series'])!=0:
+          return np.array([i for i in a['series'][parameter]])
+
 
 
 def units(data, unit):
@@ -122,12 +138,12 @@ def plot_curve(ax, x, y, title, xlabel, ylabel, legend, annotate, x_loc, y_loc):
     """
 
     #plt.figure()
-    ax.plot(x, y, '-o', ms=3, label=legend)
+    ax.plot(x, y, 'o', ms=3, label=legend)
     plt.annotate(annotate, (x_loc, y_loc), xycoords='figure fraction', color='black', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.legend(loc='upper left')
+    plt.legend(loc='best')
     plt.grid(alpha=0.5, linestyle='--', linewidth=1)
     plt.tight_layout()
    # plt.show()
@@ -146,3 +162,12 @@ def fit_curve(ax, x, y1, y2=None):
       ax.plot(x, y2, '--r')
 
     return ax
+
+
+
+def plot_histogram(data, xlabel):
+
+    plt.hist(data)
+    plt.title("Histogram")
+    plt.xlabel(xlabel)
+
