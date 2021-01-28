@@ -431,7 +431,7 @@ def analyse_full_line_data(path):
     path ... path to parent directory: subdirs for each measurment-set
     """
     dirs = glob.glob(os.path.join(path, "*"))
-    flutelist = ["PQCFlutesRight", "PQCFlutesLeft"]
+    flutelist = ["PQCFlutesLeft"]
     #flutelist = ["PQCFlutesLeft"]
     flutes = flutelist*len(dirs)
     dirs = dirs*len(flutelist)   # we need to double it for the two flutes
