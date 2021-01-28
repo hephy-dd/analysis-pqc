@@ -13,6 +13,10 @@ You may want to test a particular file (which might not be the most recent one).
 In that case, you can just modify the corresponding functions in the
 pqc_analysis_tools.py script and give the file (and the path) as an input in the
 terminal.
+
+full-line: analyze a whole set of measurements, e.g. one batch
+> python scripts/pqc_analysis_json.py ../VPX34353_2-S/ full-line
+the given folter should contain subdirectories for each sample
 """
 
 import argparse
@@ -432,7 +436,7 @@ def analyse_full_line_data(path):
     """
     dirs = glob.glob(os.path.join(path, "*"))
     flutelist = ["PQCFlutesLeft"]
-    #flutelist = ["PQCFlutesLeft"]
+    #flutelist = ["PQCFlutesLeft", "PQCFlutesRight"]
     flutes = flutelist*len(dirs)
     dirs = dirs*len(flutelist)   # we need to double it for the two flutes
     dirs.sort()
