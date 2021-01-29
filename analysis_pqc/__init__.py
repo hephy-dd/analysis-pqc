@@ -11,7 +11,7 @@ import numpy as np
 from scipy.interpolate import CubicSpline
 from collections import namedtuple
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 __all__ = [
     'STATUS_NONE',
