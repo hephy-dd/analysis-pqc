@@ -89,23 +89,15 @@ def analyse_cv_data(path, plot=True):
     lbl = assign_label(path, test)
     annotate = 'V$_{{fd}}}}$: {} V\n\nT$_{{avg}}$: {} \u00B0C\nH$_{{avg}}$: {}'.format(v_dep2, round(np.mean(temp),2), round(np.mean(humidity),2)) + r'$\%$'
 
-<<<<<<< HEAD
+
     if plot:
       fig2, ax2 = plt.subplots(1,1)
       fit_curve(ax2, v_rise, a_rise * v_rise+ b_rise, 0)
       fit_curve(ax2, v_const, a_const*v_const + b_const, 0)
       plot_curve(ax2, v, inv_c2, 'Full Depletion Voltage Estimation', 'Voltage[{}]'.format(v_unit), '1/C$^{2}$ [F$^{-2}$]', lbl, '', 0, 0 )
-=======
-    #fig1, ax1 = plt.subplots(1, 1)
-    #plot_curve(ax1, v_norm, c_norm, 'CV curve', 'Voltage[{}]'.format(v_unit), 'Capacitance [{}]'.format(c_unit), lbl, annotate, x_loc, y_loc)
-
-    fig2, ax2 = plt.subplots(1,1)
-    fit_curve(ax2, v_rise, a_rise * v_rise+ b_rise, 0)
-    plot_curve(ax2, v_norm, inv_c2, 'Full Depletion Voltage Estimation', 'Voltage[{}]'.format(v_unit), '1/C$^{2}$ [F$^{-2}$]', lbl, '', 0, 0 )
->>>>>>> 0fbcd18134f3ae2ea186b68b16be957f8bc159d8
-
+   
     if print_results:
-    	#print(f"{lbl}: CV: v_fd: {}")
+    	
         print('%s: \tCV: v_fd: %.2e V\trho: %.2e Ohm\tconc: %.2e cm^-3' % (lbl, v_dep2, rho*1e-3, conc*1e-6))
    
     return v_dep2 
@@ -146,15 +138,10 @@ def analyse_mos_data(path, plot=True):
       plot_curve(ax, v, c, 'CV Curve', 'Voltage [V]', 'Capacitance [F]', lbl, annotate, x_loc, y_loc)
 
     if print_results:
-<<<<<<< HEAD
-        print('%s: MOS: v_fb2: %.2e V \t t_ox: %.2e um \t n_ox: %.2e cm^-2 \t Mean Cacc: %.2e F' % (lbl, v_fb2, t_ox, n_ox, np.mean(c_acc)))
-      
-    print(v_acc) 
-=======
-        print('%s: \tMOS: v_fb2: %.2e V\tt_ox: %.2e um\tn_ox: %.2e cm^-3' % (lbl, v_fb2, t_ox, n_ox))
- 
->>>>>>> 0fbcd18134f3ae2ea186b68b16be957f8bc159d8
 
+        print('%s: MOS: v_fb2: %.2e V \t t_ox: %.2e um \t n_ox: %.2e cm^-2 \t Mean Cacc: %.2e F' % (lbl, v_fb2, t_ox, n_ox, np.mean(c_acc)))      
+  
+  
     return v_fb1, v_fb2, t_ox, n_ox, Q_ox, np.mean(c_acc)
 
      
@@ -193,12 +180,10 @@ def analyse_gcd_data(path, plot=True):
       plt.vlines(v_fb3, np.min(i_em_norm), np.max(i_em_norm), color='k', linestyle='dashed')
 
     if print_results:
-<<<<<<< HEAD
+
         print('%s: GCD: i_surf: %.2e A\t i_bulk: %.2e A\t vfb_acc: %.2e \t vfb_inv: %.2e' % (lbl, i_surf, i_bulk, np.mean(v_acc), np.mean(v_inv)))
-=======
-        print('%s: \tGCD: i_surf: %.2e A\t i_bulk: %.2e A' % (lbl, i_surf, i_bulk))
->>>>>>> 0fbcd18134f3ae2ea186b68b16be957f8bc159d8
-  
+
+         
     return i_surf, i_bulk, v_fb2, v_fb3, s0
   
   except:
@@ -260,7 +245,6 @@ def analyse_van_der_pauw_data(path, plot=True):
         v = read_json_file(path, test, 'voltage')
 
     
-<<<<<<< HEAD
    i = read_json_file(path, test, 'current')
 
 
@@ -281,12 +265,7 @@ def analyse_van_der_pauw_data(path, plot=True):
        plt.show()
    
      if print_results:
-        print('%s: van der Pauw: r_sheet: %.2e Ohm/sq' % (lbl, r_sheet))
-=======
-    if print_results:
-       print('%s: \tvan der Pauw: r_sheet: %.2e Ohm/sq' % (lbl, r_sheet))
->>>>>>> 0fbcd18134f3ae2ea186b68b16be957f8bc159d8
- 
+        print('%s: van der Pauw: r_sheet: %.2e Ohm/sq' % (lbl, r_sheet)) 
 
         return r_sheet, lbl
   
@@ -368,11 +347,9 @@ def analyse_cbkr_data(path, r_sheet, plot=True):
       plot_curve(ax, i, v, 'IV Curve', 'Current [{}]'.format(i_unit), 'Voltage [V]', lbl, '', 0, 0)
    
     if print_results:
-<<<<<<< HEAD
-       print('%s: cbkr: r_contact: %.4e Ohm' % (lbl, r_contact))
-=======
+ 
        print('%s: \tcbkr: r_contact: %.2e Ohm' % (lbl, r_contact))
->>>>>>> 0fbcd18134f3ae2ea186b68b16be957f8bc159d8
+
  
 
     return r_contact
