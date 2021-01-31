@@ -93,6 +93,7 @@ def main():
         for diri in dirs:
             print("Current dir: "+str(diri))
             res = loadBatch(diri)
+            res.sortByTime()
             pqc_batches.append(res) 
             #res.createHistograms(args.path)
         
