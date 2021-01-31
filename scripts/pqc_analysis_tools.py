@@ -9,6 +9,9 @@ import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
+import datetime
+import dateutil.parser as parser
+
 
 from analysis_pqc import *
 
@@ -16,6 +19,7 @@ from analysis_pqc import *
 __all__ = [
     'find_most_recent_file',
     'find_all_files_from_path',
+    'get_timestamp',
     'assign_label',
     'read_json_file',
     'units',
@@ -118,6 +122,12 @@ def read_json_file(filename):
         series[k] = np.array(v)
     return data
 
+def get_timestamp(filename):
+    ret = None
+    with open(filename) as json_file:
+        data = json.load(json_file)
+        ret = parser.parse(data['meta']['start_timestamp'])
+    return ret
 
 def units(data, unit):
     """This function converts the unit scale to the correct one."""

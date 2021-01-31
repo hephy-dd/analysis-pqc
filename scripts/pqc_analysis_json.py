@@ -85,7 +85,7 @@ def analyse_cv_data(path, plotResults=True, printResults=print_results):
     temp = series.get('temperature_chuck', np.array([]))
     humidity = series.get('humidity_box', np.array([]))
 
-    if(len(v) == 0):
+    if(len(v) == 0) or (len(c) == 0):
         return np.nan, np.nan, np.nan
 
     x_loc = 0.3
@@ -181,7 +181,7 @@ def analyse_gcd_data(path, plotResults=True, printResults=print_results):
     i_src = series.get('current_vsrc', np.array([]))
     i_hvsrc = series.get('current_hvsrc', np.array([]))
 
-    if(len(v) == 0):
+    if(len(v) == 0) or (len(i_em) == 0):
         return np.nan, np.nan
 
     lbl = assign_label(path, test)
@@ -214,7 +214,7 @@ def analyse_fet_data(path, plotResults=True, printResults=print_results):
     i_src = series.get('current_vsrc', np.array([]))
     i_hvsrc = series.get('current_hvsrc', np.array([]))
 
-    if(len(v) == 0):
+    if(len(v) == 0) or (len(i_em) == 0):
         return np.nan
 
     v_th, a, b, spl_dev, status = analyse_fet(v, i_em)
@@ -421,7 +421,7 @@ def get_vdp_value(pathlist, printResults=False, plotResults=False):
     for f in pathlist:
         #print(f)
         rs, rv = analyse_van_der_pauw_data(f, printResults=printResults, plotResults=plotResults, minCorrelation=.7)
-        if(rv > r_value):  # we take the best value
+        if(abs(rv) > r_value):  # we take the best value
             r_sheet = rs
             r_value = rv
     return r_sheet
