@@ -89,12 +89,14 @@ def main():
         dirs = [t for t in dirs if "histograms" not in t and "VPX" in t ]
         
         pqc_batches = []
+        pqc_slices = []
         
         for diri in dirs:
             print("Current dir: "+str(diri))
             res = loadBatch(diri)
             res.sortByTime()
-            pqc_batches.append(res) 
+            pqc_batches.append(res)
+            pqc_slices.append(res.split(3))
             #res.createHistograms(args.path)
         
         print("loaded "+str(len(pqc_batches))+" batches")

@@ -51,6 +51,10 @@ class PQC_value:
         # with multiplier to suit the unit
         return self.value[index]*self.showmultiplier
         
+    def split(self, itemsperclice)
+        ret = [PQC_value(len(i), self.name, self.nicename, self.expectedValue, self.unit, self.showmultiplier, self.stray, self.value=i) for i in make_chunks(self.value, itemsperclice)]
+        return ret
+        
     @params('values, nTot, nNan, nTooHigh, nTooLow, totAvg, totStd, totMed, selAvg, selStd, selMed')
     def getStats(self):
         nTot = len(self.value)
@@ -202,7 +206,10 @@ class PQC_resultset:
         
     # warning: this creates not full copies, only the dict is available then
     def split(self, itemsperclice)
-        return None
+        print(str(self.dataseries["vdp_n_f"].split(itemsperclice)))
+        
+        #ret = [PQC_resultset( self.value=i) for i in make_chunks(self.value, itemsperclice)]
+        return []
     
     def analyze(self, dirs, flutes):
         print("dirs: "+str(len(dirs))+"  "+str(len(flutes)))
