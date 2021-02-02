@@ -29,6 +29,15 @@ def make_chunks(data, size):
     for i in range(0, len(data), size):
         yield [k for k in islice(it, size)]
 
+def num2str(num, basenum=None):
+    if basenum is None:
+        basenum = num
+    if basenum < 10:
+        ret = "{:4.2f}".format(num)
+    else:
+        ret = "{:4.1f}".format(num)
+    return ret
+
 class PQC_value:
     def __init__(self, numrows, name='na', nicename='na', expectedValue=0., unit='', showmultiplier=1e0, stray=0.5, value=None):
         self.value = np.array([0.]*numrows)
@@ -46,7 +55,7 @@ class PQC_value:
             self.value = value
             
     def __str__(self):
-            return self.name+str(self.value*self.showmultiplier)+self.unit
+        return self.name+str(self.value*self.showmultiplier)+self.unit
             
     def rearrange(self, indices):
         self.value = self.value[indices]
@@ -99,20 +108,35 @@ class PQC_value:
         value = np.concatenate( [t.value for t in parents])
         return new(1, name, nicename, parents[0].expectedValue, parents[0].unit, parents[0].showmultiplier, value=value, stray=parents[0].stray)
     
+
+    
+    # get a colorized value string for ise in latex, if the index is higher we get summary elemets
     def valueToLatex(self, index):
-        value = self.value[index]*self.showmultiplier
-        if self.expectedValue < 10:
-            vstr = "{:4.2f}".format(value)
+        if index < len(self.value):
+            value = self.value[index]*self.showmultiplier
+            vstr = num2str(value, self.expectedValue)
+                
+            if np.isnan(value):
+                return "\\nanval NaN"
+            elif value > self.maxAllowed:
+                return "\\highval "+vstr
+            elif value < self.minAllowed:
+                return "\\lowval "+vstr
+            return "\\okval "+vstr
         else:
-            vstr = "{:4.1f}".format(value)
-            
-        if np.isnan(value):
-            return "\\nanval NaN"
-        elif value > self.maxAllowed:
-            return "\\highval "+vstr
-        elif value < self.minAllowed:
-            return "\\lowval "+vstr
-        return "\\okval "+vstr
+            stats = self.getStats()
+            sel={
+                0: "\\okval "+num2str(stats.selMed, self.expectedValue),
+                1: "\\okval "+num2str(stats.selAvg, self.expectedValue),
+                2: "\\okval "+num2str(stats.selStd, self.expectedValue),
+                3: "\\okval {}/{}".format(len(stats.values), stats.nTot),
+                4: "\\okval {:2.0f}\\%".format(len(stats.values)/stats.nTot*100),
+             }
+        return sel.get(index-len(self.value), "\\nanval err")
+        
+    def summaryDesciption(self, index):
+        v = ["\\hline \nMedian", "Average", "Std dev", "\\hline \nOK/Tot", "OK (rel)"]
+        return v[index-len(self.value)]
     
     def headerToLatex():
         return "\\def\\nanval{\\cellcolor[HTML]{aa0000}}\n" \
@@ -177,14 +201,14 @@ class PQC_resultset:
         self.dataseries['v_fd'] = self.v_fd
         self.rho = PQC_value(rows, "rho", "rho", 1.3, "kOhm cm", 0.1)
         self.dataseries['rho'] = self.rho
-        self.conc = PQC_value(rows, "d_conc", "Doping Concentration", 3.5, "* 1E12 cm^-3", 1e-18)
+        self.conc = PQC_value(rows, "d_conc", "Doping Concentration", 3.5, "*1E12 cm^-3", 1e-18)
         self.dataseries['conc'] = self.conc
 
         self.v_fb2 = PQC_value(rows, "v_fb", "Flatband voltage", 2.5, "V", stray=0.33)
         self.dataseries['v_fb2'] = self.v_fb2
         self.t_ox = PQC_value(rows, "t_ox", "Oxide thickness", 0.67, "um", stray=0.33)
         self.dataseries['t_ox'] = self.t_ox
-        self.n_ox = PQC_value(rows, "n_ox", "Oxide concentration", 10.5, "* 1E10 cm^-3", 1e-10)
+        self.n_ox = PQC_value(rows, "n_ox", "Oxide concentration", 10.5, "*1E10 cm^-3", 1e-10)
         self.dataseries['n_ox'] = self.n_ox
         self.c_acc_m = PQC_value(rows, "c_acc", "Accumulation capacitance", 85., "pF", 1e12, stray=0.2)
         self.dataseries['c_acc_m'] = self.c_acc_m
@@ -417,7 +441,7 @@ class PQC_resultset:
         ax0 = plt.subplot(gs[0])
         
         if rangeExtension is not None:
-            plt.title(self.batch + ": " + pqc_values.nicename + ", Extended", fontsize=18)
+            plt.title(self.batch + ": " + pqc_values.nicename + ", Ext: {:5.1E}".format(rangeExtension), fontsize=18)
             plt.ticklabel_format(axis='x', style='sci', scilimits=(-2,2))
         else:
             plt.title(self.batch + ": " + pqc_values.nicename + "", fontsize=18)
@@ -487,9 +511,9 @@ class PQC_resultset:
         self.histogram(self.vdp_n_tot(), histogramDir)
         self.histogram(self.vdp_pstop_tot(), histogramDir)   
         
-        self.histogram(self.vdp_poly_tot(), histogramDir, rangeExtension=1e2)
-        self.histogram(self.vdp_n_tot(), histogramDir, rangeExtension=1e2)
-        self.histogram(self.vdp_pstop_tot(), histogramDir, rangeExtension=1e2)        
+        self.histogram(self.vdp_poly_tot(), histogramDir, rangeExtension=1.5e2)
+        self.histogram(self.vdp_n_tot(), histogramDir, rangeExtension=1.5e2)
+        self.histogram(self.vdp_pstop_tot(), histogramDir, rangeExtension=1.5e2)        
 
         self.histogram(PQC_value.merge([self.nvdp_poly_f, self.nvdp_poly_r], "nvdp_poly_tot", "PolySi Swapped VdP"), histogramDir)
         self.histogram(PQC_value.merge([self.nvdp_n_f, self.nvdp_n_r], "nvdp_N_tot", "N+ Swapped VdP both"), histogramDir)
@@ -527,8 +551,11 @@ class PQC_resultset:
         \\hline\n
         """)
         
-        for i in range(0, len(self.labels)):
-            line = "        \detokenize{"+self.shortenLabel(self.labels[i])+"}"
+        for i in range(0, len(self.labels)+5):
+            if i < len(self.labels):
+                line = "        \detokenize{"+self.shortenLabel(self.labels[i])+"}"
+            else:
+                line = self.vdp_poly_f.summaryDesciption(i)
             line = line + " & " + self.vdp_poly_f.valueToLatex(i)
             line = line + " & " + self.vdp_poly_r.valueToLatex(i)
             line = line + " & " + self.vdp_n_f.valueToLatex(i)
@@ -570,8 +597,11 @@ class PQC_resultset:
         \\hline\n
         """)
         
-        for i in range(0, len(self.labels)):
-            line = "        \detokenize{"+self.shortenLabel(self.labels[i])+"}"
+        for i in range(0, len(self.labels)+5):
+            if i < len(self.labels):
+                line = "        \detokenize{"+self.shortenLabel(self.labels[i])+"}"
+            else:
+                line = self.vdp_poly_f.summaryDesciption(i)
             line = line + " & " + self.v_th.valueToLatex(i)
             line = line + " & " + self.vdp_metclo_f.valueToLatex(i)
             line = line + " & " + self.vdp_metclo_r.valueToLatex(i)
@@ -611,8 +641,11 @@ class PQC_resultset:
         \\hline\n
         """)
         
-        for i in range(0, len(self.labels)):
-            line = "        \detokenize{"+self.shortenLabel(self.labels[i])+"}"
+        for i in range(0, len(self.labels)+5):
+            if i < len(self.labels):
+                line = "        \detokenize{"+self.shortenLabel(self.labels[i])+"}"
+            else:
+                line = self.vdp_poly_f.summaryDesciption(i)
             line = line + " & " + self.v_fb2.valueToLatex(i)
             line = line + " & " + self.c_acc_m.valueToLatex(i)
             line = line + " & " + self.t_ox.valueToLatex(i)
