@@ -40,9 +40,13 @@ class PQC_value:
         self.minAllowed = expectedValue * (1-stray)
         self.maxAllowed = expectedValue * (1+stray)
         self.stray = stray
+        self.expectedValue = expectedValue
 
         if value is not None:
             self.value = value
+            
+    def __str__(self):
+            return self.name+str(self.value*self.showmultiplier)+self.unit
             
     def rearrange(self, indices):
         self.value = self.value[indices]
@@ -51,12 +55,17 @@ class PQC_value:
         # with multiplier to suit the unit
         return self.value[index]*self.showmultiplier
         
-    def split(self, itemsperclice)
-        ret = [PQC_value(len(i), self.name, self.nicename, self.expectedValue, self.unit, self.showmultiplier, self.stray, self.value=i) for i in make_chunks(self.value, itemsperclice)]
+    def split(self, itemsperclice):
+        ret = [PQC_value(len(i), self.name, self.nicename, self.expectedValue, self.unit, self.showmultiplier, self.stray, value=i) for i in make_chunks(self.value, itemsperclice)]
         return ret
         
     @params('values, nTot, nNan, nTooHigh, nTooLow, totAvg, totStd, totMed, selAvg, selStd, selMed')
-    def getStats(self):
+    def getStats(self, minAllowed=None, maxAllowed=None):
+        if minAllowed is None:
+            minAllowed = self.minAllowed
+        if maxAllowed is None:
+            maxAllowed = self.maxAllowed
+        
         nTot = len(self.value)
 
         selector = np.isfinite(self.value)
@@ -74,9 +83,9 @@ class PQC_value:
         totStd = np.std(values)
         
         nNan = nTot - len(values)
-        values = values[values < self.maxAllowed]
+        values = values[values < maxAllowed]
         nTooHigh = nTot - len(values) - nNan
-        values = values[values > self.minAllowed]
+        values = values[values > minAllowed]
         nTooLow = nTot - len(values) - nNan - nTooHigh
         
         selMed = np.median(values)
@@ -89,6 +98,28 @@ class PQC_value:
     def merge(new, parents, name='na', nicename='na'):
         value = np.concatenate( [t.value for t in parents])
         return new(1, name, nicename, parents[0].expectedValue, parents[0].unit, parents[0].showmultiplier, value=value, stray=parents[0].stray)
+    
+    def valueToLatex(self, index):
+        value = self.value[index]*self.showmultiplier
+        if self.expectedValue < 10:
+            vstr = "{:4.2f}".format(value)
+        else:
+            vstr = "{:4.1f}".format(value)
+            
+        if np.isnan(value):
+            return "\\nanval NaN"
+        elif value > self.maxAllowed:
+            return "\\highval "+vstr
+        elif value < self.minAllowed:
+            return "\\lowval "+vstr
+        return "\\okval "+vstr
+    
+    def headerToLatex():
+        return "\\def\\nanval{\\cellcolor[HTML]{aa0000}}\n" \
+               "\\def\\highval{\\cellcolor[HTML]{ff9900}}\n" \
+               "\\def\\lowval{\\cellcolor[HTML]{ffff00}}\n" \
+               "\\def\\okval{\\cellcolor[HTML]{ffffff}}\n\n" \
+               
 
 class PQC_resultset:
     def __init__(self, rows, batchname, dataseries=None):
@@ -205,8 +236,8 @@ class PQC_resultset:
                 self.dataseries[key][:] = [self.dataseries[key][i] for i in order]  # we want to keep the original object so references are preserved
         
     # warning: this creates not full copies, only the dict is available then
-    def split(self, itemsperclice)
-        print(str(self.dataseries["vdp_n_f"].split(itemsperclice)))
+    def split(self, itemsperclice):
+        print(str((self.dataseries["vdp_n_f"]).split(itemsperclice)))
         
         #ret = [PQC_resultset( self.value=i) for i in make_chunks(self.value, itemsperclice)]
         return []
@@ -368,8 +399,13 @@ class PQC_resultset:
             plt.xlim([start, stop])
             
         
-    def histogram(self, pqc_values, path, stray=1.4):
-        stats = pqc_values.getStats()
+    def histogram(self, pqc_values, path, stray=1.4, rangeExtension=None):
+        if rangeExtension is not None:
+            stats = pqc_values.getStats(minAllowed=0, maxAllowed=pqc_values.maxAllowed*rangeExtension)
+        else:
+            stats = pqc_values.getStats()
+        
+        
         if len(stats.values) == 1 and stats.nNan == 1:
             print("warning: skipping plot due to no valid results: "+pqc_values.name)
             return
@@ -379,17 +415,28 @@ class PQC_resultset:
         
         gs = gridspec.GridSpec(1, 2, width_ratios=[10, 1]) 
         ax0 = plt.subplot(gs[0])
-        plt.title(self.batch + ": " + pqc_values.nicename + "", fontsize=18)
+        
+        if rangeExtension is not None:
+            plt.title(self.batch + ": " + pqc_values.nicename + ", Extended", fontsize=18)
+            plt.ticklabel_format(axis='x', style='sci', scilimits=(-2,2))
+        else:
+            plt.title(self.batch + ": " + pqc_values.nicename + "", fontsize=18)
+        
         ax1 = plt.subplot(gs[1])
                 
-        ax0.hist(stats.values, bins=20, range=[pqc_values.minAllowed, pqc_values.maxAllowed], facecolor='blue', alpha=1, edgecolor='black', linewidth=1)
-        
+        if rangeExtension is not None:
+            #ax0.hist(pqc_values.value, bins=50, facecolor='blueviolet', alpha=1, edgecolor='black', linewidth=1)
+            ax0.hist(stats.values, bins=50, range=[0, pqc_values.maxAllowed*rangeExtension], facecolor='blueviolet', alpha=1, edgecolor='black', linewidth=1)
+            descNum = "Total: {}\nShown: {}\nFailed: {}\nToo high: {}\nToo low: {}".format(stats.nTot, len(stats.values),  stats.nNan, stats.nTooHigh, stats.nTooLow)
+        else:
+            ax0.hist(stats.values, bins=20, range=[pqc_values.minAllowed, pqc_values.maxAllowed], facecolor='blue', alpha=1, edgecolor='black', linewidth=1)
+            descNum = "Total: {}\nShown: {}\nFailed: {}\nToo high: {}\nToo low: {}".format(stats.nTot, len(stats.values),  stats.nNan, stats.nTooHigh, stats.nTooLow)
         
         ax0.set_xlabel(pqc_values.unit)
         ax0.set_ylabel("occurences")
         
         #descNum = "Total number: {}\nShown: {:2.0f}%, {}\nFailed: {:2.0f}%, {}\nToo high: {:2.0f}%, {}\nToo low: {:2.0f}%, {}".format(stats.nTot, len(stats.values)/stats.nTot*1e2, len(stats.values), stats.nNan/stats.nTot*1e2, stats.nNan, stats.nTooHigh/stats.nTot*1e2, stats.nTooHigh, stats.nTooLow/stats.nTot*1e2, stats.nTooLow)
-        descNum = "Total: {}\nShown: {}\nFailed: {}\nToo high: {}\nToo low: {}".format(stats.nTot, len(stats.values),  stats.nNan, stats.nTooHigh, stats.nTooLow)
+        
         fig.text(0.83, 0.85, descNum, bbox=dict(facecolor='red', alpha=0.6), horizontalalignment='right', verticalalignment='top')
         
         if abs(stats.selMed) < 9.99:
@@ -402,11 +449,11 @@ class PQC_resultset:
             descStat = "Total avg: {0:9.2E} {4}\nTotal median: {1:9.2E} {4}\nSelected avg: {2:9.2E} {4}\nSel median: {3:9.2E} {4}".format(stats.totAvg, stats.totMed, stats.selAvg, stats.selMed, pqc_values.unit)
         fig.text(0.45, 0.85, descStat, bbox=dict(facecolor='yellow', alpha=0.85), horizontalalignment='right', verticalalignment='top')
         
-        for i in [(stats.totAvg, 'purple', 'solid'), (stats.totMed, 'purple', 'dashed'), (stats.selAvg, 'green', 'solid'), (stats.selMed, 'green', 'dashed')]:
-            if (i[0] < pqc_values.maxAllowed) and (i[0] > pqc_values.minAllowed):
-                ax0.vlines(x = i[0], ymin = 0, ymax = 3, 
-                    colors = i[1], linestyles=i[2],
-                    label = 'vline_multiple - full height') 
+        #for i in [(stats.totAvg, 'purple', 'solid'), (stats.totMed, 'purple', 'dashed'), (stats.selAvg, 'green', 'solid'), (stats.selMed, 'green', 'dashed')]:
+        #    if (i[0] < pqc_values.maxAllowed) and (i[0] > pqc_values.minAllowed):
+        #        ax0.vlines(x = i[0], ymin = 0, ymax = 3, 
+        #            colors = i[1], linestyles=i[2],
+        #            label = 'vline_multiple - full height') 
                     
 
         self.statusbar(stats, ax1)
@@ -414,7 +461,10 @@ class PQC_resultset:
         
         
         fig.tight_layout(h_pad=1.0)
-        fig.savefig(path+"/"+pqc_values.name+"_hist.png")
+        if rangeExtension is not None:
+            fig.savefig(path+"/"+pqc_values.name+"_erhist.png")
+        else:
+            fig.savefig(path+"/"+pqc_values.name+"_hist.png")
         plt.close()
 
         
@@ -435,16 +485,149 @@ class PQC_resultset:
         
         self.histogram(self.vdp_poly_tot(), histogramDir)
         self.histogram(self.vdp_n_tot(), histogramDir)
-        self.histogram(self.vdp_pstop_tot(), histogramDir)        
+        self.histogram(self.vdp_pstop_tot(), histogramDir)   
+        
+        self.histogram(self.vdp_poly_tot(), histogramDir, rangeExtension=1e2)
+        self.histogram(self.vdp_n_tot(), histogramDir, rangeExtension=1e2)
+        self.histogram(self.vdp_pstop_tot(), histogramDir, rangeExtension=1e2)        
 
         self.histogram(PQC_value.merge([self.nvdp_poly_f, self.nvdp_poly_r], "nvdp_poly_tot", "PolySi Swapped VdP"), histogramDir)
         self.histogram(PQC_value.merge([self.nvdp_n_f, self.nvdp_n_r], "nvdp_N_tot", "N+ Swapped VdP both"), histogramDir)
         self.histogram(PQC_value.merge([self.nvdp_pstop_f, self.nvdp_pstop_r], "nvdp_pstop_tot", "P-stop Swapped VdP"), histogramDir)
         
+    def shortenLabel(self, label):
+        lbl_list = [2,5]
+        return ' '.join([label.split('_')[i] for i in lbl_list])
+        
+    def shortenBatch(self, batch):
+        lbl_list = [0]
+        return ' '.join([batch.split('_')[i] for i in lbl_list])
         
         
+    # this could be done e.g. via df.to_latex() in pandas, but coloring the cells is then complicated, so done manually...
+    def exportLatex(self, path):
+        self.exportLatex1(path)
+        self.exportLatex2(path)
+        self.exportLatex3(path)
+    
+    
+    def exportLatex1(self, path):
+        f = open(path+"/histograms_"+self.batch+"/table1.tex", "w")
+        f.write("% automatically created table for batch " + self.batch + "\n\n")
+        
+        f.write(PQC_value.headerToLatex())
+        
+        f.write("""\\begin{center}
+        \\fontsize{5pt}{6pt}\\selectfont
+    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|r| } 
+        \\hline
+        """+self.shortenBatch(self.batch)+""" & \multicolumn{2}{ c|}{PolySi VdP} & \multicolumn{2}{c|}{N+ VdP} & \multicolumn{2}{c|}{P-Stop VdP} & \multicolumn{3}{c|}{line thickness} & \multicolumn{2}{ c|}{Contact resistance} \\\\
+        & \multicolumn{2}{c|}{"""+self.vdp_poly_f.unit+"} & \multicolumn{2}{c|}{"+self.vdp_n_f.unit+"} & \multicolumn{2}{c|}{"+self.vdp_pstop_f.unit+"} & \multicolumn{3}{c|}{"+self.t_line_n.unit+"} & "+self.r_contac_poly.unit+" & "+self.r_contact_n.unit+"""\\\\
+         & forw & rev & forw & rev & forw & rev & N+ & p-stop2 & p-stop4 & PolySi & N+\\\\
+        \\hline\n
+        """)
+        
+        for i in range(0, len(self.labels)):
+            line = "        \detokenize{"+self.shortenLabel(self.labels[i])+"}"
+            line = line + " & " + self.vdp_poly_f.valueToLatex(i)
+            line = line + " & " + self.vdp_poly_r.valueToLatex(i)
+            line = line + " & " + self.vdp_n_f.valueToLatex(i)
+            line = line + " & " + self.vdp_n_r.valueToLatex(i)
+            line = line + " & " + self.vdp_pstop_f.valueToLatex(i)
+            line = line + " & " + self.vdp_pstop_r.valueToLatex(i)
+            
+            line = line + " & " + self.t_line_n.valueToLatex(i)
+            line = line + " & " + self.t_line_pstop2.valueToLatex(i)
+            line = line + " & " + self.t_line_pstop4.valueToLatex(i)
+            line = line + " & " + self.r_contac_poly.valueToLatex(i)
+            line = line + " & " + self.r_contact_n.valueToLatex(i)
+            
+            f.write(line+"\\\\\n")
         
         
+        f.write("""        \\hline
+    \\end{tabular}
+\\end{center}""")
+        
+        f.close()
+     
+     
+     
+        
+    def exportLatex2(self, path):
+        f = open(path+"/histograms_"+self.batch+"/table2.tex", "w")
+        f.write("% automatically created table for batch " + self.batch + "\n\n")
+        
+        f.write(PQC_value.headerToLatex())
+        
+        f.write("""\\begin{center}
+        \\fontsize{5pt}{6pt}\\selectfont
+    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|r| } 
+        \\hline
+        """+self.shortenBatch(self.batch)+""" & FET & \multicolumn{2}{ c|}{MetClover VdP} & \multicolumn{3}{c|}{P cross-bridge VdP/LW} & Vbd & I600 & Vfd & rho & d. conc \\\\
+        & """+self.v_th.unit+" & \multicolumn{2}{c|}{"+self.vdp_metclo_f.unit+"} & \multicolumn{2}{c|}{"+self.vdp_p_cross_bridge_f.unit+"} & "+self.t_line_p_cross_bridge.unit+" & "+self.v_bd.unit+" & "+self.i600.unit+" & "+self.v_fd.unit+" & \detokenize{"+self.rho.unit+"} & \detokenize{"+self.conc.unit+"""}\\\\
+         & Vth & forw & rev & forw & rev & & & & & & \\\\
+        \\hline\n
+        """)
+        
+        for i in range(0, len(self.labels)):
+            line = "        \detokenize{"+self.shortenLabel(self.labels[i])+"}"
+            line = line + " & " + self.v_th.valueToLatex(i)
+            line = line + " & " + self.vdp_metclo_f.valueToLatex(i)
+            line = line + " & " + self.vdp_metclo_r.valueToLatex(i)
+            line = line + " & " + self.vdp_p_cross_bridge_f.valueToLatex(i)
+            line = line + " & " + self.vdp_p_cross_bridge_r.valueToLatex(i)
+            line = line + " & " + self.t_line_p_cross_bridge.valueToLatex(i)
+            
+            line = line + " & " + self.v_bd.valueToLatex(i)
+            line = line + " & " + self.i600.valueToLatex(i)
+            line = line + " & " + self.v_fd.valueToLatex(i)
+            line = line + " & " + self.rho.valueToLatex(i)
+            line = line + " & " + self.conc.valueToLatex(i)
+            
+            f.write(line+"\\\\\n")
+        
+        
+        f.write("""        \\hline
+    \\end{tabular}
+\\end{center}""")
+        
+        f.close()
+        
+        
+    def exportLatex3(self, path):
+        f = open(path+"/histograms_"+self.batch+"/table3.tex", "w")
+        f.write("% automatically created table for batch " + self.batch + "\n\n")
+        
+        f.write(PQC_value.headerToLatex())
+        
+        f.write("""\\begin{center}
+        \\fontsize{5pt}{6pt}\\selectfont
+    \\begin{tabular}{ |l|r|r|r|r|r|r|r|} 
+        \\hline
+        """+self.shortenBatch(self.batch)+""" & Vfb & \multicolumn{3}{ c|}{MOS} & GCD & \multicolumn{2}{ c|}{GCD05} \\\\
+        & """+self.v_fb2.unit+" & "+self.c_acc_m.unit+" & "+self.t_ox.unit+" & \detokenize{"+self.n_ox.unit+"} & "+self.i_surf.unit+" & "+self.i_surf05.unit+" & "+self.i_bulk05.unit+"""\\\\
+         & &  C-acc & t-ox & n-ox & i-surf & i-surf05 & i-bulk05 \\\\
+        \\hline\n
+        """)
+        
+        for i in range(0, len(self.labels)):
+            line = "        \detokenize{"+self.shortenLabel(self.labels[i])+"}"
+            line = line + " & " + self.v_fb2.valueToLatex(i)
+            line = line + " & " + self.c_acc_m.valueToLatex(i)
+            line = line + " & " + self.t_ox.valueToLatex(i)
+            line = line + " & " + self.n_ox.valueToLatex(i)
+            line = line + " & " + self.i_surf.valueToLatex(i)
+            line = line + " & " + self.i_surf05.valueToLatex(i)
+            line = line + " & " + self.i_bulk05.valueToLatex(i)
+
+            f.write(line+"\\\\\n")
+        
+        f.write("""        \\hline
+    \\end{tabular}
+\\end{center}""")
+        
+        f.close()
         
         
         

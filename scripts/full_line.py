@@ -83,6 +83,7 @@ def main():
         pqc_results = loadBatch(args.path)
         pqc_results.prettyPrint()
         pqc_results.createHistograms(args.path)
+        pqc_results.exportLatex(args.path)
     else:
         print("Multibatch mode")
         dirs = glob.glob(os.path.join(args.path, "*"))
