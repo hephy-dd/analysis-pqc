@@ -30,7 +30,7 @@ def loadBatch(path):
     dirs.sort()
     
     pqc_results = PQC_resultset(len(dirs), os.path.basename(os.path.dirname(path+"/")))
-    pqc_results.analyze(dirs, flutes)
+    pqc_results.analyze(dirs)
     
     return pqc_results
     
