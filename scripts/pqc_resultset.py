@@ -251,74 +251,77 @@ class PQC_resultset:
     def analyze(self, dirs):
         print("dirs: "+str(len(dirs)))
         for i in range(0, len(dirs)):
-            self.labels.append(dirs[i].split("/")[-1])
-            self.flutes.append("PQCFlutesLeft")   # TODO find which flutes are interesting
-            currflute = "PQCFlutesLeft"
-            
-            x = pqc.find_all_files_from_path(dirs[i], "van_der_pauw")
-            if i != []:
-                self.timestamps.append(pqc.get_timestamp(x[-1]))
-            else:
-                self.timestamps.append(0)
-            
-            self.dataseries['vdp_poly_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "cross"], blacklist=["reverse"]), plotResults=False))
-            self.dataseries['vdp_poly_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "reverse", "cross"])))
+            for currflute in ["PQCFlutesLeft", "PQCFlutesRight", "PQCFluteLeft", "PQCFluteRight", ]:   # we want both flutes if they are measured, but sometimes it's misspelled
+                if len(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "cross"], blacklist=["reverse"])) < 3:
+                    continue
 
-            self.dataseries['vdp_n_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "cross"], blacklist=["reverse"])))
-            self.dataseries['vdp_n_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "reverse", "cross"])))
-            
-            
-            self.dataseries['vdp_pstop_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "cross"], blacklist=["reverse"])))
-            self.dataseries['vdp_pstop_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "reverse", "cross"])))
+                self.labels.append(dirs[i].split("/")[-1])
+                self.flutes.append(currflute)
 
-            self.dataseries['t_line_n'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "n"], single=True), r_sheet=self.dataseries['vdp_n_f'].values[i], printResults=False, plotResults=False))
-            self.dataseries['t_line_pstop2'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "P_stop", "2_wire"], single=True), r_sheet=self.dataseries['vdp_pstop_f'].values[i], printResults=False, plotResults=False))
-            self.dataseries['t_line_pstop4'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "P_stop", "4_wire"], single=True), r_sheet=self.dataseries['vdp_pstop_f'].values[i], printResults=False, plotResults=False))
+                x = pqc.find_all_files_from_path(dirs[i], "van_der_pauw")
+                if i != []:
+                    self.timestamps.append(pqc.get_timestamp(x[-1]))
+                else:
+                    self.timestamps.append(0)
+                
+                self.dataseries['vdp_poly_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "cross"], blacklist=["reverse"]), plotResults=False))
+                self.dataseries['vdp_poly_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "reverse", "cross"])))
 
-            self.dataseries['r_contact_n'].append(pqc.analyse_cbkr_data(pqc.find_all_files_from_path(dirs[i], "cbkr", whitelist=[currflute, "n"], single=True), r_sheet=self.dataseries['vdp_n_f'].values[i], printResults=False, plotResults=False))
-            self.dataseries['r_contact_poly'].append(pqc.analyse_cbkr_data(pqc.find_all_files_from_path(dirs[i], "cbkr", whitelist=[currflute, "Polysilicon"], single=True), r_sheet=self.dataseries['vdp_poly_f'].values[i], printResults=False, plotResults=False))
+                self.dataseries['vdp_n_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "cross"], blacklist=["reverse"])))
+                self.dataseries['vdp_n_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "reverse", "cross"])))
+                
+                
+                self.dataseries['vdp_pstop_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "cross"], blacklist=["reverse"])))
+                self.dataseries['vdp_pstop_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "reverse", "cross"])))
 
-            self.dataseries['v_th'].append(pqc.analyse_fet_data(pqc.find_all_files_from_path(dirs[i], "fet", whitelist=[currflute, ], single=True), printResults=False, plotResults=False))
+                self.dataseries['t_line_n'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "n"], single=True), r_sheet=self.dataseries['vdp_n_f'].values[i], printResults=False, plotResults=False))
+                self.dataseries['t_line_pstop2'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "P_stop", "2_wire"], single=True), r_sheet=self.dataseries['vdp_pstop_f'].values[i], printResults=False, plotResults=False))
+                self.dataseries['t_line_pstop4'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "P_stop", "4_wire"], single=True), r_sheet=self.dataseries['vdp_pstop_f'].values[i], printResults=False, plotResults=False))
 
-            self.dataseries['vdp_metclo_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "metal", "clover"], blacklist=["reverse"])))
-            self.dataseries['vdp_metclo_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "metal", "clover", "reverse"], blacklist=[])))
+                self.dataseries['r_contact_n'].append(pqc.analyse_cbkr_data(pqc.find_all_files_from_path(dirs[i], "cbkr", whitelist=[currflute, "n"], single=True), r_sheet=self.dataseries['vdp_n_f'].values[i], printResults=False, plotResults=False))
+                self.dataseries['r_contact_poly'].append(pqc.analyse_cbkr_data(pqc.find_all_files_from_path(dirs[i], "cbkr", whitelist=[currflute, "Polysilicon"], single=True), r_sheet=self.dataseries['vdp_poly_f'].values[i], printResults=False, plotResults=False))
 
-            self.dataseries['vdp_p_cross_bridge_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P", "cross_bridge"], blacklist=["reverse"])))
-            self.dataseries['vdp_p_cross_bridge_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P", "cross_bridge", "reverse"])))
-            self.dataseries['t_line_p_cross_bridge'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "P", "cross_bridge"], single=True), r_sheet=self.dataseries['vdp_p_cross_bridge_f'].values[i], printResults=False, plotResults=False))
+                self.dataseries['v_th'].append(pqc.analyse_fet_data(pqc.find_all_files_from_path(dirs[i], "fet", whitelist=[currflute, ], single=True), printResults=False, plotResults=False))
 
-            self.dataseries['v_bd'].append(pqc.analyse_breakdown_data(pqc.find_all_files_from_path(dirs[i], "breakdown", whitelist=[currflute, ], single=True), printResults=False, plotResults=False))
+                self.dataseries['vdp_metclo_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "metal", "clover"], blacklist=["reverse"])))
+                self.dataseries['vdp_metclo_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "metal", "clover", "reverse"], blacklist=[])))
 
-            # we want this for FLute_3 and not Flute_1
-            i600, dummy = pqc.analyse_iv_data(pqc.find_all_files_from_path(dirs[i], "iv", whitelist=[currflute, "3"], single=True), printResults=False, plotResults=False)
-            self.dataseries['i600'].append(i600)
-            
-            v_fd, rho, conc = pqc.analyse_cv_data(pqc.find_all_files_from_path(dirs[i], "cv", whitelist=[currflute, "3"], single=True), printResults=False, plotResults=False)
-            self.dataseries['v_fd'].append(v_fd)
-            self.dataseries['rho'].append(rho)
-            self.dataseries['conc'].append(conc)
-            
-            dummy, v_fb2, t_ox, n_ox, c_acc_m = pqc.analyse_mos_data(pqc.find_all_files_from_path(dirs[i], "mos", whitelist=[currflute, ], single=True), printResults=False, plotResults=False)
-            self.dataseries['v_fb2'].append(v_fb2)
-            self.dataseries['t_ox'].append(t_ox)
-            self.dataseries['n_ox'].append(n_ox)
-            self.dataseries['c_acc_m'].append(c_acc_m)
-            
-            i_surf, dummy = pqc.analyse_gcd_data(pqc.find_all_files_from_path(dirs[i], "gcd", whitelist=[currflute, ], single=True), printResults=False, plotResults=False)  # only i_surf valid
-            self.dataseries['i_surf'].append(i_surf)
-            
-            i_surf05, i_bulk05 = pqc.analyse_gcd_data(pqc.find_all_files_from_path(dirs[i], "gcd05", whitelist=[currflute, ], single=True), printResults=False, plotResults=False)  # for i_bulk
-            self.dataseries['i_surf05'].append(i_surf05)
-            self.dataseries['i_bulk05'].append(i_bulk05)
-            
-            self.dataseries['nvdp_poly_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "ncross"], blacklist=["reverse"]), plotResults=False))
-            self.dataseries['nvdp_poly_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "reverse", "ncross"])))
+                self.dataseries['vdp_p_cross_bridge_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P", "cross_bridge"], blacklist=["reverse"])))
+                self.dataseries['vdp_p_cross_bridge_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P", "cross_bridge", "reverse"])))
+                self.dataseries['t_line_p_cross_bridge'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "P", "cross_bridge"], single=True), r_sheet=self.dataseries['vdp_p_cross_bridge_f'].values[i], printResults=False, plotResults=False))
 
-            self.dataseries['nvdp_n_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "ncross"], blacklist=["reverse"])))
-            self.dataseries['nvdp_n_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "reverse", "ncross"])))
+                self.dataseries['v_bd'].append(pqc.analyse_breakdown_data(pqc.find_all_files_from_path(dirs[i], "breakdown", whitelist=[currflute, ], single=True), printResults=False, plotResults=False))
 
-            self.dataseries['nvdp_pstop_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "ncross"], blacklist=["reverse"])))
-            self.dataseries['nvdp_pstop_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "reverse", "ncross"])))
+                # we want this for FLute_3 and not Flute_1
+                i600, dummy = pqc.analyse_iv_data(pqc.find_all_files_from_path(dirs[i], "iv", whitelist=[currflute, "3"], single=True), printResults=False, plotResults=False)
+                self.dataseries['i600'].append(i600)
+                
+                v_fd, rho, conc = pqc.analyse_cv_data(pqc.find_all_files_from_path(dirs[i], "cv", whitelist=[currflute, "3"], single=True), printResults=False, plotResults=False)
+                self.dataseries['v_fd'].append(v_fd)
+                self.dataseries['rho'].append(rho)
+                self.dataseries['conc'].append(conc)
+                
+                dummy, v_fb2, t_ox, n_ox, c_acc_m = pqc.analyse_mos_data(pqc.find_all_files_from_path(dirs[i], "mos", whitelist=[currflute, ], single=True), printResults=False, plotResults=False)
+                self.dataseries['v_fb2'].append(v_fb2)
+                self.dataseries['t_ox'].append(t_ox)
+                self.dataseries['n_ox'].append(n_ox)
+                self.dataseries['c_acc_m'].append(c_acc_m)
+                
+                i_surf, dummy = pqc.analyse_gcd_data(pqc.find_all_files_from_path(dirs[i], "gcd", whitelist=[currflute, ], single=True), printResults=False, plotResults=False)  # only i_surf valid
+                self.dataseries['i_surf'].append(i_surf)
+                
+                i_surf05, i_bulk05 = pqc.analyse_gcd_data(pqc.find_all_files_from_path(dirs[i], "gcd05", whitelist=[currflute, ], single=True), printResults=False, plotResults=False)  # for i_bulk
+                self.dataseries['i_surf05'].append(i_surf05)
+                self.dataseries['i_bulk05'].append(i_bulk05)
+                
+                self.dataseries['nvdp_poly_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "ncross"], blacklist=["reverse"]), plotResults=False))
+                self.dataseries['nvdp_poly_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "reverse", "ncross"])))
+
+                self.dataseries['nvdp_n_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "ncross"], blacklist=["reverse"])))
+                self.dataseries['nvdp_n_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "reverse", "ncross"])))
+
+                self.dataseries['nvdp_pstop_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "ncross"], blacklist=["reverse"])))
+                self.dataseries['nvdp_pstop_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "reverse", "ncross"])))
             
             
             
@@ -497,13 +500,18 @@ class PQC_resultset:
         self.histogram(self.nvdp_n_tot(), histogramDir)
         self.histogram(self.nvdp_pstop_tot(), histogramDir)   
         
-    def shortenLabel(self, label):
+    def shortLabel(self, i):
         lbl_list = [2,5]
-        return ' '.join([label.split('_')[i] for i in lbl_list])
+        if "Left" in self.flutes[i]:
+            fl = " L"
+        else:
+            fl = " R"
         
-    def shortenBatch(self, batch):
+        return ' '.join([self.labels[i].split('_')[j] for j in lbl_list]) + fl
+        
+    def shortBatch(self):
         lbl_list = [0]
-        return ' '.join([batch.split('_')[i] for i in lbl_list])
+        return ' '.join([self.batch.split('_')[i] for i in lbl_list])
         
         
     # this could be done e.g. via df.to_latex() in pandas, but coloring the cells is then complicated, so done manually...
@@ -523,7 +531,7 @@ class PQC_resultset:
         \\fontsize{5pt}{6pt}\\selectfont
     \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|r| } 
         \\hline
-        """+self.shortenBatch(self.batch)+""" & \multicolumn{2}{ c|}{PolySi VdP} & \multicolumn{2}{c|}{N+ VdP} & \multicolumn{2}{c|}{P-Stop VdP} & \multicolumn{3}{c|}{line thickness} & \multicolumn{2}{ c|}{Contact resistance} \\\\
+        """+self.shortBatch()+""" & \multicolumn{2}{ c|}{PolySi VdP} & \multicolumn{2}{c|}{N+ VdP} & \multicolumn{2}{c|}{P-Stop VdP} & \multicolumn{3}{c|}{line thickness} & \multicolumn{2}{ c|}{Contact resistance} \\\\
         & \multicolumn{2}{c|}{"""+self.dataseries['vdp_poly_f'].unit+"} & \multicolumn{2}{c|}{"+self.dataseries['vdp_n_f'].unit+"} & \multicolumn{2}{c|}{"+self.dataseries['vdp_pstop_f'].unit+"} & \multicolumn{3}{c|}{"+self.dataseries['t_line_n'].unit+"} & "+self.dataseries['r_contact_poly'].unit+" & "+self.dataseries['r_contact_n'].unit+"""\\\\
          & forw & rev & forw & rev & forw & rev & N+ & p-stop2 & p-stop4 & PolySi & N+\\\\
         \\hline\n
@@ -531,7 +539,7 @@ class PQC_resultset:
         
         for i in range(0, len(self.labels)+5):
             if i < len(self.labels):
-                line = "        \detokenize{"+self.shortenLabel(self.labels[i])+"}"
+                line = "        \detokenize{"+self.shortLabel(i)+"}"
             else:
                 line = self.dataseries['vdp_poly_f'].summaryDesciption(i)
             line = line + " & " + self.dataseries['vdp_poly_f'].valueToLatex(i)
@@ -567,20 +575,20 @@ class PQC_resultset:
         
         f.write("""\\begin{center}
         \\fontsize{5pt}{6pt}\\selectfont
-    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|r| } 
+    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r| } 
         \\hline
-        """+self.shortenBatch(self.batch)+""" & FET & \multicolumn{2}{ c|}{MetClover VdP} & \multicolumn{3}{c|}{P cross-bridge VdP/LW} & Vbd & I600 & Vfd & rho & d. conc \\\\
-        & """+self.dataseries['v_th'].unit+" & \multicolumn{2}{c|}{"+self.dataseries['vdp_metclo_f'].unit+"} & \multicolumn{2}{c|}{"+self.dataseries['vdp_p_cross_bridge_f'].unit+"} & "+self.dataseries['t_line_p_cross_bridge'].unit+" & "+self.dataseries['v_bd'].unit+" & "+self.dataseries['i600'].unit+" & "+self.dataseries['v_fd'].unit+" & \detokenize{"+self.dataseries['rho'].unit+"} & \detokenize{"+self.dataseries['conc'].unit+"""}\\\\
-         & Vth & forw & rev & forw & rev & & & & & & \\\\
+        """+self.shortBatch()+""" & \multicolumn{2}{ c|}{MetClover VdP} & \multicolumn{3}{c|}{P cross-bridge VdP/LW} & Vbd & I600 & \multicolumn{3}{c|}{Diode Half CV} \\\\
+        & """+" \multicolumn{2}{c|}{"+self.dataseries['vdp_metclo_f'].unit+"} & \multicolumn{2}{c|}{"+self.dataseries['vdp_p_cross_bridge_f'].unit+"} & "+self.dataseries['t_line_p_cross_bridge'].unit+" & "+self.dataseries['v_bd'].unit+" & "+self.dataseries['i600'].unit+" & "+self.dataseries['v_fd'].unit+" & \detokenize{"+self.dataseries['rho'].unit+"} & \detokenize{"+self.dataseries['conc'].unit+"""}\\\\
+          & forw & rev & forw & rev & & & & Vfd & rho & d. conc \\\\
         \\hline\n
         """)
         
         for i in range(0, len(self.labels)+5):
             if i < len(self.labels):
-                line = "        \detokenize{"+self.shortenLabel(self.labels[i])+"}"
+                line = "        \detokenize{"+self.shortLabel(i)+"}"
             else:
                 line = self.dataseries['v_th'].summaryDesciption(i)
-            line = line + " & " + self.dataseries['v_th'].valueToLatex(i)
+
             line = line + " & " + self.dataseries['vdp_metclo_f'].valueToLatex(i)
             line = line + " & " + self.dataseries['vdp_metclo_r'].valueToLatex(i)
             line = line + " & " + self.dataseries['vdp_p_cross_bridge_f'].valueToLatex(i)
@@ -611,19 +619,20 @@ class PQC_resultset:
         
         f.write("""\\begin{center}
         \\fontsize{5pt}{6pt}\\selectfont
-    \\begin{tabular}{ |l|r|r|r|r|r|r|r|} 
+    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|} 
         \\hline
-        """+self.shortenBatch(self.batch)+""" & Vfb & \multicolumn{3}{ c|}{MOS} & GCD & \multicolumn{2}{ c|}{GCD05} \\\\
-        & """+self.dataseries['v_fb2'].unit+" & "+self.dataseries['c_acc_m'].unit+" & "+self.dataseries['t_ox'].unit+" & \detokenize{"+self.dataseries['n_ox'].unit+"} & "+self.dataseries['i_surf'].unit+" & "+self.dataseries['i_surf05'].unit+" & "+self.dataseries['i_bulk05'].unit+"""\\\\
-         & &  C-acc & t-ox & n-ox & i-surf & i-surf05 & i-bulk05 \\\\
+        """+self.shortBatch()+""" & FET & \multicolumn{4}{ c|}{MOS} & GCD & \multicolumn{2}{ c|}{GCD05} \\\\
+        & """+self.dataseries['v_th'].unit+" & "+self.dataseries['v_fb2'].unit+" & "+self.dataseries['c_acc_m'].unit+" & "+self.dataseries['t_ox'].unit+" & \detokenize{"+self.dataseries['n_ox'].unit+"} & "+self.dataseries['i_surf'].unit+" & "+self.dataseries['i_surf05'].unit+" & "+self.dataseries['i_bulk05'].unit+"""\\\\
+         & Vth & Vfb &  C-acc & t-ox & n-ox & i-surf & i-surf05 & i-bulk05 \\\\
         \\hline\n
         """)
         
         for i in range(0, len(self.labels)+5):
             if i < len(self.labels):
-                line = "        \detokenize{"+self.shortenLabel(self.labels[i])+"}"
+                line = "        \detokenize{"+self.shortLabel(i)+"}"
             else:
                 line = self.dataseries['v_fb2'].summaryDesciption(i)
+            line = line + " & " + self.dataseries['v_th'].valueToLatex(i)
             line = line + " & " + self.dataseries['v_fb2'].valueToLatex(i)
             line = line + " & " + self.dataseries['c_acc_m'].valueToLatex(i)
             line = line + " & " + self.dataseries['t_ox'].valueToLatex(i)
