@@ -39,7 +39,7 @@ def num2str(num, basenum=None):
     return ret
 
 class PQC_value:
-    def __init__(self, numrows, name='na', nicename='na', expectedValue=0., unit='', showmultiplier=1e0, stray=0.5, values=None):
+    def __init__(self, name='na', nicename='na', expectedValue=0., unit='', showmultiplier=1e0, stray=0.5, values=None):
         self.values = []
         self.name = name
         self.nicename = nicename
@@ -61,14 +61,14 @@ class PQC_value:
         self.values.append(val)
             
     def rearrange(self, indices):
-        self.values = self.values[indices]
+        self.values = [ self.values[indices[i]] for i in range(0, len(indices)) ]
 
     def getValue(self, index):
         # with multiplier to suit the unit
         return self.values[index]*self.showmultiplier
         
     def split(self, itemsperclice):
-        ret = [PQC_value(len(i), self.name, self.nicename, self.expectedValue, self.unit, self.showmultiplier, self.stray, values=i) for i in make_chunks(self.values, itemsperclice)]
+        ret = [PQC_value(self.name, self.nicename, self.expectedValue, self.unit, self.showmultiplier, self.stray, values=i) for i in make_chunks(self.values, itemsperclice)]
         return ret
         
     @params('values, nTot, nNan, nTooHigh, nTooLow, totAvg, totStd, totMed, selAvg, selStd, selMed')
@@ -109,7 +109,7 @@ class PQC_value:
     @classmethod
     def merge(new, parents, name='na', nicename='na'):
         values = np.concatenate( [t.values for t in parents])
-        return new(1, name, nicename, parents[0].expectedValue, parents[0].unit, parents[0].showmultiplier, values=values, stray=parents[0].stray)
+        return new(name, nicename, parents[0].expectedValue, parents[0].unit, parents[0].showmultiplier, values=values, stray=parents[0].stray)
     
 
     
@@ -149,7 +149,7 @@ class PQC_value:
                
 
 class PQC_resultset:
-    def __init__(self, rows, batchname, dataseries=None):
+    def __init__(self, batchname, dataseries=None):
         self.batch = batchname
         self.labels = []
         self.flutes = []
@@ -159,60 +159,60 @@ class PQC_resultset:
                            'xlabels':     self.labels,
                            'xflutes':     self.flutes,}
 
-        self.dataseries['vdp_poly_f'] = PQC_value(rows, "vdp_poly", "Polysilicon VdP", 2.4, "kOhm/sq", 1e-3, stray=0.2)
-        self.dataseries['vdp_poly_r'] = PQC_value(rows, "vdp_poly_rev", "Polysilicon VdP reverse", 2.4, "kOhm/sq", 1e-3, stray=0.2)
+        self.dataseries['vdp_poly_f'] = PQC_value("vdp_poly", "Polysilicon VdP", 2.4, "kOhm/sq", 1e-3, stray=0.2)
+        self.dataseries['vdp_poly_r'] = PQC_value("vdp_poly_rev", "Polysilicon VdP reverse", 2.4, "kOhm/sq", 1e-3, stray=0.2)
 
-        self.dataseries['vdp_n_f'] = PQC_value(rows, "vdp_N", "N+ VdP", 35., "Ohm/sq", stray=0.2)
-        self.dataseries['vdp_n_r'] = PQC_value(rows, "vdp_N_rev", "N+ VdP reverse", 35., "Ohm/sq", stray=0.2)
+        self.dataseries['vdp_n_f'] = PQC_value("vdp_N", "N+ VdP", 35., "Ohm/sq", stray=0.2)
+        self.dataseries['vdp_n_r'] = PQC_value("vdp_N_rev", "N+ VdP reverse", 35., "Ohm/sq", stray=0.2)
 
-        self.dataseries['vdp_pstop_f'] = PQC_value(rows, "vdp_pstop", "P-stop VdP", 19., "kOhm/sq", 1e-3, stray=0.2)
-        self.dataseries['vdp_pstop_r'] = PQC_value(rows, "vdp_pstop_rev", "P-stop VdP reverse", 19., "kOhm/sq", 1e-3, stray=0.2)
+        self.dataseries['vdp_pstop_f'] = PQC_value("vdp_pstop", "P-stop VdP", 19., "kOhm/sq", 1e-3, stray=0.2)
+        self.dataseries['vdp_pstop_r'] = PQC_value("vdp_pstop_rev", "P-stop VdP reverse", 19., "kOhm/sq", 1e-3, stray=0.2)
 
-        self.dataseries['t_line_n'] = PQC_value(rows, "t_line_n", "Linewidth N+", 35., "um")
-        self.dataseries['t_line_pstop2'] = PQC_value(rows, "t_line_pstop2", "Linewidth P-stop 2 Wire", 38., "um")
-        self.dataseries['t_line_pstop4'] = PQC_value(rows, "t_line_pstop4", "Linewidth P-stop 4 Wire", 55., "um")
+        self.dataseries['t_line_n'] = PQC_value("t_line_n", "Linewidth N+", 35., "um")
+        self.dataseries['t_line_pstop2'] = PQC_value("t_line_pstop2", "Linewidth P-stop 2 Wire", 38., "um")
+        self.dataseries['t_line_pstop4'] = PQC_value("t_line_pstop4", "Linewidth P-stop 4 Wire", 55., "um")
 
-        self.dataseries['r_contact_n'] = PQC_value(rows, "r_contact_n", "Rcontact N+", 27., "Ohm")
-        self.dataseries['r_contact_poly'] = PQC_value(rows, "r_contact_poly", "Rcontact polysilicon", 100., "kOhm", 1e-3)
-
-
-        self.dataseries['v_th'] = PQC_value(rows, "fet", "FET Vth", 4., "V", stray=0.25)
-
-        self.dataseries['vdp_metclo_f'] = PQC_value(rows, "vdp_met_clover", "Metal Cloverleaf VdP", 25., "mOhm/sq", 1e3)
-        self.dataseries['vdp_metclo_r'] = PQC_value(rows, "vdp_met_clover_rev", "Metal Cloverleaf VdP reverse", 25., "mOhm/sq", 1e3)
-
-        self.dataseries['vdp_p_cross_bridge_f'] = PQC_value(rows, "vdp_cross_bridge", "Cross Bridge VdP", 1.5, "kOhm/sq", 1e-3)
-        self.dataseries['vdp_p_cross_bridge_r'] = PQC_value(rows, "vdp_cross_bridge_rev", "Cross Bridge VdP reverse", 1.5, "kOhm/sq", 1e-3)
-
-        self.dataseries['t_line_p_cross_bridge'] = PQC_value(rows, "t_line_cb", "Linewidth cross bridge P", 35., "um")
-
-        self.dataseries['v_bd'] = PQC_value(rows, "v_bd", "Breakdown Voltage", 215., "V")
+        self.dataseries['r_contact_n'] = PQC_value("r_contact_n", "Rcontact N+", 27., "Ohm")
+        self.dataseries['r_contact_poly'] = PQC_value("r_contact_poly", "Rcontact polysilicon", 100., "kOhm", 1e-3)
 
 
-        self.dataseries['i600'] = PQC_value(rows, "i600", "I @ 600V", 100., "uA", 1e6, stray=1.)
-        self.dataseries['v_fd'] = PQC_value(rows, "v_fd", "Full depletion Voltage", 260., "V", stray=0.33)
-        self.dataseries['rho'] = PQC_value(rows, "rho", "rho", 1.3, "kOhm cm", 0.1)
-        self.dataseries['conc'] = PQC_value(rows, "d_conc", "Doping Concentration", 3.5, "*1E12 cm^-3", 1e-18)
+        self.dataseries['v_th'] = PQC_value("fet", "FET Vth", 4., "V", stray=0.25)
+
+        self.dataseries['vdp_metclo_f'] = PQC_value("vdp_met_clover", "Metal Cloverleaf VdP", 25., "mOhm/sq", 1e3)
+        self.dataseries['vdp_metclo_r'] = PQC_value("vdp_met_clover_rev", "Metal Cloverleaf VdP reverse", 25., "mOhm/sq", 1e3)
+
+        self.dataseries['vdp_p_cross_bridge_f'] = PQC_value("vdp_cross_bridge", "Cross Bridge VdP", 1.5, "kOhm/sq", 1e-3)
+        self.dataseries['vdp_p_cross_bridge_r'] = PQC_value("vdp_cross_bridge_rev", "Cross Bridge VdP reverse", 1.5, "kOhm/sq", 1e-3)
+
+        self.dataseries['t_line_p_cross_bridge'] = PQC_value("t_line_cb", "Linewidth cross bridge P", 35., "um")
+
+        self.dataseries['v_bd'] = PQC_value("v_bd", "Breakdown Voltage", 215., "V")
 
 
-        self.dataseries['v_fb2'] = PQC_value(rows, "v_fb", "Flatband voltage", 2.5, "V", stray=0.33)
+        self.dataseries['i600'] = PQC_value("i600", "I @ 600V", 100., "uA", 1e6, stray=1.)
+        self.dataseries['v_fd'] = PQC_value("v_fd", "Full depletion Voltage", 260., "V", stray=0.33)
+        self.dataseries['rho'] = PQC_value("rho", "rho", 1.3, "kOhm cm", 0.1)
+        self.dataseries['conc'] = PQC_value("d_conc", "Doping Concentration", 3.5, "*1E12 cm^-3", 1e-18)
 
-        self.dataseries['t_ox'] = PQC_value(rows, "t_ox", "Oxide thickness", 0.67, "um", stray=0.33)
-        self.dataseries['n_ox'] = PQC_value(rows, "n_ox", "Oxide concentration", 10.5, "*1E10 cm^-3", 1e-10)
-        self.dataseries['c_acc_m'] = PQC_value(rows, "c_acc", "Accumulation capacitance", 85., "pF", 1e12, stray=0.2)
 
-        self.dataseries['i_surf'] = PQC_value(rows, "i_surf", "Surface current", 8., "pA", -1e12, stray=1)
-        self.dataseries['i_surf05'] = PQC_value(rows, "i_surf05", "Surface current 05", 11., "pA", -1e12, stray=1)
-        self.dataseries['i_bulk05'] = PQC_value(rows, "i_bulk05", "Bulk current 05", 0.7, "pA", -1e12, stray=1)
+        self.dataseries['v_fb2'] = PQC_value("v_fb", "Flatband voltage", 2.5, "V", stray=0.33)
+
+        self.dataseries['t_ox'] = PQC_value("t_ox", "Oxide thickness", 0.67, "um", stray=0.33)
+        self.dataseries['n_ox'] = PQC_value("n_ox", "Oxide concentration", 10.5, "*1E10 cm^-3", 1e-10)
+        self.dataseries['c_acc_m'] = PQC_value("c_acc", "Accumulation capacitance", 85., "pF", 1e12, stray=0.2)
+
+        self.dataseries['i_surf'] = PQC_value("i_surf", "Surface current", 8., "pA", -1e12, stray=1)
+        self.dataseries['i_surf05'] = PQC_value("i_surf05", "Surface current 05", 11., "pA", -1e12, stray=1)
+        self.dataseries['i_bulk05'] = PQC_value("i_bulk05", "Bulk current 05", 0.7, "pA", -1e12, stray=1)
         
-        self.dataseries['nvdp_poly_f'] = PQC_value(rows, "nvdp_poly", "PolySi Swapped VdP", 2.4, "kOhm/sq", -1e-3, stray=0.2)
-        self.dataseries['nvdp_poly_r'] = PQC_value(rows, "nvdp_poly_rev", "PolySi Swapped VdP reverse", 2.4, "kOhm/sq", -1e-3, stray=0.2)
+        self.dataseries['nvdp_poly_f'] = PQC_value("nvdp_poly", "PolySi Swapped VdP", 2.4, "kOhm/sq", -1e-3, stray=0.2)
+        self.dataseries['nvdp_poly_r'] = PQC_value("nvdp_poly_rev", "PolySi Swapped VdP reverse", 2.4, "kOhm/sq", -1e-3, stray=0.2)
 
-        self.dataseries['nvdp_n_f'] = PQC_value(rows, "nvdp_N", "N+ Swapped VdP", 35., "Ohm/sq", -1., stray=0.2)
-        self.dataseries['nvdp_n_r'] = PQC_value(rows, "nvdp_N_rev", "N+ Swapped VdP reverse", 35., "Ohm/sq", -1., stray=0.2)
+        self.dataseries['nvdp_n_f'] = PQC_value("nvdp_N", "N+ Swapped VdP", 35., "Ohm/sq", -1., stray=0.2)
+        self.dataseries['nvdp_n_r'] = PQC_value("nvdp_N_rev", "N+ Swapped VdP reverse", 35., "Ohm/sq", -1., stray=0.2)
 
-        self.dataseries['nvdp_pstop_f'] = PQC_value(rows, "nvdp_pstop", "P-stop Swapped VdP", 19., "kOhm/sq", -1e-3, stray=0.2)
-        self.dataseries['nvdp_pstop_r'] = PQC_value(rows, "nvdp_pstop_rev", "P-stop Swapped VdP rev", 19., "kOhm/sq", -1e-3, stray=0.2)
+        self.dataseries['nvdp_pstop_f'] = PQC_value("nvdp_pstop", "P-stop Swapped VdP", 19., "kOhm/sq", -1e-3, stray=0.2)
+        self.dataseries['nvdp_pstop_r'] = PQC_value("nvdp_pstop_rev", "P-stop Swapped VdP rev", 19., "kOhm/sq", -1e-3, stray=0.2)
         
         if dataseries is not None:
             self.dataseries = dataseries
@@ -233,7 +233,7 @@ class PQC_resultset:
     
     def sortByTime(self):
         order = np.argsort(self.timestamps)
-        print(str(order))
+        #print(str(order))
         
         for key in self.dataseries:
             if type(self.dataseries[key]) is PQC_value:
@@ -243,10 +243,29 @@ class PQC_resultset:
         
     # warning: this creates not full copies, only the dict is available then
     def split(self, itemsperclice):
-        print(str((self.dataseries["vdp_n_f"]).split(itemsperclice)))
+        #print(str((self.dataseries["vdp_n_f"]).split(itemsperclice)))
         
         #ret = [PQC_resultset( self.value=i) for i in make_chunks(self.value, itemsperclice)]
-        return []
+        ret = [None] * len(self.dataseries["vdp_n_f"].split(itemsperclice))
+        
+        for i in range(0, len(ret)):
+            ret[i] = PQC_resultset(self.batch)
+        
+        for key in self.dataseries:
+            if type(self.dataseries[key]) is PQC_value:
+                ch = self.dataseries[key].split(itemsperclice)
+            else:
+                ch = [i for i in make_chunks(self.dataseries[key], itemsperclice)]
+
+            for i in range(0, len(ch)):
+                ret[i].dataseries[key] = ch[i]
+        
+        for i in ret:
+            i.timestamps = i.dataseries['xtimestamps']
+            i.flutes = i.dataseries['xflutes']
+            i.labels = i.dataseries['xlabels']
+
+        return ret
     
     def analyze(self, dirs):
         print("dirs: "+str(len(dirs)))
@@ -387,13 +406,14 @@ class PQC_resultset:
         else:
             minthreshhold = 0.15
             
-        axes.text(center, relOK-minthreshhold/2, 'OK', horizontalalignment='center', verticalalignment='top')
-        if relNan > minthreshhold:
-            axes.text(center, relOK+relNan-minthreshhold/2, 'Failed', horizontalalignment='center', verticalalignment='top')
-        if relTooHigh > minthreshhold:
-            axes.text(center, relOK+relNan+relTooHigh-minthreshhold/2, 'High', horizontalalignment='center', verticalalignment='top')
-        if relTooLow > minthreshhold:
-            axes.text(center, relOK+relNan+relTooHigh+relTooLow-minthreshhold/2, 'Low', horizontalalignment='center', verticalalignment='top')
+        if single or label != '':
+            axes.text(center, relOK-minthreshhold/2, 'OK', horizontalalignment='center', verticalalignment='top')
+            if relNan > minthreshhold:
+                axes.text(center, relOK+relNan-minthreshhold/2, 'Failed', horizontalalignment='center', verticalalignment='top')
+            if relTooHigh > minthreshhold:
+                axes.text(center, relOK+relNan+relTooHigh-minthreshhold/2, 'High', horizontalalignment='center', verticalalignment='top')
+            if relTooLow > minthreshhold:
+                axes.text(center, relOK+relNan+relTooHigh+relTooLow-minthreshhold/2, 'Low', horizontalalignment='center', verticalalignment='top')
         
         axes.text(center, 0.01, label, horizontalalignment='center', verticalalignment='bottom')
         
@@ -504,8 +524,10 @@ class PQC_resultset:
         lbl_list = [2,5]
         if "Left" in self.flutes[i]:
             fl = " L"
-        else:
+        elif "Right" in self.flutes[i]:
             fl = " R"
+        else:
+            fl = " err"
         
         return ' '.join([self.labels[i].split('_')[j] for j in lbl_list]) + fl
         
