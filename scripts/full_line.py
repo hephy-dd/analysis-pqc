@@ -83,7 +83,64 @@ def plotTimeline(pqc_batches, path, printBatchNumbers=True):
     plt.close()
     
     
+def plotBoxplot(pqc_batches, path, values=['vdp_poly_f', 'vdp_n_f', 'vdp_pstop_f', 'vdp_poly_r', 'vdp_n_r', 'vdp_pstop_r']):
+    print(path)
+    matplotlib.rcParams.update({'font.size': 12})
     
+    fig = plt.figure(figsize=(8, 6))
+    
+    gs = gridspec.GridSpec(int(len(values)/2), 2)
+    labels = [ b.shortBatch(vpx=False) for b in pqc_batches ]
+    
+    for i in range(0, len(values)):
+        ax = plt.subplot(gs[i])
+        plt.title(pqc_batches[0].dataseries[values[i]].nicename, fontsize=13)
+        plt.grid(axis='y', linestyle=':')
+        ax.set_ylabel(pqc_batches[0].dataseries[values[i]].unit)
+        
+        data = [ b.dataseries[values[i]].getStats().values for b in pqc_batches ]
+
+        ax.boxplot(data, labels=labels)
+        if (i < (len(values)-2)):
+            ax.set_xticklabels([])
+    
+    fig.tight_layout(h_pad=1.0)
+    fig.savefig(path+"Boxplot.png")
+    plt.close()
+    
+def vdpPlotBoxplot(pqc_batches, path):
+    print(path)
+    matplotlib.rcParams.update({'font.size': 14})
+    
+    fig = plt.figure(figsize=(8, 6))
+    
+    gs = gridspec.GridSpec(3, 1)
+    labels = [ b.shortBatch() for b in pqc_batches ]
+    
+    ax = plt.subplot(gs[0])
+    plt.grid(axis='y', linestyle=':')
+    plt.title(pqc_batches[0].vdp_poly_tot().nicename, fontsize=15)
+    ax.set_ylabel(pqc_batches[0].vdp_poly_tot().unit)
+    data = [ b.vdp_poly_tot().getStats().values for b in pqc_batches ]
+    ax.boxplot(data, labels=labels) 
+    
+    ax = plt.subplot(gs[1])
+    plt.grid(axis='y', linestyle=':')
+    plt.title(pqc_batches[0].vdp_n_tot().nicename, fontsize=15)
+    ax.set_ylabel(pqc_batches[0].vdp_n_tot().unit)
+    data = [ b.vdp_n_tot().getStats().values for b in pqc_batches ]
+    ax.boxplot(data, labels=labels) 
+    
+    ax = plt.subplot(gs[2])
+    plt.grid(axis='y', linestyle=':')
+    plt.title(pqc_batches[0].vdp_pstop_tot().nicename, fontsize=15)
+    ax.set_ylabel(pqc_batches[0].vdp_pstop_tot().unit)
+    data = [ b.vdp_pstop_tot().getStats().values for b in pqc_batches ]
+    ax.boxplot(data, labels=labels) 
+    
+    fig.tight_layout(h_pad=1.0)
+    fig.savefig(path+"vdpBoxplot.png")
+    plt.close()
     
     
 def main():
@@ -110,18 +167,19 @@ def main():
             pqc_slices.extend(res.split(4))
         #    #res.createHistograms(args.path)
         
-
-        for sl in pqc_slices:
-            print(str(sl))
-            sl.prettyPrint()
-        
         print("loaded "+str(len(pqc_batches))+" batches")
         plotTimeline(pqc_batches, args.path+"histograms/batch")
         plotTimeline(pqc_slices, args.path+"histograms/fine", printBatchNumbers=False)
         
+        vdpPlotBoxplot(pqc_batches, args.path+"histograms/")
+        plotBoxplot(pqc_batches, args.path+"histograms/a", values=['t_line_n', 'r_contact_n', 't_line_pstop2', 't_line_pstop4', 'r_contact_poly', 'v_th'])
+        plotBoxplot(pqc_batches, args.path+"histograms/b", values=['vdp_p_cross_bridge_f', 'vdp_p_cross_bridge_r', 't_line_p_cross_bridge', 'v_bd', 'i600', 'v_fd'])
+        plotBoxplot(pqc_batches, args.path+"histograms/c", values=['rho', 'conc', 't_ox', 'n_ox', 'c_acc_m', 'i_surf'])
         
         
-
+    
+        
+        
 if __name__ =="__main__":
     main()
 

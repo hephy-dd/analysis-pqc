@@ -6,6 +6,7 @@ import matplotlib
 from matplotlib import gridspec
 import numpy as np
 import os
+import re
 import glob
 from collections import namedtuple
 import datetime
@@ -55,7 +56,7 @@ class PQC_value:
             self.values = values
             
     def __str__(self):
-        return self.name+str(self.value*self.showmultiplier)+self.unit
+        return self.name+str(np.array(self.values)*self.showmultiplier)+self.unit
         
     def append(self, val):
         self.values.append(val)
@@ -269,7 +270,10 @@ class PQC_resultset:
     
     def analyze(self, dirs):
         print("dirs: "+str(len(dirs)))
+        
+        
         for i in range(0, len(dirs)):
+
             for currflute in ["PQCFlutesLeft", "PQCFlutesRight", "PQCFluteLeft", "PQCFluteRight", ]:   # we want both flutes if they are measured, but sometimes it's misspelled
                 if len(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "cross"], blacklist=["reverse"])) < 3:
                     continue
@@ -289,16 +293,15 @@ class PQC_resultset:
                 self.dataseries['vdp_n_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "cross"], blacklist=["reverse"])))
                 self.dataseries['vdp_n_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "reverse", "cross"])))
                 
-                
                 self.dataseries['vdp_pstop_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "cross"], blacklist=["reverse"])))
                 self.dataseries['vdp_pstop_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "reverse", "cross"])))
+                
+                self.dataseries['t_line_n'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "n"], single=True), r_sheet=self.dataseries['vdp_n_f'].values[-1], printResults=False, plotResults=False))
+                self.dataseries['t_line_pstop2'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "P_stop", "2_wire"], single=True), r_sheet=self.dataseries['vdp_pstop_f'].values[-1], printResults=False, plotResults=False))
+                self.dataseries['t_line_pstop4'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "P_stop", "4_wire"], single=True), r_sheet=self.dataseries['vdp_pstop_f'].values[-1], printResults=False, plotResults=False))
 
-                self.dataseries['t_line_n'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "n"], single=True), r_sheet=self.dataseries['vdp_n_f'].values[i], printResults=False, plotResults=False))
-                self.dataseries['t_line_pstop2'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "P_stop", "2_wire"], single=True), r_sheet=self.dataseries['vdp_pstop_f'].values[i], printResults=False, plotResults=False))
-                self.dataseries['t_line_pstop4'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "P_stop", "4_wire"], single=True), r_sheet=self.dataseries['vdp_pstop_f'].values[i], printResults=False, plotResults=False))
-
-                self.dataseries['r_contact_n'].append(pqc.analyse_cbkr_data(pqc.find_all_files_from_path(dirs[i], "cbkr", whitelist=[currflute, "n"], single=True), r_sheet=self.dataseries['vdp_n_f'].values[i], printResults=False, plotResults=False))
-                self.dataseries['r_contact_poly'].append(pqc.analyse_cbkr_data(pqc.find_all_files_from_path(dirs[i], "cbkr", whitelist=[currflute, "Polysilicon"], single=True), r_sheet=self.dataseries['vdp_poly_f'].values[i], printResults=False, plotResults=False))
+                self.dataseries['r_contact_n'].append(pqc.analyse_cbkr_data(pqc.find_all_files_from_path(dirs[i], "cbkr", whitelist=[currflute, "n"], single=True), r_sheet=self.dataseries['vdp_n_f'].values[-1], printResults=False, plotResults=False))
+                self.dataseries['r_contact_poly'].append(pqc.analyse_cbkr_data(pqc.find_all_files_from_path(dirs[i], "cbkr", whitelist=[currflute, "Polysilicon"], single=True), r_sheet=self.dataseries['vdp_poly_f'].values[-1], printResults=False, plotResults=False))
 
                 self.dataseries['v_th'].append(pqc.analyse_fet_data(pqc.find_all_files_from_path(dirs[i], "fet", whitelist=[currflute, ], single=True), printResults=False, plotResults=False))
 
@@ -307,7 +310,7 @@ class PQC_resultset:
 
                 self.dataseries['vdp_p_cross_bridge_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P", "cross_bridge"], blacklist=["reverse"])))
                 self.dataseries['vdp_p_cross_bridge_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P", "cross_bridge", "reverse"])))
-                self.dataseries['t_line_p_cross_bridge'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "P", "cross_bridge"], single=True), r_sheet=self.dataseries['vdp_p_cross_bridge_f'].values[i], printResults=False, plotResults=False))
+                self.dataseries['t_line_p_cross_bridge'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "P", "cross_bridge"], single=True), r_sheet=self.dataseries['vdp_p_cross_bridge_f'].values[-1], printResults=False, plotResults=False))
 
                 self.dataseries['v_bd'].append(pqc.analyse_breakdown_data(pqc.find_all_files_from_path(dirs[i], "breakdown", whitelist=[currflute, ], single=True), printResults=False, plotResults=False))
 
@@ -531,9 +534,13 @@ class PQC_resultset:
         
         return ' '.join([self.labels[i].split('_')[j] for j in lbl_list]) + fl
         
-    def shortBatch(self):
+    def shortBatch(self, vpx=True):
         lbl_list = [0]
-        return ' '.join([self.batch.split('_')[i] for i in lbl_list])
+        s = ' '.join([self.batch.split('_')[i] for i in lbl_list])
+        if vpx:
+            return s
+        else:
+            return re.sub(r'VPX','', s)
         
         
     # this could be done e.g. via df.to_latex() in pandas, but coloring the cells is then complicated, so done manually...
