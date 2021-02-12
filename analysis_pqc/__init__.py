@@ -550,8 +550,8 @@ def analyse_contact(i, v, cut_param=1e-5, debug=False):
 
 
 
-@params('rho_sq, status')
-def analyse_meander(i, v, w=10, nsq=12835, debug=False):
+@params('r, status')
+def analyse_meander(i, v, cut_param=1e-5, debug=False):
     """
     Meander: Calculates specific resistance per square.
 
@@ -566,10 +566,12 @@ def analyse_meander(i, v, w=10, nsq=12835, debug=False):
     """
 
     status = STATUS_PASSED
-    r = v/i
-    rho_sq = np.mean(r * w / nsq)
-
-    return rho_sq, status
+    
+    a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
+    
+    r = a
+    
+    return r, status
 
 
 

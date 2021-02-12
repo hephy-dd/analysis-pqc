@@ -357,27 +357,30 @@ def analyse_contact_data(path):
 
 
 
-def analyse_meander_data(path):
+def analyse_meander_data(path, printResults=print_results, plotResults=True):
     test = 'meander'
 
     if path is None:
         return np.nan
 
     series = read_json_file(path).get('series')
+    
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
+    if (len(v) == 0):  # the polisilicon resistor uses a v-source and not a current source
+        v = series.get('voltage', np.array([]))
+        i = series.get('current_elm', np.array([]))
 
-    i_norm, i_unit = normalise_parameter(i, 'A')
 
     lbl = assign_label(path, test)
 
-    rho_sq, status = analyse_meander(i, v, debug=0)
+    r, status = analyse_meander(i, v)
 
-    if print_results:
-       print('%s: \tMeander: rho_sq: %.2e' % (lbl, rho_sq))
+    if printResults:
+       print('%s: \tMeander: r: %.2e' % (lbl, r))
 
 
-    return rho_sq
+    return r
 
 
 
@@ -475,6 +478,7 @@ functions = {
     'van_der_pauw': analyse_van_der_pauw_data,
     'breakdown': analyse_breakdown_data,
     'cbkr': analyse_cbkr_data,
+    'meander': analyse_meander_data,
 }
 
 

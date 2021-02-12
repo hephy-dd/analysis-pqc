@@ -215,6 +215,12 @@ class PQC_resultset:
         self.dataseries['nvdp_pstop_f'] = PQC_value("nvdp_pstop", "P-stop Swapped VdP", 19., "kOhm/sq", -1e-3, stray=0.2)
         self.dataseries['nvdp_pstop_r'] = PQC_value("nvdp_pstop_rev", "P-stop Swapped VdP rev", 19., "kOhm/sq", -1e-3, stray=0.2)
         
+        self.dataseries['vdp_bulk_f'] = PQC_value("vdp_bulk", "Bulk VdP Cross", 150., "kOhm/sq", 1e-3, stray=0.8)
+        self.dataseries['vdp_bulk_r'] = PQC_value("vdp_bulk_rev", "Bulk VdP Cross rev", 150., "kOhm/sq", 1e-3, stray=0.8)
+        
+        self.dataseries['meander_poly'] = PQC_value("meander_poly", "Polisilicon Resistor", 1.7, "MOhm", 1e-6, stray=0.5)
+        self.dataseries['meander_metal'] = PQC_value("meander_metal", "Metal Meander", 260., "Ohm", 1., stray=0.5)
+        
         if dataseries is not None:
             self.dataseries = dataseries
 
@@ -345,7 +351,12 @@ class PQC_resultset:
                 self.dataseries['nvdp_pstop_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "ncross"], blacklist=["reverse"])))
                 self.dataseries['nvdp_pstop_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "reverse", "ncross"])))
             
-            
+                self.dataseries['vdp_bulk_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], None, whitelist=[currflute, "bulk", "cross"], blacklist=["reverse"])))
+                self.dataseries['vdp_bulk_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], None, whitelist=[currflute, "bulk", "reverse", "cross"])))
+                
+                self.dataseries['meander_metal'].append(pqc.analyse_meander_data(pqc.find_all_files_from_path(dirs[i], "meander", whitelist=[currflute, "metal"], single=True), printResults=False, plotResults=False))
+                self.dataseries['meander_poly'].append(pqc.analyse_meander_data(pqc.find_all_files_from_path(dirs[i], "meander", whitelist=[currflute, "polysilicon"], single=True), printResults=False, plotResults=False))
+                
             
     def prettyPrint(self):
         print("# serial                                 \t  vdp_poly/kOhm/sq       vdp_n/Ohm/sq     vdp_pstop/kOhm/sq   lw_n/um    lw_p2/um   lw_p4/um cbkr_poly/kOhm cbkr_n/Ohm")
@@ -376,13 +387,14 @@ class PQC_resultset:
             print(line)
         print("")
         print("")
-        print("# serial                                 \t                    mos                        gcd             gcd05")
-        print("#                                        \t v_fb/V    c_acc/pF   t_ox/um n_ox/1E10cm^-2 i_surf/pA  i_surf/pA   i_bulk/pA")
+        print("# serial                                 \t                    mos                        gcd             gcd05            vdp_bulk           poly_r   met_meand")
+        print("#                                        \t v_fb/V    c_acc/pF   t_ox/um n_ox/1E10cm^-2 i_surf/pA  i_surf/pA   i_bulk/pA     kOhm/sq            MOhm      Ohm")
         for i in range(0, len(self.labels)):
             line = "{} {}  \t".format(self.labels[i], self.flutes[i])
             line += "{:8.2f}    {:6.2f}    {:7.3f}  {:9.2f}     ".format(self.dataseries['v_fb2'].getValue(i), self.dataseries['c_acc_m'].getValue(i), self.dataseries['t_ox'].getValue(i), self.dataseries['n_ox'].getValue(i))
             line += "{:8.2f}  {:8.2f}  {:8.2f}    ".format(self.dataseries['i_surf'].getValue(i), self.dataseries['i_surf05'].getValue(i), self.dataseries['i_bulk05'].getValue(i))
-
+            line += "{:8.2f} {:8.2f}    ".format(self.dataseries['vdp_bulk_f'].getValue(i), self.dataseries['vdp_bulk_r'].getValue(i))
+            line += "{:8.2f} {:8.2f}    ".format(self.dataseries['meander_poly'].getValue(i), self.dataseries['meander_metal'].getValue(i))
             print(line)
         
     def statusbar(self, pqc_value_statistics, axes, single=True, start=-0.5, stop=0.5, label=''):
@@ -524,15 +536,19 @@ class PQC_resultset:
         self.histogram(self.nvdp_pstop_tot(), histogramDir)   
         
     def shortLabel(self, i):
-        lbl_list = [2,5]
-        if "Left" in self.flutes[i]:
-            fl = " L"
-        elif "Right" in self.flutes[i]:
-            fl = " R"
-        else:
-            fl = " err"
-        
-        return ' '.join([self.labels[i].split('_')[j] for j in lbl_list]) + fl
+        fl = "x"
+        try:
+            lbl_list = [2,5]
+            if "Left" in self.flutes[i]:
+                fl = " L"
+            elif "Right" in self.flutes[i]:
+                fl = " R"
+            else:
+                fl = " err"
+            
+            return ' '.join([self.labels[i].split('_')[j] for j in lbl_list]) + fl
+        except:
+            return self.labels[i] + fl
         
     def shortBatch(self, vpx=True):
         lbl_list = [0]
@@ -648,11 +664,11 @@ class PQC_resultset:
         
         f.write("""\\begin{center}
         \\fontsize{5pt}{6pt}\\selectfont
-    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|} 
+    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|} 
         \\hline
-        """+self.shortBatch()+""" & FET & \multicolumn{4}{ c|}{MOS} & GCD & \multicolumn{2}{ c|}{GCD05} \\\\
-        & """+self.dataseries['v_th'].unit+" & "+self.dataseries['v_fb2'].unit+" & "+self.dataseries['c_acc_m'].unit+" & "+self.dataseries['t_ox'].unit+" & \detokenize{"+self.dataseries['n_ox'].unit+"} & "+self.dataseries['i_surf'].unit+" & "+self.dataseries['i_surf05'].unit+" & "+self.dataseries['i_bulk05'].unit+"""\\\\
-         & Vth & Vfb &  C-acc & t-ox & n-ox & i-surf & i-surf05 & i-bulk05 \\\\
+        """+self.shortBatch()+""" & FET & \multicolumn{4}{ c|}{MOS} & GCD & \multicolumn{2}{ c|}{GCD05} & \multicolumn{2}{ c|}{Meander}\\\\
+        & """+self.dataseries['v_th'].unit+" & "+self.dataseries['v_fb2'].unit+" & "+self.dataseries['c_acc_m'].unit+" & "+self.dataseries['t_ox'].unit+" & \detokenize{"+self.dataseries['n_ox'].unit+"} & "+self.dataseries['i_surf'].unit+" & "+self.dataseries['i_surf05'].unit+" & "+self.dataseries['i_bulk05'].unit+" & "+self.dataseries['meander_poly'].unit+" & "+self.dataseries['meander_metal'].unit+"""\\\\
+         & Vth & Vfb &  C-acc & t-ox & n-ox & i-surf & i-surf05 & i-bulk05 & PolySi & Metal \\\\
         \\hline\n
         """)
         
@@ -669,6 +685,9 @@ class PQC_resultset:
             line = line + " & " + self.dataseries['i_surf'].valueToLatex(i)
             line = line + " & " + self.dataseries['i_surf05'].valueToLatex(i)
             line = line + " & " + self.dataseries['i_bulk05'].valueToLatex(i)
+            
+            line = line + " & " + self.dataseries['meander_poly'].valueToLatex(i)
+            line = line + " & " + self.dataseries['meander_metal'].valueToLatex(i)
 
             f.write(line+"\\\\\n")
         
