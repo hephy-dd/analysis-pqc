@@ -193,13 +193,13 @@ class PQC_resultset:
         self.dataseries['i600'] = PQC_value("i600", "I @ 600V", 100., "uA", 1e6, stray=1.)
         self.dataseries['v_fd'] = PQC_value("v_fd", "Full depletion Voltage", 260., "V", stray=0.33)
         self.dataseries['rho'] = PQC_value("rho", "rho", 1.3, "kOhm cm", 0.1)
-        self.dataseries['conc'] = PQC_value("d_conc", "Doping Concentration", 3.5, "*1E12 cm^-3", 1e-18)
+        self.dataseries['conc'] = PQC_value("d_conc", "Doping Concentration", 3.5, "1E12cm^-3", 1e-18)
 
 
         self.dataseries['v_fb2'] = PQC_value("v_fb", "Flatband voltage", 2.5, "V", stray=0.33)
 
         self.dataseries['t_ox'] = PQC_value("t_ox", "Oxide thickness", 0.67, "um", stray=0.33)
-        self.dataseries['n_ox'] = PQC_value("n_ox", "Oxide concentration", 10.5, "*1E10 cm^-3", 1e-10)
+        self.dataseries['n_ox'] = PQC_value("n_ox", "Oxide concentration", 10.5, "1E10cm^-3", 1e-10)
         self.dataseries['c_acc_m'] = PQC_value("c_acc", "Accumulation capacitance", 85., "pF", 1e12, stray=0.2)
 
         self.dataseries['i_surf'] = PQC_value("i_surf", "Surface current", 8., "pA", -1e12, stray=1)
@@ -220,6 +220,11 @@ class PQC_resultset:
         
         self.dataseries['meander_poly'] = PQC_value("meander_poly", "Polisilicon Resistor", 1.7, "MOhm", 1e-6, stray=0.5)
         self.dataseries['meander_metal'] = PQC_value("meander_metal", "Metal Meander", 260., "Ohm", 1., stray=0.5)
+        
+        self.dataseries['contact_poly'] = PQC_value("contact_poly", "Contact Chain PolySi", 30., "MOhm", 1e-6, stray=0.5)
+        self.dataseries['contact_p'] = PQC_value("contact_p", "Contact Chain P", 85., "kOhm", 1e-3, stray=0.5)
+        self.dataseries['contact_n'] = PQC_value("contact_n", "Contact Chain N", 85., "kOhm", 1e-3, stray=0.5)
+        
         
         if dataseries is not None:
             self.dataseries = dataseries
@@ -357,6 +362,10 @@ class PQC_resultset:
                 self.dataseries['meander_metal'].append(pqc.analyse_meander_data(pqc.find_all_files_from_path(dirs[i], "meander", whitelist=[currflute, "metal"], single=True), printResults=False, plotResults=False))
                 self.dataseries['meander_poly'].append(pqc.analyse_meander_data(pqc.find_all_files_from_path(dirs[i], "meander", whitelist=[currflute, "polysilicon"], single=True), printResults=False, plotResults=False))
                 
+                self.dataseries['contact_poly'].append(pqc.analyse_contact_data(pqc.find_all_files_from_path(dirs[i], "contact", whitelist=[currflute, "chain", "polysilicon"], single=True), printResults=False, plotResults=False))
+                self.dataseries['contact_p'].append(pqc.analyse_contact_data(pqc.find_all_files_from_path(dirs[i], "contact", whitelist=[currflute, "chain", "P"], single=True), printResults=False, plotResults=False))
+                self.dataseries['contact_n'].append(pqc.analyse_contact_data(pqc.find_all_files_from_path(dirs[i], "contact", whitelist=[currflute, "chain", "N"], single=True), printResults=False, plotResults=False))
+                
             
     def prettyPrint(self):
         print("# serial                                 \t  vdp_poly/kOhm/sq       vdp_n/Ohm/sq     vdp_pstop/kOhm/sq   lw_n/um    lw_p2/um   lw_p4/um cbkr_poly/kOhm cbkr_n/Ohm")
@@ -372,18 +381,20 @@ class PQC_resultset:
         
         print("")
         print("")
-        print("# serial                                 \t fet       vdp_met-clov       vdp_p-cr-br/kOhm/sq  lw_cb/um  v_bd/V    i600/uA    V_fd/V   rho/kOhm cm   d-conc/1E12 cm^-3")
-        print("#                                        \tv_th/V     ")
+        print("# serial                                 \t fet       vdp_met-clov       vdp_p-cr-br/kOhm/sq     lw_cb  v_bd   i600    V_fd  rho    dconc  contact chains")
+        print("#                                        \tv_th/V                                                 um     V      uA       V kOhmcm 1E12cm^-3 Poly/MOhm  N/kOhm  P/kOhm")
         for i in range(0, len(self.labels)):
             line = "{} {}  \t".format(self.labels[i], self.flutes[i])
             line += "{:5.2f}  ".format(self.dataseries['v_th'].getValue(i))
             line += "{:9.2E}  {:9.2E}   ".format(self.dataseries['vdp_metclo_f'].getValue(i), self.dataseries['vdp_metclo_r'].getValue(i))
 
             line += "{:8.2f} {:8.2f}    ".format(self.dataseries['vdp_p_cross_bridge_f'].getValue(i), self.dataseries['vdp_p_cross_bridge_r'].getValue(i))
-            line += "{:8.2f}".format(self.dataseries['t_line_p_cross_bridge'].getValue(i))
+            line += "{:8.2f}  ".format(self.dataseries['t_line_p_cross_bridge'].getValue(i))
 
-            line += "{:8.2f}     ".format(self.dataseries['v_bd'].getValue(i))
-            line += "{:9.2f}  {:9.2f}  {:7.2f}  {:8.2f}   ".format(self.dataseries['i600'].getValue(i), self.dataseries['v_fd'].getValue(i), self.dataseries['rho'].getValue(i), self.dataseries['conc'].getValue(i))
+            line += "{:3.0f}  ".format(self.dataseries['v_bd'].getValue(i))
+            line += "{:6.2f}  {:6.2f}  {:4.2f}  {:4.2f}   ".format(self.dataseries['i600'].getValue(i), self.dataseries['v_fd'].getValue(i), self.dataseries['rho'].getValue(i), self.dataseries['conc'].getValue(i))
+            
+            line += "{:8.2f} {:8.2f}  {:8.2f}  ".format(self.dataseries['contact_poly'].getValue(i), self.dataseries['contact_n'].getValue(i), self.dataseries['contact_p'].getValue(i))
             print(line)
         print("")
         print("")
@@ -573,7 +584,7 @@ class PQC_resultset:
         f.write(PQC_value.headerToLatex())
         
         f.write("""\\begin{center}
-        \\fontsize{5pt}{6pt}\\selectfont
+        \\fontsize{4pt}{5pt}\\selectfont
     \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|r| } 
         \\hline
         """+self.shortBatch()+""" & \multicolumn{2}{ c|}{PolySi VdP} & \multicolumn{2}{c|}{N+ VdP} & \multicolumn{2}{c|}{P-Stop VdP} & \multicolumn{3}{c|}{line thickness} & \multicolumn{2}{ c|}{Contact resistance} \\\\
@@ -619,12 +630,12 @@ class PQC_resultset:
         f.write(PQC_value.headerToLatex())
         
         f.write("""\\begin{center}
-        \\fontsize{5pt}{6pt}\\selectfont
-    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r| } 
+        \\fontsize{4pt}{5pt}\\selectfont
+    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|r|r| } 
         \\hline
-        """+self.shortBatch()+""" & \multicolumn{2}{ c|}{MetClover VdP} & \multicolumn{3}{c|}{P cross-bridge VdP/LW} & Vbd & I600 & \multicolumn{3}{c|}{Diode Half CV} \\\\
-        & """+" \multicolumn{2}{c|}{"+self.dataseries['vdp_metclo_f'].unit+"} & \multicolumn{2}{c|}{"+self.dataseries['vdp_p_cross_bridge_f'].unit+"} & "+self.dataseries['t_line_p_cross_bridge'].unit+" & "+self.dataseries['v_bd'].unit+" & "+self.dataseries['i600'].unit+" & "+self.dataseries['v_fd'].unit+" & \detokenize{"+self.dataseries['rho'].unit+"} & \detokenize{"+self.dataseries['conc'].unit+"""}\\\\
-          & forw & rev & forw & rev & & & & Vfd & rho & d. conc \\\\
+        """+self.shortBatch()+""" & \multicolumn{2}{ c|}{MetClover VdP} & \multicolumn{3}{c|}{P cross-bridge VdP/LW} & \multicolumn{2}{ c|}{Bulk VdP cross} & Vbd & I600 & \multicolumn{3}{c|}{Diode Half CV} \\\\
+        & """+" \multicolumn{2}{c|}{"+self.dataseries['vdp_metclo_f'].unit+"} & \multicolumn{2}{c|}{"+self.dataseries['vdp_p_cross_bridge_f'].unit+"} & "+self.dataseries['t_line_p_cross_bridge'].unit+ "& \multicolumn{2}{c|}{"+self.dataseries['vdp_bulk_f'].unit+"} & "+self.dataseries['v_bd'].unit+" & "+self.dataseries['i600'].unit+" & "+self.dataseries['v_fd'].unit+" & \detokenize{"+self.dataseries['rho'].unit+"} & \detokenize{"+self.dataseries['conc'].unit+"""}\\\\
+          & forw & rev & forw & rev & & forw & rev & & & Vfd & rho & d. conc \\\\
         \\hline\n
         """)
         
@@ -639,6 +650,9 @@ class PQC_resultset:
             line = line + " & " + self.dataseries['vdp_p_cross_bridge_f'].valueToLatex(i)
             line = line + " & " + self.dataseries['vdp_p_cross_bridge_r'].valueToLatex(i)
             line = line + " & " + self.dataseries['t_line_p_cross_bridge'].valueToLatex(i)
+            
+            line = line + " & " + self.dataseries['vdp_bulk_f'].valueToLatex(i)
+            line = line + " & " + self.dataseries['vdp_bulk_r'].valueToLatex(i)
             
             line = line + " & " + self.dataseries['v_bd'].valueToLatex(i)
             line = line + " & " + self.dataseries['i600'].valueToLatex(i)
@@ -663,12 +677,17 @@ class PQC_resultset:
         f.write(PQC_value.headerToLatex())
         
         f.write("""\\begin{center}
-        \\fontsize{5pt}{6pt}\\selectfont
-    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|} 
+        \\fontsize{4pt}{5pt}\\selectfont
+    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|r|r|r|} 
         \\hline
-        """+self.shortBatch()+""" & FET & \multicolumn{4}{ c|}{MOS} & GCD & \multicolumn{2}{ c|}{GCD05} & \multicolumn{2}{ c|}{Meander}\\\\
-        & """+self.dataseries['v_th'].unit+" & "+self.dataseries['v_fb2'].unit+" & "+self.dataseries['c_acc_m'].unit+" & "+self.dataseries['t_ox'].unit+" & \detokenize{"+self.dataseries['n_ox'].unit+"} & "+self.dataseries['i_surf'].unit+" & "+self.dataseries['i_surf05'].unit+" & "+self.dataseries['i_bulk05'].unit+" & "+self.dataseries['meander_poly'].unit+" & "+self.dataseries['meander_metal'].unit+"""\\\\
-         & Vth & Vfb &  C-acc & t-ox & n-ox & i-surf & i-surf05 & i-bulk05 & PolySi & Metal \\\\
+        """+self.shortBatch()+""" & FET & \multicolumn{4}{ c|}{MOS} & GCD & \multicolumn{2}{ c|}{GCD05} & \multicolumn{2}{ c|}{Meander} & \multicolumn{3}{ c|}{Contact chain}\\\\
+        
+        & """+self.dataseries['v_th'].unit+" & "+self.dataseries['v_fb2'].unit+" & "+self.dataseries['c_acc_m'].unit+" & "+self.dataseries['t_ox'].unit+
+        " & \detokenize{"+self.dataseries['n_ox'].unit+"} & "+self.dataseries['i_surf'].unit+" & "+self.dataseries['i_surf05'].unit+" & "+
+        self.dataseries['i_bulk05'].unit+" & "+self.dataseries['meander_poly'].unit+" & "+self.dataseries['meander_metal'].unit+" & "+
+        self.dataseries['contact_poly'].unit+" & "+self.dataseries['contact_n'].unit+" & "+self.dataseries['contact_p'].unit+"""\\\\
+        
+         & Vth & Vfb &  C-acc & t-ox & n-ox & i-surf & i-surf05 & i-bulk05 & PolySi & Metal & PolySi & N+ & P \\\\
         \\hline\n
         """)
         
@@ -688,7 +707,12 @@ class PQC_resultset:
             
             line = line + " & " + self.dataseries['meander_poly'].valueToLatex(i)
             line = line + " & " + self.dataseries['meander_metal'].valueToLatex(i)
+            
+            line = line + " & " + self.dataseries['contact_poly'].valueToLatex(i)
+            line = line + " & " + self.dataseries['contact_n'].valueToLatex(i)
+            line = line + " & " + self.dataseries['contact_p'].valueToLatex(i)
 
+            
             f.write(line+"\\\\\n")
         
         f.write("""        \\hline

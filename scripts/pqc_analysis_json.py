@@ -333,7 +333,7 @@ def analyse_cbkr_data(path, r_sheet=np.nan, printResults=print_results, plotResu
     return r_contact
 
 
-def analyse_contact_data(path):
+def analyse_contact_data(path, minCorrelation=0.96, printResults=print_results, plotResults=True):
     test= 'contact'
 
     if path is None:
@@ -342,16 +342,20 @@ def analyse_contact_data(path):
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
-
-    i_norm, i_unit = normalise_parameter(i, 'A')
+    
+    if len(v) == 0:
+        return np.nan
 
     lbl = assign_label(path, test)
-    r_contact, a, b, x_fit, spl_dev, status = analyse_contact(i, v, cut_param=0.01, debug=0)
+    r_contact, a, b, x_fit, spl_dev, status, r_value = analyse_contact(i, v, cut_param=0.01, debug=0)
+    
+    if abs(r_value) < minCorrelation:
+        return np.nan
 
     fit = [a*x+b for x in x_fit]
 
-    if print_results:
-       print('%s: \tcontact: r_contact: %.2e Ohm' % (lbl, r_contact))
+    if printResults or True:
+       print('%s: \tcontact: r_contact: %.2e Ohm, r_value: %.2f' % (lbl, r_contact, r_value))
 
     return r_contact
 
@@ -374,10 +378,13 @@ def analyse_meander_data(path, printResults=print_results, plotResults=True):
 
     lbl = assign_label(path, test)
 
-    r, status = analyse_meander(i, v)
+    r, status, r_value = analyse_meander(i, v)
+    
+    if (r_value < 0.95):
+        return np.nan
 
     if printResults:
-       print('%s: \tMeander: r: %.2e' % (lbl, r))
+       print('%s: \tMeander: r: %.2e r_value: %.2f' % (lbl, r, r_value))
 
 
     return r

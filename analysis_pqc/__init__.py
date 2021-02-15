@@ -528,7 +528,7 @@ def analyse_cbkr(i, v, r_sheet=-1, cut_param=1e-5, debug=False):
 
 
 
-@params('r_contact, a, b, x_fit, spl_dev, status')
+@params('r_contact, a, b, x_fit, spl_dev, status, r_value')
 def analyse_contact(i, v, cut_param=1e-5, debug=False):
     """
     Contact Chain: Extract metal-implant contact resistance.
@@ -546,11 +546,11 @@ def analyse_contact(i, v, cut_param=1e-5, debug=False):
     a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
     r_contact = a
 
-    return r_contact, a, b, x_fit, spl_dev, status
+    return r_contact, a, b, x_fit, spl_dev, status, r_value
 
 
 
-@params('r, status')
+@params('r, status, r_value')
 def analyse_meander(i, v, cut_param=1e-5, debug=False):
     """
     Meander: Calculates specific resistance per square.
@@ -568,10 +568,9 @@ def analyse_meander(i, v, cut_param=1e-5, debug=False):
     status = STATUS_PASSED
     
     a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
-    
     r = a
     
-    return r, status
+    return r, status, r_value
 
 
 
