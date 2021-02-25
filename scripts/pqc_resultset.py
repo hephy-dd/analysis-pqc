@@ -297,15 +297,17 @@ class PQC_resultset:
                     self.timestamps.append(pqc.get_timestamp(x[-1]))
                 else:
                     self.timestamps.append(0)
+                    
+                cross = "cross"
                 
-                self.dataseries['vdp_poly_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "cross"], blacklist=["reverse"]), plotResults=False))
-                self.dataseries['vdp_poly_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "reverse", "cross"])))
+                self.dataseries['vdp_poly_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", cross], blacklist=["reverse"]), plotResults=False))
+                self.dataseries['vdp_poly_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "reverse", cross])))
 
-                self.dataseries['vdp_n_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "cross"], blacklist=["reverse"])))
-                self.dataseries['vdp_n_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "reverse", "cross"])))
+                self.dataseries['vdp_n_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", cross], blacklist=["reverse"])))
+                self.dataseries['vdp_n_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "reverse", cross])))
                 
-                self.dataseries['vdp_pstop_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "cross"], blacklist=["reverse"])))
-                self.dataseries['vdp_pstop_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "reverse", "cross"])))
+                self.dataseries['vdp_pstop_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", cross], blacklist=["reverse"])))
+                self.dataseries['vdp_pstop_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "reverse", cross])))
                 
                 self.dataseries['t_line_n'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "n"], single=True), r_sheet=self.dataseries['vdp_n_f'].values[-1], printResults=False, plotResults=False))
                 self.dataseries['t_line_pstop2'].append(pqc.analyse_linewidth_data(pqc.find_all_files_from_path(dirs[i], "linewidth", whitelist=[currflute, "P_stop", "2_wire"], single=True), r_sheet=self.dataseries['vdp_pstop_f'].values[-1], printResults=False, plotResults=False))
@@ -676,7 +678,8 @@ class PQC_resultset:
         
         f.write(PQC_value.headerToLatex())
         
-        f.write("""\\begin{center}
+        f.write("""
+        \\begin{center}
         \\fontsize{4pt}{5pt}\\selectfont
     \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|r|r|r|} 
         \\hline

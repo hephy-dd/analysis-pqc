@@ -79,7 +79,7 @@ def line_regr_with_cuts(x, y, cut_param, debug=False):
     """
 
     # init
-    a = b = x_fit = spl_dev = -1
+    r_value = a = b = x_fit = spl_dev = -1
     status = STATUS_NONE
 
     # get spline fit, requires strictlty increasing array

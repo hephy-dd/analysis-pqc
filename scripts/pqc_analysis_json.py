@@ -144,13 +144,15 @@ def analyse_mos_data(path, plotResults=True, printResults=print_results):
 
     #v_norm, v_unit = normalise_parameter(v, 'V')
     #c_norm, c_unit = normalise_parameter(c, 'F')
+    try:
+        v_fb1, v_fb2, c_acc, c_inv, t_ox, n_ox, a_acc, b_acc, v_acc, a_dep, b_dep, v_dep, a_inv, b_inv, v_inv,  spl_dev, status = analyse_mos(v, c)
+        lbl = assign_label(path, test)
+        c_acc_m = np.mean(c_acc)
 
-    v_fb1, v_fb2, c_acc, c_inv, t_ox, n_ox, a_acc, b_acc, v_acc, a_dep, b_dep, v_dep, a_inv, b_inv, v_inv,  spl_dev, status = analyse_mos(v, c)
-    lbl = assign_label(path, test)
-    c_acc_m = np.mean(c_acc)
-
-    fit_acc = [a_acc*x + b_acc for x in v]
-    fit_dep = [a_dep*i+b_dep for i in v]
+        fit_acc = [a_acc*x + b_acc for x in v]
+        fit_dep = [a_dep*i+b_dep for i in v]
+    except:
+        return np.nan, np.nan, np.nan, np.nan, np.nan
     annotate = 'V$_{{fb}}$: {} V (via intersection)\nV$_{{fb}}$: {} V (via inflection)\n\nt$_{{ox}}$: {} m\nn$_{{ox}}$: {} cm$^{{-2}}$'.format(round(v_fb2,2), round(v_fb1,2), round(t_ox, 2), round(n_ox, 2))
 
     x_loc = 0.15
@@ -214,7 +216,7 @@ def analyse_fet_data(path, plotResults=True, printResults=print_results):
     i_src = series.get('current_vsrc', np.array([]))
     i_hvsrc = series.get('current_hvsrc', np.array([]))
 
-    if(len(v) == 0) or (len(i_em) == 0):
+    if(len(v) < 3) or (len(i_em) < 3):
         return np.nan
 
     v_th, a, b, spl_dev, status = analyse_fet(v, i_em)
@@ -285,10 +287,13 @@ def analyse_linewidth_data(path, r_sheet=np.nan, printResults=print_results, plo
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
+    
+    if len(v) < 3:
+        return np.nan
 
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
-    t_line, a, b, x_fit, spl_dev, status = analyse_linewidth(i, v, r_sheet=r_sheet, cut_param=0.01, debug=0)
+    t_line, a, b, x_fit, spl_dev, status = analyse_linewidth(i, v, r_sheet=r_sheet, cut_param=-1., debug=0)
 
     fit = [a*x +b for x in x_fit]
     if plotResults:
@@ -354,7 +359,7 @@ def analyse_contact_data(path, minCorrelation=0.96, printResults=print_results, 
 
     fit = [a*x+b for x in x_fit]
 
-    if printResults or True:
+    if printResults:
        print('%s: \tcontact: r_contact: %.2e Ohm, r_value: %.2f' % (lbl, r_contact, r_value))
 
     return r_contact
@@ -375,7 +380,9 @@ def analyse_meander_data(path, printResults=print_results, plotResults=True):
         v = series.get('voltage', np.array([]))
         i = series.get('current_elm', np.array([]))
 
-
+    if len(v) < 3:
+        return np.nan
+        
     lbl = assign_label(path, test)
 
     r, status, r_value = analyse_meander(i, v)
@@ -408,6 +415,9 @@ def analyse_breakdown_data(path, printResults=print_results, plotResults=True):
     lbl = assign_label(path, test)
     x_loc = 0.3
     y_loc = 0.5
+    
+    if len(v) < 1:
+        return np.nan
 
     v_bd, status = analyse_breakdown(v, i_elm, debug=0)
 
