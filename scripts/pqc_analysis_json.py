@@ -96,6 +96,7 @@ def analyse_cv_data(path, plotResults=True, printResults=print_results):
     lbl = assign_label(path, test)
     if "Flute_1" in path:
     	area = 1.56e-6  # m^2, quarter
+    	return -1, -1, -1   # this does not work anyway and creates a lot of plots
     elif "Flute_3" in path:
     	area = 6.25e-6  # m^2, half (but without rounded edges)
     else:
@@ -431,6 +432,36 @@ def analyse_breakdown_data(path, printResults=print_results, plotResults=True):
        print('%s: \tBreakdown: v_bd: %.2e V' % (lbl, v_bd))
 
     return v_bd
+    
+    
+def analyse_capacitor_data(path, printResults=print_results, plotResults=True):
+    test = 'capacitor'
+
+    if path is None:
+        return np.nan
+
+    series = read_json_file(path).get('series')
+    v = series.get('voltage_hvsrc', np.array([]))
+    c = series.get('capacitance', np.array([]))
+
+
+    lbl = assign_label(path, test)
+    x_loc = 0.3
+    y_loc = 0.5
+    
+    if len(v) < 1:
+        return np.nan
+
+    c_mean, c_median, d, status = analyse_capacitor(v, c, debug=0)
+
+    if plotResults:
+        pass
+
+
+    if printResults:
+       print('%s: \tCapacitance: %.2e F, ' % (lbl, c_median))
+
+    return c_mean, c_median, d
 
 
 
@@ -496,6 +527,7 @@ functions = {
     'breakdown': analyse_breakdown_data,
     'cbkr': analyse_cbkr_data,
     'meander': analyse_meander_data,
+    'capacitor': analyse_capacitor_data,
 }
 
 

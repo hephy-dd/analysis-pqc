@@ -176,7 +176,7 @@ def main():
         plotBoxplot(pqc_batches, args.path+"histograms/b", values=['vdp_p_cross_bridge_f', 'vdp_p_cross_bridge_r', 't_line_p_cross_bridge', 'v_bd', 'i600', 'v_fd'])
         plotBoxplot(pqc_batches, args.path+"histograms/c", values=['rho', 'conc', 't_ox', 'n_ox', 'c_acc_m', 'i_surf'])
         
-        
+    plt.show()
     
         
         

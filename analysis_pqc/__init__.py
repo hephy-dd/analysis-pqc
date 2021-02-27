@@ -156,7 +156,7 @@ def analyse_iv(v, i, debug=False):
 
 
 @params('v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status')
-def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_windowsize=None, min_correl=0.9, debug=False):
+def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_windowsize=None, min_correl=0.1, debug=False):
     """
     Diode CV: Extract depletion voltage and resistivity.
 
@@ -182,7 +182,9 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
     status = STATUS_NONE
     
     if savgol_windowsize is None:
-        savgol_windowsize = int(len(c)/40+1)*2+1  # a suitable off windowsie - making 20 windows among the whole measurement
+        #savgol_windowsize = int(len(c)/40+1)*2+1  # a suitable off windowsie - making 20 windows along the whole measurement
+        savgol_windowsize = int(len(c)/30+1)*2+1  # a suitable off windowsie - making 15 windows along the whole measurement
+        # the window size needs to be an odd number, therefore this strange calculation
 
     # invert and square
     c = 1./c**2
@@ -197,7 +199,7 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
     
     # get regions for indexing
     idx_rise = [ i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) > cut_param) ]  # the first and last value seems to be off sometimes
-    idx_const = [ i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) < cut_param) ]
+    idx_const = [ i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) < cut_param) and i > idx_rise[-1] ]
 
     with warnings.catch_warnings():
         warnings.filterwarnings('error')
@@ -233,6 +235,12 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
         
             if abs(r_value_rise) < min_correl or abs(r_value_const) < min_correl or status == STATUS_FAILED:
                 status = STATUS_FAILED
+                
+            #print("v_rise: "+str(v_rise))
+            #print("r rise: "+str(r_value_rise))
+            #print("r const: "+str(r_value_const))
+            #print("v_const: "+str(v_const))
+            
 
         except np.RankWarning:
             status = STATUS_FAILED
@@ -607,6 +615,8 @@ def analyse_capacitor(v, c, debug=False):
     c_mean ... mean capacitance
     c_median ... median capacitance
     """
+    
+    print(str(c))
 
     status = STATUS_PASSED
     c_mean = np.mean(c)
