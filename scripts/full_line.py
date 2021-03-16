@@ -21,7 +21,9 @@ def parse_args():
     
     
 def loadBatch(path):
-    pqc_results = PQC_resultset(os.path.basename(os.path.dirname(path)))
+    batchname = os.path.basename(os.path.normpath(path))
+    print("Batch: "+batchname)
+    pqc_results = PQC_resultset(batchname)
     pqc_results.analyze(path)
     
     return pqc_results
