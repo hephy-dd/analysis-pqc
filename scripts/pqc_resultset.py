@@ -101,9 +101,14 @@ class PQC_value:
         values = values[values > minAllowed]
         nTooLow = nTot - len(values) - nNan - nTooHigh
         
-        selMed = np.median(values)
-        selAvg = np.mean(values)
-        selStd = np.std(values)
+        if (len(values)):
+            selMed = np.median(values)
+            selAvg = np.mean(values)
+            selStd = np.std(values)
+        else:
+            selMed = np.nan
+            selAvg = np.nan
+            selStd = np.nan
         
         return values, nTot, nNan, nTooHigh, nTooLow, totAvg, totStd, totMed, selAvg, selStd, selMed
      
@@ -155,6 +160,7 @@ class PQC_resultset:
         self.labels = []
         self.flutes = []
         self.timestamps = []
+        self.basepath = ""
         
         self.dataseries = {'xtimestamps': self.timestamps,
                            'xlabels':     self.labels,
@@ -283,9 +289,12 @@ class PQC_resultset:
 
         return ret
     
-    def analyze(self, dirs):
-        print("dirs: "+str(len(dirs)))
+    def analyze(self, basepath):
+        self.basepath = basepath
+        dirs = glob.glob(os.path.join(basepath, "*"))
+        dirs = [t for t in dirs if "analysis" not in t ]
         
+        dirs.sort()
         
         for i in range(0, len(dirs)):
 
@@ -526,22 +535,28 @@ class PQC_resultset:
         
         fig.tight_layout(h_pad=1.0)
         if rangeExtension is not None:
-            fig.savefig(path+"/"+pqc_values.name+"_erhist.png")
+            fig.savefig(os.path.join(self.getAnalysisFolderPath(), pqc_values.name+"_erhist.png"))
         else:
-            fig.savefig(path+"/"+pqc_values.name+"_hist.png")
+            fig.savefig(os.path.join(self.getAnalysisFolderPath(), pqc_values.name+"_hist.png"))
         plt.close()
-
+    
+    def getAnalysisFolderPath(self):
+        return os.path.join(self.basepath, "analysis_"+self.batch)
+    
+    # either creates or empties analysis folder
+    def prepareAnalysisFolder(self):
+        try:
+            os.mkdir(self.getAnalysisFolderPath())
+        except OSError:
+            files = glob.glob(os.path.join(self.getAnalysisFolderPath(), "*"))
+            for f in files:
+                os.remove(f)
         
     def createHistograms(self, path):
         matplotlib.rcParams.update({'font.size': 14})
-
-        histogramDir = path+"histograms_"+self.batch
-        try:
-            os.mkdir(histogramDir)
-        except OSError:
-            files = glob.glob(histogramDir+"/*")
-            for f in files:
-                os.remove(f)
+        
+        self.prepareAnalysisFolder()
+        histogramDir = self.getAnalysisFolderPath()
         
         for key in self.dataseries:
             if not key.startswith('x'):
@@ -591,7 +606,7 @@ class PQC_resultset:
     
     
     def exportLatex1(self, path):
-        f = open(path+"/histograms_"+self.batch+"/table1.tex", "w")
+        f = open(os.path.join(self.getAnalysisFolderPath(), "table1.tex"), "w")
         f.write("% automatically created table for batch " + self.batch + "\n\n")
         
         f.write(PQC_value.headerToLatex())
@@ -644,7 +659,7 @@ class PQC_resultset:
      
         
     def exportLatex2(self, path):
-        f = open(path+"/histograms_"+self.batch+"/table2.tex", "w")
+        f = open(os.path.join(self.getAnalysisFolderPath(), "table2.tex"), "w")
         f.write("% automatically created table for batch " + self.batch + "\n\n")
         
         f.write(PQC_value.headerToLatex())
@@ -691,7 +706,7 @@ class PQC_resultset:
         
         
     def exportLatex3(self, path):
-        f = open(path+"/histograms_"+self.batch+"/table3.tex", "w")
+        f = open(os.path.join(self.getAnalysisFolderPath(), "table3.tex"), "w")
         f.write("% automatically created table for batch " + self.batch + "\n\n")
         
         f.write(PQC_value.headerToLatex())

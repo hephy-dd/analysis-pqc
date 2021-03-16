@@ -21,13 +21,8 @@ def parse_args():
     
     
 def loadBatch(path):
-    dirs = glob.glob(os.path.join(path, "*"))
-    dirs = [t for t in dirs if "histograms" not in t ]
-    
-    dirs.sort()
-    
-    pqc_results = PQC_resultset(os.path.basename(os.path.dirname(path+"/")))
-    pqc_results.analyze(dirs)
+    pqc_results = PQC_resultset(os.path.basename(os.path.dirname(path)))
+    pqc_results.analyze(path)
     
     return pqc_results
     
