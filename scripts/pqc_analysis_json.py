@@ -103,7 +103,7 @@ def analyse_cv_data(path, plotResults=True, printResults=print_results):
     	area = 1
     	print("WARNING: clould not determine flute number - area dependent values will be wrong!")
 
-    v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status = analyse_cv(v, c, area=area, cut_param= 0.008)
+    v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status = analyse_cv(v, c, area=area, cut_param= 0.008, carrier='holes')
 
 
     annotate = 'V$_{{fd}}}}$: {} V\n\nT$_{{avg}}$: {} \u00B0C\nH$_{{avg}}$: {}'.format(v_dep2, round(np.mean(temp),2), round(np.mean(humidity),2)) + r'$\%$'
@@ -438,7 +438,7 @@ def analyse_capacitor_data(path, printResults=print_results, plotResults=True):
     test = 'capacitor'
 
     if path is None:
-        return np.nan
+        return np.nan, np.nan, np.nan
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_hvsrc', np.array([]))

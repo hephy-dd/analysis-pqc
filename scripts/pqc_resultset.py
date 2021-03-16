@@ -192,7 +192,7 @@ class PQC_resultset:
 
         self.dataseries['i600'] = PQC_value("i600", "I @ 600V", 100., "uA", 1e6, stray=1.)
         self.dataseries['v_fd'] = PQC_value("v_fd", "Full depletion Voltage", 260., "V", stray=0.33)
-        self.dataseries['rho'] = PQC_value("rho", "rho", 1.3, "kOhm cm", 0.1)
+        self.dataseries['rho'] = PQC_value("rho", "rho", 3.5, "kOhm cm", 0.1)
         self.dataseries['conc'] = PQC_value("d_conc", "Doping Concentration", 3.5, "1E12cm^-3", 1e-18)
 
 
@@ -221,7 +221,7 @@ class PQC_resultset:
         self.dataseries['meander_poly'] = PQC_value("meander_poly", "Polisilicon Resistor", 1.7, "MOhm", 1e-6, stray=0.5)
         self.dataseries['meander_metal'] = PQC_value("meander_metal", "Metal Meander", 260., "Ohm", 1., stray=0.5)
         
-        self.dataseries['contact_poly'] = PQC_value("contact_poly", "Contact Chain PolySi", 30., "MOhm", 1e-6, stray=0.5)
+        self.dataseries['contact_poly'] = PQC_value("contact_poly", "Contact Chain PolySi", 35., "MOhm", 1e-6, stray=0.5)
         self.dataseries['contact_p'] = PQC_value("contact_p", "Contact Chain P", 85., "kOhm", 1e-3, stray=0.5)
         self.dataseries['contact_n'] = PQC_value("contact_n", "Contact Chain N", 85., "kOhm", 1e-3, stray=0.5)
         
@@ -398,7 +398,7 @@ class PQC_resultset:
         print("#                                        \tv_th/V                                                 um     V      uA       V kOhmcm 1E12cm^-3 Poly/MOhm  N/kOhm  P/kOhm")
         for i in range(0, len(self.labels)):
             line = "{} {}  \t".format(self.labels[i], self.flutes[i])
-            line += "{:5.2f}  ".format(self.dataseries['v_th'].getValue(i))
+            line += "{:6.2f}  ".format(self.dataseries['v_th'].getValue(i))
             line += "{:9.2E}  {:9.2E}   ".format(self.dataseries['vdp_metclo_f'].getValue(i), self.dataseries['vdp_metclo_r'].getValue(i))
 
             line += "{:8.2f} {:8.2f}    ".format(self.dataseries['vdp_p_cross_bridge_f'].getValue(i), self.dataseries['vdp_p_cross_bridge_r'].getValue(i))
@@ -596,13 +596,19 @@ class PQC_resultset:
         
         f.write(PQC_value.headerToLatex())
         
+        # \\rowcolors{2}{gray!25}{white}
+        
         f.write("""\\begin{center}
+        
         \\fontsize{4pt}{5pt}\\selectfont
-    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|r| } 
+    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|r|r| } 
         \\hline
-        """+self.shortBatch()+""" & \multicolumn{2}{ c|}{PolySi VdP} & \multicolumn{2}{c|}{N+ VdP} & \multicolumn{2}{c|}{P-Stop VdP} & \multicolumn{3}{c|}{line thickness} & \multicolumn{2}{ c|}{Contact resistance} \\\\
-        & \multicolumn{2}{c|}{"""+self.dataseries['vdp_poly_f'].unit+"} & \multicolumn{2}{c|}{"+self.dataseries['vdp_n_f'].unit+"} & \multicolumn{2}{c|}{"+self.dataseries['vdp_pstop_f'].unit+"} & \multicolumn{3}{c|}{"+self.dataseries['t_line_n'].unit+"} & "+self.dataseries['r_contact_poly'].unit+" & "+self.dataseries['r_contact_n'].unit+"""\\\\
-         & forw & rev & forw & rev & forw & rev & N+ & p-stop2 & p-stop4 & PolySi & N+\\\\
+        """+self.shortBatch()+""" & \multicolumn{2}{ c|}{PolySi VdP} & \multicolumn{2}{c|}{N+ VdP} & \multicolumn{2}{c|}{P-Stop VdP} &
+        \multicolumn{3}{c|}{line thickness} & Capacitor & \multicolumn{2}{ c|}{Contact resistance} \\\\
+        Unit: & \multicolumn{2}{c|}{"""+self.dataseries['vdp_poly_f'].unit+"} & \multicolumn{2}{c|}{"+self.dataseries['vdp_n_f'].unit+"} & \multicolumn{2}{c|}{"+
+        self.dataseries['vdp_pstop_f'].unit+"} & \multicolumn{3}{c|}{"+self.dataseries['t_line_n'].unit+"} & "
+        +self.dataseries['capacitor'].unit+" & "+self.dataseries['r_contact_poly'].unit+" & "+self.dataseries['r_contact_n'].unit+"""\\\\
+         & forw & rev & forw & rev & forw & rev & N+ & p-stop2 & p-stop4 &  & PolySi & N+\\\\
         \\hline\n
         """)
         
@@ -621,6 +627,7 @@ class PQC_resultset:
             line = line + " & " + self.dataseries['t_line_n'].valueToLatex(i)
             line = line + " & " + self.dataseries['t_line_pstop2'].valueToLatex(i)
             line = line + " & " + self.dataseries['t_line_pstop4'].valueToLatex(i)
+            line = line + " & " + self.dataseries['capacitor'].valueToLatex(i)
             line = line + " & " + self.dataseries['r_contact_poly'].valueToLatex(i)
             line = line + " & " + self.dataseries['r_contact_n'].valueToLatex(i)
             
@@ -647,8 +654,8 @@ class PQC_resultset:
     \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|r|r| } 
         \\hline
         """+self.shortBatch()+""" & \multicolumn{2}{ c|}{MetClover VdP} & \multicolumn{3}{c|}{P cross-bridge VdP/LW} & \multicolumn{2}{ c|}{Bulk VdP cross} & Vbd & I600 & \multicolumn{3}{c|}{Diode Half CV} \\\\
-        & """+" \multicolumn{2}{c|}{"+self.dataseries['vdp_metclo_f'].unit+"} & \multicolumn{2}{c|}{"+self.dataseries['vdp_p_cross_bridge_f'].unit+"} & "+self.dataseries['t_line_p_cross_bridge'].unit+ "& \multicolumn{2}{c|}{"+self.dataseries['vdp_bulk_f'].unit+"} & "+self.dataseries['v_bd'].unit+" & "+self.dataseries['i600'].unit+" & "+self.dataseries['v_fd'].unit+" & \detokenize{"+self.dataseries['rho'].unit+"} & \detokenize{"+self.dataseries['conc'].unit+"""}\\\\
-          & forw & rev & forw & rev & & forw & rev & & & Vfd & rho & d. conc \\\\
+        Unit: & """+" \multicolumn{2}{c|}{"+self.dataseries['vdp_metclo_f'].unit+"} & \multicolumn{2}{c|}{"+self.dataseries['vdp_p_cross_bridge_f'].unit+"} & "+self.dataseries['t_line_p_cross_bridge'].unit+ "& \multicolumn{2}{c|}{"+self.dataseries['vdp_bulk_f'].unit+"} & "+self.dataseries['v_bd'].unit+" & "+self.dataseries['i600'].unit+" & "+self.dataseries['v_fd'].unit+" & \detokenize{"+self.dataseries['rho'].unit+"} & \detokenize{"+self.dataseries['conc'].unit+"""}\\\\
+          & forw & rev & forw & rev & & forw & rev & & & Vfd & Bulk res. & dop. conc. \\\\
         \\hline\n
         """)
         
@@ -696,7 +703,7 @@ class PQC_resultset:
         \\hline
         """+self.shortBatch()+""" & FET & \multicolumn{4}{ c|}{MOS} & GCD & GCD05 & \multicolumn{2}{ c|}{Meander} & \multicolumn{3}{ c|}{Contact chain}\\\\
         
-        & """+self.dataseries['v_th'].unit+" & "+self.dataseries['v_fb2'].unit+" & "+self.dataseries['c_acc_m'].unit+" & "+self.dataseries['t_ox'].unit+
+        Unit: & """+self.dataseries['v_th'].unit+" & "+self.dataseries['v_fb2'].unit+" & "+self.dataseries['c_acc_m'].unit+" & "+self.dataseries['t_ox'].unit+
         " & \detokenize{"+self.dataseries['n_ox'].unit+"} & "+self.dataseries['i_surf'].unit+" & "+self.dataseries['i_surf05'].unit+" & "
         +self.dataseries['meander_poly'].unit+" & "+self.dataseries['meander_metal'].unit+" & "+
         self.dataseries['contact_poly'].unit+" & "+self.dataseries['contact_n'].unit+" & "+self.dataseries['contact_p'].unit+"""\\\\

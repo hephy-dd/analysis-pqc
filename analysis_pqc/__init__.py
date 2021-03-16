@@ -196,15 +196,18 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
     #spl_dev = spl(x_norm, 1)
     spl_dev = scipy.signal.savgol_filter(y_norm, window_length=savgol_windowsize, polyorder=1, deriv=1)
 
-    
-    # get regions for indexing
-    idx_rise = [ i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) > cut_param) ]  # the first and last value seems to be off sometimes
-    idx_const = [ i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) < cut_param) and i > idx_rise[-1] ]
+    idx_rise = []
+    idx_const = []
 
     with warnings.catch_warnings():
         warnings.filterwarnings('error')
 
         try:
+            # get regions for indexing
+            idx_rise = [ i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) > cut_param) ]  # the first and last value seems to be off sometimes
+            idx_const = [ i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) < cut_param) and i > idx_rise[-1] ]
+                    
+            
             v_rise = v[ idx_rise[0]:idx_rise[-1]+1 ]
             v_const = v[ idx_const[0]:idx_const[-1]+1 ]
             c_rise = c[ idx_rise[0]:idx_rise[-1]+1 ]
@@ -616,7 +619,7 @@ def analyse_capacitor(v, c, debug=False):
     c_median ... median capacitance
     """
     
-    print(str(c))
+    #print(str(c))
 
     status = STATUS_PASSED
     c_mean = np.mean(c)
