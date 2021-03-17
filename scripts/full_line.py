@@ -13,21 +13,7 @@ import numpy as np
 from pqc_resultset import PQC_resultset
 from datetime import timedelta, date
 
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('path')
-    parser.add_argument('multibatch', nargs='?', default=None)
-    return parser.parse_args()
-    
-    
-def loadBatch(path):
-    batchname = os.path.basename(os.path.normpath(path))
-    print("Batch: "+batchname)
-    pqc_results = PQC_resultset(batchname)
-    pqc_results.analyze(path)
-    
-    return pqc_results
-    
+   
     
     
 def plotTimeline(pqc_batches, path, printBatchNumbers=True):
@@ -140,14 +126,43 @@ def vdpPlotBoxplot(pqc_batches, path):
     plt.close()
     
     
-def main():
-    args = parse_args()
     
-    if args.multibatch is None:
-        pqc_results = loadBatch(args.path)
+def loadBatch(path, outdir=None, lazy=False):
+    batchname = os.path.basename(os.path.normpath(path))
+    print("Batch: "+batchname)
+    pqc_results = PQC_resultset(batchname)
+    
+    if lazy and outdir is not None:
+        anatime = os.path.getmtime(pqc_results.getAnalysisFolderPath(outdir))
+        meastime = os.path.getmtime(path)
+        if anatime > meastime:
+            print("lazy mode: nothing to do")
+            exit(0)
+    
+    pqc_results.analyze(path)
+    
+    return pqc_results
+    
+    
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('path')
+    parser.add_argument('-m', action='store_true', help='multibatch mode, e. g. for time analysis (experimental)')
+    parser.add_argument('-o', default=None, help='override output directory location')
+    parser.add_argument('-l', action='store_true', default=None, help='lazy evaluation: skip if the measurement folder is older than analysis folder')
+    args = parser.parse_args()
+    
+    outdir = args.o
+    if outdir is None:
+        outdir = args.path
+    
+    if not args.m:
+        pqc_results = loadBatch(args.path, outdir, args.l)
         pqc_results.prettyPrint()
-        pqc_results.createHistograms(args.path)
-        pqc_results.exportLatex(args.path)
+        
+        pqc_results.prepareAnalysisFolder(outdir)
+        pqc_results.createHistograms(outdir)
+        pqc_results.exportLatex(outdir)
     else:
         print("Multibatch mode")
         dirs = glob.glob(os.path.join(args.path, "*"))

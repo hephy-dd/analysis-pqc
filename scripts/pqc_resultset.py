@@ -535,28 +535,30 @@ class PQC_resultset:
         
         fig.tight_layout(h_pad=1.0)
         if rangeExtension is not None:
-            fig.savefig(os.path.join(self.getAnalysisFolderPath(), pqc_values.name+"_erhist.png"))
+            fig.savefig(os.path.join(path, pqc_values.name+"_erhist.png"))
         else:
-            fig.savefig(os.path.join(self.getAnalysisFolderPath(), pqc_values.name+"_hist.png"))
+            fig.savefig(os.path.join(path, pqc_values.name+"_hist.png"))
         plt.close()
     
-    def getAnalysisFolderPath(self):
-        return os.path.join(self.basepath, "analysis_"+self.batch)
+    def getAnalysisFolderPath(self, basedir):
+        return os.path.join(basedir, "analysis_"+self.batch)
     
     # either creates or empties analysis folder
-    def prepareAnalysisFolder(self):
+    def prepareAnalysisFolder(self, basedir=None):
+        if basedir is None:
+            basedir = self.basepath
+        anadir = self.getAnalysisFolderPath(basedir)
         try:
-            os.mkdir(self.getAnalysisFolderPath())
+            os.mkdir(anadir)
         except OSError:
-            files = glob.glob(os.path.join(self.getAnalysisFolderPath(), "*"))
+            files = glob.glob(os.path.join(anadir, "*"))
             for f in files:
                 os.remove(f)
         
     def createHistograms(self, path):
         matplotlib.rcParams.update({'font.size': 14})
         
-        self.prepareAnalysisFolder()
-        histogramDir = self.getAnalysisFolderPath()
+        histogramDir = self.getAnalysisFolderPath(path)
         
         for key in self.dataseries:
             if not key.startswith('x'):
@@ -606,7 +608,7 @@ class PQC_resultset:
     
     
     def exportLatex1(self, path):
-        f = open(os.path.join(self.getAnalysisFolderPath(), "table1.tex"), "w")
+        f = open(os.path.join(self.getAnalysisFolderPath(path), "table1.tex"), "w")
         f.write("% automatically created table for batch " + self.batch + "\n\n")
         
         f.write(PQC_value.headerToLatex())
@@ -659,7 +661,7 @@ class PQC_resultset:
      
         
     def exportLatex2(self, path):
-        f = open(os.path.join(self.getAnalysisFolderPath(), "table2.tex"), "w")
+        f = open(os.path.join(self.getAnalysisFolderPath(path), "table2.tex"), "w")
         f.write("% automatically created table for batch " + self.batch + "\n\n")
         
         f.write(PQC_value.headerToLatex())
@@ -706,7 +708,7 @@ class PQC_resultset:
         
         
     def exportLatex3(self, path):
-        f = open(os.path.join(self.getAnalysisFolderPath(), "table3.tex"), "w")
+        f = open(os.path.join(self.getAnalysisFolderPath(path), "table3.tex"), "w")
         f.write("% automatically created table for batch " + self.batch + "\n\n")
         
         f.write(PQC_value.headerToLatex())
