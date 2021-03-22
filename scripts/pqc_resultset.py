@@ -298,8 +298,8 @@ class PQC_resultset:
         
         for i in range(0, len(dirs)):
 
-            for currflute in ["PQCFlutesLeft", "PQCFlutesRight", "PQCFluteLeft", "PQCFluteRight", ]:   # we want both flutes if they are measured, but sometimes it's misspelled
-                if len(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "cross"], blacklist=["reverse"])) < 3:
+            for currflute in ["PQCFlutesLeft", "PQCFlutesRight", "PQCFluteLeft", "PQCFluteRight", "RL", "UL"]:   # we want both flutes if they are measured, but sometimes it's misspelled
+                if len(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "cross"], blacklist=["reverse"])) < 1:
                     continue
 
                 self.labels.append(dirs[i].split("/")[-1])
@@ -584,6 +584,10 @@ class PQC_resultset:
                 fl = " L"
             elif "Right" in self.flutes[i]:
                 fl = " R"
+            elif "RL" in self.flutes[i]:
+                fl = " RL"
+            elif "UL" in self.flutes[i]:
+                fl = " UL"
             else:
                 fl = " err"
             

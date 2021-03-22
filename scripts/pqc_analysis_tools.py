@@ -61,6 +61,7 @@ def find_all_files_from_path(path, test, whitelist=None, blacklist=None, single=
             #print("  chosen: "+str(filedir[-1]))
         if len(filedir) == 0:
             return None
+        #print(str(files))
         return filedir[-1]  # we sorted it first for time
 
     return np.sort(filedir)
