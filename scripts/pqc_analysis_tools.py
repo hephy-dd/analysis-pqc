@@ -28,14 +28,13 @@ __all__ = [
     'fit_curve'
 ]
 
-def find_all_files_from_path(path, test, whitelist=None, blacklist=None, single=False):
+def find_all_files_from_path(path, test, whitelist=None, blacklist=None):
     """
     returns a list of measurements for a given test
-    optionally filters also whitelist an blacklist (all whitelists must match and no blacklist match)
+    optionally filters also with whitelist and blacklist (all whitelists must match and no blacklist match)
     eg for forward right poly vdp:
       whitlelist=["PQCFlutesRight","polyslicon"] and
       blacklist=["reverse"]
-    if single is set to true, we expect only one return value (not a list) and it throws an error if there is more
     """
 
     path_folder = path
@@ -52,40 +51,32 @@ def find_all_files_from_path(path, test, whitelist=None, blacklist=None, single=
            (blacklist is None or not any(e.lower() in segments for e in blacklist)) and \
            (whitelist is None or all(e .lower() in segments for e in whitelist)):
             filedir.append(f)
-    if single:
-        if len(filedir) > 1:
-            pass
-            #print("Warning: more than one measurement available, taking the most recent one!:")
-            #for i in filedir:
-            #    print("        "+i)
-            #print("  chosen: "+str(filedir[-1]))
-        if len(filedir) == 0:
-            return None
-        #print(str(files))
-        return filedir[-1]  # we sorted it first for time
 
     return np.sort(filedir)
 
 
 
-def find_most_recent_file(path, test):
+def find_most_recent_file(path, test, whitelist=None, blacklist=None):
     """This function takes the pathfile and the name of test as inputs and
-    returns the most recent file which corresponds to the selected test.
+    returns the most recent file which corresponds to the selected test. This is obtained via the name,
+    not with the timestamp, so it gives a warning if the names don'z match for all candidats
     """
-    path_folder = path
-    filedir = []
-
-    # get all json files
-    files = glob.glob(os.path.join(path_folder, "*.json"))
-    # sort the folders accordind to datetime
-    files.sort(key=os.path.getmtime)
-
-    for f in files:
-        if test in [v.lower() for v in f.split('_')]:
-            filedir.append(f)
-
-    # get the last, i.e the most recent file
-    return filedir[-1]
+    all_files = find_all_files_from_path(path, test, whitelist=whitelist, blacklist=blacklist)
+    if len(all_files) == 0:
+        return None
+       
+    all_files.sort()  # the date should be the only difference, so we can sort
+    
+    # when we mix up measurements this gives a warning here (if the name is not equal (except for the timestamp))
+    basename_first = '_'.join(all_files[-1].split('_')[0:-1])
+    for f in all_files:
+        basename = '_'.join(f.split('_')[0:-1])
+        if(basename != basename_first):
+            print("Warning: heterogenous naming: "+os.path.basename(basename))
+            print("   Info: first one was:       "+os.path.basename(basename_first))
+            break  # we only want to show this once
+    
+    return all_files[-1]
 
 
 def assign_label(path, test, vdp=False):

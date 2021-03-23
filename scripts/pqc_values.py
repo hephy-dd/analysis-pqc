@@ -18,6 +18,10 @@ def make_chunks(data, size):
     for i in range(0, len(data), size):
         yield [k for k in islice(it, size)]
 
+"""
+This Object contains one parameter obtained via the PQC measurements, but for all samples measured
+the order in the array is cucial for the correct mapping, so be careful to reorder everything in the PQC_resultset.dataseries at once
+"""
 class PQC_Values:
     def __init__(self, name='na', nicename='na', expectedValue=0., unit='', showmultiplier=1e0, stray=0.5, values=None):
         self.values = []
@@ -34,8 +38,7 @@ class PQC_Values:
         if values is not None:
             self.values = values
     
-    def len(self):
-        return len(self.values)
+    
             
     def __str__(self):
         return self.name+str(np.array(self.values)*self.showmultiplier)+self.unit
@@ -48,10 +51,35 @@ class PQC_Values:
 
     def getValue(self, index):
         # with multiplier to suit the unit
-        return self.values[index]*self.showmultiplier
+        if index < len(self.values):
+            return self.values[index]*self.showmultiplier
+        else:
+            stats = self.getStats()
+            sel={0: stats.selMed,
+                 1: stats.selAvg,
+                 2: stats.selStd,
+                 3: len(stats.values),
+                 4: len(stats.values)/stats.nTot*100., }
+            return sel.get(index-len(self.values), "error")
         
     def getValueString(self, index):
-        return num2str(self.values[index]*self.showmultiplier, self.expectedValue)
+        if index < len(self.values):
+            return num2str(self.values[index]*self.showmultiplier, self.expectedValue)
+        else:
+            stats = self.getStats()
+            sel={0: num2str(stats.selMed, self.expectedValue),
+                 1: num2str(stats.selAvg, self.expectedValue),
+                 2: num2str(stats.selStd, self.expectedValue),
+                 3: "{}/{}".format(len(stats.values), stats.nTot),
+                 4: "{:2.0f}".format(len(stats.values)/stats.nTot*100.), }
+            return sel.get(index-len(self.values), "error")
+    
+    @staticmethod 
+    def getStatLabels():
+        return ["Median", "Average", "Std dev.", "OK/Tot.", "OK (rel)"]
+        
+    def len(self):
+        return len(self.values)
         
     def split(self, itemsperclice):
         ret = [PQC_value(self.name, self.nicename, self.expectedValue, self.unit, self.showmultiplier, self.stray, values=i) for i in make_chunks(self.values, itemsperclice)]

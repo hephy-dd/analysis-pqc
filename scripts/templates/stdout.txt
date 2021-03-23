@@ -5,7 +5,7 @@ batch {{ batch }}:
 {% set flute3=['i600', 'v_fd', 'rho', 'conc', 'meander_metal', 'vdp_metclo_f', 'vdp_metclo_r', 'vdp_p_cross_bridge_f', 'vdp_p_cross_bridge_r', 't_line_p_cross_bridge', 'vdp_bulk_f', 'vdp_bulk_r'] %}
 {% set flute4=['i_surf05', 'r_contact_n', 'contact_p', 'contact_n'] %}
 {% set labelwidth='{:40s}' %}
-{% set valuewidth='{:>12s}' %}
+{% set valuewidth='{:>11s}' %}
 {% set tables=[flute1, flute2, flute3, flute4] %}
 
 {% for table in tables %}
@@ -16,6 +16,12 @@ batch {{ batch }}:
 {{ labelwidth.format('#') }}{% for key in table %}{{ valuewidth.format(dataseries[key].unit) }}{% endfor %}
 
 {% for i in range(0, dataseries['vdp_pstop_r'].len() ) %}
+{{ labelwidth.format(dataseries['xlabels'][i]) }}{% for key in table %}{{ valuewidth.format(dataseries[key].getValueString(i)) }}{% endfor %}
+
+{% endfor %}
+{{ labelwidth.format('--------------------') }}{% for key in table %}{{ valuewidth.format('-------') }}{% endfor %}
+
+{% for i in range(dataseries['vdp_pstop_r'].len(), dataseries['vdp_pstop_r'].len()+5) %}
 {{ labelwidth.format(dataseries['xlabels'][i]) }}{% for key in table %}{{ valuewidth.format(dataseries[key].getValueString(i)) }}{% endfor %}
 
 {% endfor %}
