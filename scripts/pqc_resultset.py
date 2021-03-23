@@ -141,7 +141,7 @@ class PQC_resultset:
 
         return ret
     
-    def analyze(self, basepath):
+    def analyze(self, basepath, outdir):
         self.basepath = basepath
         dirs = glob.glob(os.path.join(basepath, "*"))
         dirs = [t for t in dirs if "analysis" not in t ]
@@ -164,6 +164,8 @@ class PQC_resultset:
                     self.timestamps.append(0)
                     
                 cross = "cross"
+                outname = self.labels[i]
+                outdir = os.path.join(self.outDir, "plots")
                 
                 self.dataseries['vdp_poly_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", cross], blacklist=["reverse"]), plotResults=False))
                 self.dataseries['vdp_poly_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "reverse", cross])))
@@ -181,7 +183,7 @@ class PQC_resultset:
                 self.dataseries['r_contact_n'].append(pqc.analyse_cbkr_data(pqc.find_most_recent_file(dirs[i], "cbkr", whitelist=[currflute, "n"]), r_sheet=self.dataseries['vdp_n_f'].values[-1], printResults=False, plotResults=False))
                 self.dataseries['r_contact_poly'].append(pqc.analyse_cbkr_data(pqc.find_most_recent_file(dirs[i], "cbkr", whitelist=[currflute, "Polysilicon"]), r_sheet=self.dataseries['vdp_poly_f'].values[-1], printResults=False, plotResults=False))
 
-                self.dataseries['v_th'].append(pqc.analyse_fet_data(pqc.find_most_recent_file(dirs[i], "fet", whitelist=[currflute, ]), printResults=False, plotResults=False))
+                self.dataseries['v_th'].append(pqc.analyse_fet_data(pqc.find_most_recent_file(dirs[i], "fet", whitelist=[currflute, ]), outdir=outdir, outname=outname))
 
                 self.dataseries['vdp_metclo_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "metal", "clover"], blacklist=["reverse"])))
                 self.dataseries['vdp_metclo_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "metal", "clover", "reverse"], blacklist=[])))
@@ -387,25 +389,32 @@ class PQC_resultset:
             fig.savefig(os.path.join(path, pqc_values.name+"_hist.png"))
         plt.close()
     
-    def getAnalysisFolderPath(self, basedir):
-        return os.path.join(basedir, "analysis_"+self.batch)
     
     # either creates or empties analysis folder
     def prepareAnalysisFolder(self, basedir=None):
         if basedir is None:
             basedir = self.basepath
-        anadir = self.getAnalysisFolderPath(basedir)
+        self.outDir = os.path.join(basedir, "analysis_"+self.batch)
+        self.plotDir = os.path.join(self.outDir, "plots")
         try:
-            os.mkdir(anadir)
+            os.mkdir(self.outDir)
         except OSError:
-            files = glob.glob(os.path.join(anadir, "*"))
+            files = glob.glob(os.path.join(self.outDir, "*"))
+            for f in files:
+                if os.path.isfile(f):
+                    os.remove(f)
+        try:
+            os.mkdir(self.plotDir)
+        except OSError:
+            files = glob.glob(os.path.join(self.plotDir, "*"))
             for f in files:
                 os.remove(f)
+                
         
     def createHistograms(self, path):
         matplotlib.rcParams.update({'font.size': 14})
         
-        histogramDir = self.getAnalysisFolderPath(path)
+        histogramDir = self.outDir
         
         for key in self.dataseries:
             if not key.startswith('x'):
@@ -456,7 +465,7 @@ class PQC_resultset:
     
     
     def exportLatex1(self, path):
-        f = open(os.path.join(self.getAnalysisFolderPath(path), "table1.tex"), "w")
+        f = open(os.path.join(self.outDir, "table1.tex"), "w")
         f.write("% automatically created table for batch " + self.batch + "\n\n")
         
         f.write(PQC_Values.headerToLatex())
@@ -509,7 +518,7 @@ class PQC_resultset:
      
         
     def exportLatex2(self, path):
-        f = open(os.path.join(self.getAnalysisFolderPath(path), "table2.tex"), "w")
+        f = open(os.path.join(self.outDir, "table2.tex"), "w")
         f.write("% automatically created table for batch " + self.batch + "\n\n")
         
         f.write(PQC_Values.headerToLatex())
@@ -556,7 +565,7 @@ class PQC_resultset:
         
         
     def exportLatex3(self, path):
-        f = open(os.path.join(self.getAnalysisFolderPath(path), "table3.tex"), "w")
+        f = open(os.path.join(self.outDir, "table3.tex"), "w")
         f.write("% automatically created table for batch " + self.batch + "\n\n")
         
         f.write(PQC_Values.headerToLatex())

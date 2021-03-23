@@ -14,9 +14,6 @@ In that case, you can just modify the corresponding functions in the
 pqc_analysis_tools.py script and give the file (and the path) as an input in the
 terminal.
 
-full-line: analyze a whole set of measurements, e.g. one batch
-> python scripts/pqc_analysis_json.py ../VPX34353_2-S/ full-line
-the given folter should contain subdirectories for each sample
 """
 
 import argparse
@@ -205,7 +202,7 @@ def analyse_gcd_data(path, plotResults=True, printResults=print_results):
 
 
 
-def analyse_fet_data(path, plotResults=True, printResults=print_results):
+def analyse_fet_data(path, plotResults=True, printResults=print_results, outdir=None, outname=None):
     test = 'fet'
     
     if path is None:
@@ -222,27 +219,32 @@ def analyse_fet_data(path, plotResults=True, printResults=print_results):
 
     v_th, a, b, spl_dev, status = analyse_fet(v, i_em)
 
-    fit  = [a*i +b for i in v]
+    fit  = np.array([a*i +b for i in v])
 
     lbl = assign_label(path, test)
 
-    if plotResults:
+    if plotResults or outdir is not None:
         fig,ax1 = plt.subplots()
-        lns1 = ax1.plot(v,i_em, ls='', marker='s', ms=3, label='transfer characteristics')
+        plt.title("FET: "+outname)
+        lns1 = ax1.plot(v,i_em*1e6, ls='', marker='s', ms=3, label='transfer characteristics')
         ax1.set_xlabel('V$_{GS}$ [V]')
-        ax1.set_ylabel('I$_{D}$ [A]')
-        ax1.set_ylabel(r'I$_\mathrm{D}$ [A]')
+        ax1.set_ylabel('I$_{D}$ [uA]')
+        ax1.set_ylabel(r'I$_\mathrm{D}$ [uA]')
         ax2 = ax1.twinx()
-        lns2 = ax2.plot(v, spl_dev, ls=' ', marker='s', ms=3, color='tab:orange', label="transconductance")
+        lns2 = ax2.plot(v, spl_dev*1e6, ls=' ', marker='s', ms=3, color='tab:orange', label="transconductance")
         ax2.tick_params(axis='y', labelcolor='tab:orange')
         ax2.set_ylabel(r'g$_\mathrm{m}$ [S]', color='tab:orange')
-        lns3 = ax1.plot(v, fit, '--r', label="tangent")
+        lns3 = ax1.plot(v, fit*1e6, '--r', label="tangent")
         lns = lns1+lns2+lns3
         labs = [l.get_label() for l in lns]
         plt.legend(lns, labs, loc='upper left')
-        plt.show()
+        if outdir is None:
+            plt.show()
+        else:
+            fig.savefig(os.path.join(outdir, "fet_"+outname+".png"))
+            plt.close()
 
-    if printResults:
+    if printResults and outdir is None:
        print('%s: \tnFet: v_th: %.2e V' % (lbl, v_th))
 
     return v_th

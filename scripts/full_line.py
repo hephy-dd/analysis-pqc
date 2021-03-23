@@ -149,7 +149,8 @@ def loadBatch(path, outdir=None, lazy=False):
             print("lazy mode: nothing to do")
             exit(0)
     
-    pqc_results.analyze(path)
+    pqc_results.prepareAnalysisFolder(outdir)
+    pqc_results.analyze(path, outdir)
     
     return pqc_results
     
@@ -172,8 +173,7 @@ def main():
         #pqc_results.prettyPrint()
         renderTemplates(pqc_results)
         
-        #pqc_results.prepareAnalysisFolder(outdir)
-        #pqc_results.createHistograms(outdir)
+        pqc_results.createHistograms(outdir)
         #pqc_results.exportLatex(outdir)
         
         
