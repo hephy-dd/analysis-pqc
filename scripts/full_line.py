@@ -12,8 +12,18 @@ from matplotlib import gridspec
 import numpy as np
 from pqc_resultset import PQC_resultset
 from datetime import timedelta, date
+from jinja2 import Template, Environment, FileSystemLoader
 
-   
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+
+def renderTemplates(pqc_resultset):
+    # Create the jinja2 environment.
+    # Notice the use of trim_blocks, which greatly helps control whitespace.
+    j2_env = Environment(loader=FileSystemLoader(THIS_DIR),
+                         trim_blocks=True)
+    print(j2_env.get_template('templates/stdout.txt').render(
+        batch=pqc_resultset.batch,
+        dataseries=pqc_resultset.dataseries))
     
     
 def plotTimeline(pqc_batches, path, printBatchNumbers=True):
@@ -158,11 +168,15 @@ def main():
     
     if not args.m:
         pqc_results = loadBatch(args.path, outdir, args.l)
-        pqc_results.prettyPrint()
         
-        pqc_results.prepareAnalysisFolder(outdir)
-        pqc_results.createHistograms(outdir)
-        pqc_results.exportLatex(outdir)
+        #pqc_results.prettyPrint()
+        renderTemplates(pqc_results)
+        
+        #pqc_results.prepareAnalysisFolder(outdir)
+        #pqc_results.createHistograms(outdir)
+        #pqc_results.exportLatex(outdir)
+        
+        
     else:
         print("Multibatch mode")
         dirs = glob.glob(os.path.join(args.path, "*"))

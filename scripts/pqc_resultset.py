@@ -13,145 +13,13 @@ import datetime
 import dateutil.parser as parser
 from matplotlib import colors
 from itertools import islice
-
-def params(names):
-    """Function decorator returning namedtuples."""
-    def params(f):
-        def params(*args, **kwargs):
-           return namedtuple(f.__name__, names)(*f(*args, **kwargs))
-        return params
-    return params
+from pqc_values import PQC_Values, make_chunks
+from analysis_pqc import params
 
 
 
-def make_chunks(data, size):
-    it = iter(data)
 
-    for i in range(0, len(data), size):
-        yield [k for k in islice(it, size)]
 
-def num2str(num, basenum=None):
-    if basenum is None:
-        basenum = num
-    if basenum < 10:
-        ret = "{:4.2f}".format(num)
-    else:
-        ret = "{:4.1f}".format(num)
-    return ret
-
-class PQC_value:
-    def __init__(self, name='na', nicename='na', expectedValue=0., unit='', showmultiplier=1e0, stray=0.5, values=None):
-        self.values = []
-        self.name = name
-        self.nicename = nicename
-        self.unit = unit
-        self.showmultiplier = showmultiplier
-        self.expectedValue = expectedValue
-        self.minAllowed = expectedValue * (1-stray)
-        self.maxAllowed = expectedValue * (1+stray)
-        self.stray = stray
-        self.expectedValue = expectedValue
-
-        if values is not None:
-            self.values = values
-            
-    def __str__(self):
-        return self.name+str(np.array(self.values)*self.showmultiplier)+self.unit
-        
-    def append(self, val):
-        self.values.append(val)
-            
-    def rearrange(self, indices):
-        self.values = [ self.values[indices[i]] for i in range(0, len(indices)) ]
-
-    def getValue(self, index):
-        # with multiplier to suit the unit
-        return self.values[index]*self.showmultiplier
-        
-    def split(self, itemsperclice):
-        ret = [PQC_value(self.name, self.nicename, self.expectedValue, self.unit, self.showmultiplier, self.stray, values=i) for i in make_chunks(self.values, itemsperclice)]
-        return ret
-        
-    @params('values, nTot, nNan, nTooHigh, nTooLow, totAvg, totStd, totMed, selAvg, selStd, selMed')
-    def getStats(self, minAllowed=None, maxAllowed=None):
-        if minAllowed is None:
-            minAllowed = self.minAllowed
-        if maxAllowed is None:
-            maxAllowed = self.maxAllowed
-        
-        nTot = len(self.values)
-
-        selector = np.isfinite(np.array(self.values))
-        
-        if np.sum(selector) < 2:
-            return np.array([0]), 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
-            
-        values = np.array(self.values)[selector]*self.showmultiplier   # filter out nans
-        
-        if nTot < 2:
-            return values, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
-        
-        totMed = np.median(values)
-        totAvg = np.mean(values)
-        totStd = np.std(values)
-        
-        nNan = nTot - len(values)
-        values = values[values < maxAllowed]
-        nTooHigh = nTot - len(values) - nNan
-        values = values[values > minAllowed]
-        nTooLow = nTot - len(values) - nNan - nTooHigh
-        
-        if (len(values)):
-            selMed = np.median(values)
-            selAvg = np.mean(values)
-            selStd = np.std(values)
-        else:
-            selMed = np.nan
-            selAvg = np.nan
-            selStd = np.nan
-        
-        return values, nTot, nNan, nTooHigh, nTooLow, totAvg, totStd, totMed, selAvg, selStd, selMed
-     
-    @classmethod
-    def merge(new, parents, name='na', nicename='na'):
-        values = np.concatenate( [t.values for t in parents])
-        return new(name, nicename, parents[0].expectedValue, parents[0].unit, parents[0].showmultiplier, values=values, stray=parents[0].stray)
-    
-
-    
-    # get a colorized value string for ise in latex, if the index is higher we get summary elemets
-    def valueToLatex(self, index):
-        if index < len(self.values):
-            value = self.values[index]*self.showmultiplier
-            vstr = num2str(value, self.expectedValue)
-                
-            if np.isnan(value):
-                return "\\nanval NaN"
-            elif value > self.maxAllowed:
-                return "\\highval "+vstr
-            elif value < self.minAllowed:
-                return "\\lowval "+vstr
-            return "\\okval "+vstr
-        else:
-            stats = self.getStats()
-            sel={
-                0: "\\okval "+num2str(stats.selMed, self.expectedValue),
-                1: "\\okval "+num2str(stats.selAvg, self.expectedValue),
-                2: "\\okval "+num2str(stats.selStd, self.expectedValue),
-                3: "\\okval {}/{}".format(len(stats.values), stats.nTot),
-                4: "\\okval {:2.0f}\\%".format(len(stats.values)/stats.nTot*100),
-             }
-        return sel.get(index-len(self.values), "\\nanval err")
-        
-    def summaryDesciption(self, index):
-        v = ["\\hline \nMedian", "Average", "Std dev", "\\hline \nOK/Tot", "OK (rel)"]
-        return v[index-len(self.values)]
-    
-    def headerToLatex():
-        return "\\def\\nanval{\\cellcolor[HTML]{aa0000}}\n" \
-               "\\def\\highval{\\cellcolor[HTML]{ff9900}}\n" \
-               "\\def\\lowval{\\cellcolor[HTML]{ffff00}}\n" \
-               "\\def\\okval{\\cellcolor[HTML]{ffffff}}\n\n" \
                
 
 class PQC_resultset:
@@ -166,99 +34,83 @@ class PQC_resultset:
                            'xlabels':     self.labels,
                            'xflutes':     self.flutes,}
 
-        self.dataseries['vdp_poly_f'] = PQC_value("vdp_poly", "Polysilicon VdP", 2.4, "kOhm/sq", 1e-3, stray=0.2)
-        self.dataseries['vdp_poly_r'] = PQC_value("vdp_poly_rev", "Polysilicon VdP reverse", 2.4, "kOhm/sq", 1e-3, stray=0.2)
+        self.dataseries['vdp_poly_f'] = PQC_Values("vdp_poly", "Polysilicon VdP", 2.4, "kOhm/sq", 1e-3, stray=0.2)
+        self.dataseries['vdp_poly_r'] = PQC_Values("vdp_poly_r", "Polysilicon VdP reverse", 2.4, "kOhm/sq", 1e-3, stray=0.2)
 
-        self.dataseries['vdp_n_f'] = PQC_value("vdp_N", "N+ VdP", 35., "Ohm/sq", stray=0.2)
-        self.dataseries['vdp_n_r'] = PQC_value("vdp_N_rev", "N+ VdP reverse", 35., "Ohm/sq", stray=0.2)
+        self.dataseries['vdp_n_f'] = PQC_Values("vdp_N", "N+ VdP", 35., "Ohm/sq", stray=0.2)
+        self.dataseries['vdp_n_r'] = PQC_Values("vdp_N_r", "N+ VdP reverse", 35., "Ohm/sq", stray=0.2)
 
-        self.dataseries['vdp_pstop_f'] = PQC_value("vdp_pstop", "P-stop VdP", 19., "kOhm/sq", 1e-3, stray=0.2)
-        self.dataseries['vdp_pstop_r'] = PQC_value("vdp_pstop_rev", "P-stop VdP reverse", 19., "kOhm/sq", 1e-3, stray=0.2)
+        self.dataseries['vdp_pstop_f'] = PQC_Values("vdp_pstop", "P-stop VdP", 19., "kOhm/sq", 1e-3, stray=0.2)
+        self.dataseries['vdp_pstop_r'] = PQC_Values("vdp_pstop_r", "P-stop VdP reverse", 19., "kOhm/sq", 1e-3, stray=0.2)
 
-        self.dataseries['t_line_n'] = PQC_value("t_line_n", "Linewidth N+", 35., "um")
-        self.dataseries['t_line_pstop2'] = PQC_value("t_line_pstop2", "Linewidth P-stop 2 Wire", 38., "um")
-        self.dataseries['t_line_pstop4'] = PQC_value("t_line_pstop4", "Linewidth P-stop 4 Wire", 55., "um")
+        self.dataseries['t_line_n'] = PQC_Values("t_line_n", "Linewidth N+", 35., "um")
+        self.dataseries['t_line_pstop2'] = PQC_Values("t_line_pstop2", "Linewidth P-stop 2 Wire", 38., "um")
+        self.dataseries['t_line_pstop4'] = PQC_Values("t_line_pstop4", "Linewidth P-stop 4 Wire", 55., "um")
 
-        self.dataseries['r_contact_n'] = PQC_value("r_contact_n", "Rcontact N+", 27., "Ohm")
-        self.dataseries['r_contact_poly'] = PQC_value("r_contact_poly", "Rcontact polysilicon", 100., "kOhm", 1e-3)
-
-
-        self.dataseries['v_th'] = PQC_value("fet", "FET Vth", 4., "V", stray=0.25)
-
-        self.dataseries['vdp_metclo_f'] = PQC_value("vdp_met_clover", "Metal Cloverleaf VdP", 25., "mOhm/sq", 1e3)
-        self.dataseries['vdp_metclo_r'] = PQC_value("vdp_met_clover_rev", "Metal Cloverleaf VdP reverse", 25., "mOhm/sq", 1e3)
-
-        self.dataseries['vdp_p_cross_bridge_f'] = PQC_value("vdp_cross_bridge", "Cross Bridge VdP", 1.5, "kOhm/sq", 1e-3)
-        self.dataseries['vdp_p_cross_bridge_r'] = PQC_value("vdp_cross_bridge_rev", "Cross Bridge VdP reverse", 1.5, "kOhm/sq", 1e-3)
-
-        self.dataseries['t_line_p_cross_bridge'] = PQC_value("t_line_cb", "Linewidth cross bridge P", 35., "um")
-
-        self.dataseries['v_bd'] = PQC_value("v_bd", "Breakdown Voltage", 215., "V")
+        self.dataseries['r_contact_n'] = PQC_Values("r_contact_n", "Rcontact N+", 27., "Ohm")
+        self.dataseries['r_contact_poly'] = PQC_Values("r_contact_poly", "Rcontact polysilicon", 100., "kOhm", 1e-3)
 
 
-        self.dataseries['i600'] = PQC_value("i600", "I @ 600V", 100., "uA", 1e6, stray=1.)
-        self.dataseries['v_fd'] = PQC_value("v_fd", "Full depletion Voltage", 260., "V", stray=0.33)
-        self.dataseries['rho'] = PQC_value("rho", "rho", 3.5, "kOhm cm", 0.1)
-        self.dataseries['conc'] = PQC_value("d_conc", "Doping Concentration", 3.5, "1E12cm^-3", 1e-18)
+        self.dataseries['v_th'] = PQC_Values("fet", "FET Vth", 4., "V", stray=0.25)
+
+        self.dataseries['vdp_metclo_f'] = PQC_Values("vdp_met", "Metal Cloverleaf VdP", 25., "mOhm/sq", 1e3)
+        self.dataseries['vdp_metclo_r'] = PQC_Values("vdp_met_r", "Metal Cloverleaf VdP reverse", 25., "mOhm/sq", 1e3)
+
+        self.dataseries['vdp_p_cross_bridge_f'] = PQC_Values("vdp_cb", "Cross Bridge VdP", 1.5, "kOhm/sq", 1e-3)
+        self.dataseries['vdp_p_cross_bridge_r'] = PQC_Values("vdp_cb_r", "Cross Bridge VdP reverse", 1.5, "kOhm/sq", 1e-3)
+
+        self.dataseries['t_line_p_cross_bridge'] = PQC_Values("t_line_cb", "Linewidth cross bridge P", 35., "um")
+
+        self.dataseries['v_bd'] = PQC_Values("v_bd", "Breakdown Voltage", 215., "V")
 
 
-        self.dataseries['v_fb2'] = PQC_value("v_fb", "Flatband voltage", 2.5, "V", stray=0.33)
+        self.dataseries['i600'] = PQC_Values("i600", "I @ 600V", 100., "uA", 1e6, stray=1.)
+        self.dataseries['v_fd'] = PQC_Values("v_fd", "Full depletion Voltage", 260., "V", stray=0.33)
+        self.dataseries['rho'] = PQC_Values("rho", "rho", 3.5, "kOhm cm", 0.1)
+        self.dataseries['conc'] = PQC_Values("d_conc", "Doping Concentration", 3.5, "1E12cm^-3", 1e-18)
 
-        self.dataseries['t_ox'] = PQC_value("t_ox", "Oxide thickness", 0.67, "um", stray=0.33)
-        self.dataseries['n_ox'] = PQC_value("n_ox", "Oxide concentration", 10.5, "1E10cm^-3", 1e-10)
-        self.dataseries['c_acc_m'] = PQC_value("c_acc", "Accumulation capacitance", 85., "pF", 1e12, stray=0.2)
 
-        self.dataseries['i_surf'] = PQC_value("i_surf", "Surface current", 8., "pA", -1e12, stray=1)
-        self.dataseries['i_surf05'] = PQC_value("i_surf05", "Surface current 05", 11., "pA", -1e12, stray=1)
-        self.dataseries['i_bulk05'] = PQC_value("i_bulk05", "Bulk current 05", 0.7, "pA", -1e12, stray=1)
+        self.dataseries['v_fb2'] = PQC_Values("v_fb", "Flatband voltage", 2.5, "V", stray=0.33)
+
+        self.dataseries['t_ox'] = PQC_Values("t_ox", "Oxide thickness", 0.67, "um", stray=0.33)
+        self.dataseries['n_ox'] = PQC_Values("n_ox", "Oxide concentration", 10.5, "1E10cm^-3", 1e-10)
+        self.dataseries['c_acc_m'] = PQC_Values("c_acc", "Accumulation capacitance", 85., "pF", 1e12, stray=0.2)
+
+        self.dataseries['i_surf'] = PQC_Values("i_surf", "Surface current", 8., "pA", -1e12, stray=1)
+        self.dataseries['i_surf05'] = PQC_Values("i_surf05", "Surface current 05", 11., "pA", -1e12, stray=1)
+        self.dataseries['i_bulk05'] = PQC_Values("i_bulk05", "Bulk current 05", 0.7, "pA", -1e12, stray=1)
         
-        self.dataseries['nvdp_poly_f'] = PQC_value("nvdp_poly", "PolySi Swapped VdP", 2.4, "kOhm/sq", -1e-3, stray=0.2)
-        self.dataseries['nvdp_poly_r'] = PQC_value("nvdp_poly_rev", "PolySi Swapped VdP reverse", 2.4, "kOhm/sq", -1e-3, stray=0.2)
-
-        self.dataseries['nvdp_n_f'] = PQC_value("nvdp_N", "N+ Swapped VdP", 35., "Ohm/sq", -1., stray=0.2)
-        self.dataseries['nvdp_n_r'] = PQC_value("nvdp_N_rev", "N+ Swapped VdP reverse", 35., "Ohm/sq", -1., stray=0.2)
-
-        self.dataseries['nvdp_pstop_f'] = PQC_value("nvdp_pstop", "P-stop Swapped VdP", 19., "kOhm/sq", -1e-3, stray=0.2)
-        self.dataseries['nvdp_pstop_r'] = PQC_value("nvdp_pstop_rev", "P-stop Swapped VdP rev", 19., "kOhm/sq", -1e-3, stray=0.2)
+        self.dataseries['vdp_bulk_f'] = PQC_Values("vdp_bulk", "Bulk VdP Cross", 66., "kOhm/sq", 1e-3, stray=0.8)
+        self.dataseries['vdp_bulk_r'] = PQC_Values("vdp_bulk_r", "Bulk VdP Cross rev", 66., "kOhm/sq", 1e-3, stray=0.8)
         
-        self.dataseries['vdp_bulk_f'] = PQC_value("vdp_bulk", "Bulk VdP Cross", 66., "kOhm/sq", 1e-3, stray=0.8)
-        self.dataseries['vdp_bulk_r'] = PQC_value("vdp_bulk_rev", "Bulk VdP Cross rev", 66., "kOhm/sq", 1e-3, stray=0.8)
+        self.dataseries['meander_poly'] = PQC_Values("meand_poly", "Polisilicon Resistor", 1.7, "MOhm", 1e-6, stray=0.5)
+        self.dataseries['meander_metal'] = PQC_Values("meand_metal", "Metal Meander", 260., "Ohm", 1., stray=0.5)
         
-        self.dataseries['meander_poly'] = PQC_value("meander_poly", "Polisilicon Resistor", 1.7, "MOhm", 1e-6, stray=0.5)
-        self.dataseries['meander_metal'] = PQC_value("meander_metal", "Metal Meander", 260., "Ohm", 1., stray=0.5)
+        self.dataseries['contact_poly'] = PQC_Values("cont_poly", "Contact Chain PolySi", 35., "MOhm", 1e-6, stray=0.5)
+        self.dataseries['contact_p'] = PQC_Values("cont_p", "Contact Chain P", 85., "kOhm", 1e-3, stray=0.5)
+        self.dataseries['contact_n'] = PQC_Values("cont_n", "Contact Chain N", 85., "kOhm", 1e-3, stray=0.5)
         
-        self.dataseries['contact_poly'] = PQC_value("contact_poly", "Contact Chain PolySi", 35., "MOhm", 1e-6, stray=0.5)
-        self.dataseries['contact_p'] = PQC_value("contact_p", "Contact Chain P", 85., "kOhm", 1e-3, stray=0.5)
-        self.dataseries['contact_n'] = PQC_value("contact_n", "Contact Chain N", 85., "kOhm", 1e-3, stray=0.5)
-        
-        self.dataseries['capacitor'] = PQC_value("cap", "Capacitor", 3., "pF", 1e12, stray=0.5)
-        self.dataseries['capacitor_tox'] = PQC_value("cap_tox", "Capacitor: Oxide Thickness", 1., "nm", 1e9, stray=0.5)
-        
-        
+        self.dataseries['cap_l'] = PQC_Values("cap_l", "Capacitor", 3., "pF", 1e12, stray=0.5)
+        self.dataseries['cap_r'] = PQC_Values("cap_r", "Capacitor", 3., "pF", 1e12, stray=0.5)
+        self.dataseries['cap_l_tox'] = PQC_Values("capl_tox", "Capacitor: Oxide Thickness", 1., "nm", 1e9, stray=0.5)
+        self.dataseries['cap_r_tox'] = PQC_Values("capr_tox", "Capacitor: Oxide Thickness", 1., "nm", 1e9, stray=0.5)
         
         if dataseries is not None:
             self.dataseries = dataseries
 
     def vdp_poly_tot(self):
-        return PQC_value.merge([self.dataseries['vdp_poly_f'], self.dataseries['vdp_poly_r']], "vdp_poly_tot", "PolySi VdP both")
+        return PQC_Values.merge([self.dataseries['vdp_poly_f'], self.dataseries['vdp_poly_r']], "vdp_poly_tot", "PolySi VdP both")
     def vdp_n_tot(self):
-        return PQC_value.merge([self.dataseries['vdp_n_f'], self.dataseries['vdp_n_f']], "vdp_N_tot", "N+ VdP both")     
+        return PQC_Values.merge([self.dataseries['vdp_n_f'], self.dataseries['vdp_n_f']], "vdp_N_tot", "N+ VdP both")     
     def vdp_pstop_tot(self):
-        return PQC_value.merge([self.dataseries['vdp_pstop_f'], self.dataseries['vdp_pstop_f']], "vdp_pstop_tot", "P-stop VdP both")
+        return PQC_Values.merge([self.dataseries['vdp_pstop_f'], self.dataseries['vdp_pstop_f']], "vdp_pstop_tot", "P-stop VdP both")
         
-    def nvdp_poly_tot(self):
-        return PQC_value.merge([self.dataseries['nvdp_poly_f'], self.dataseries['nvdp_poly_r']], "nvdp_poly_tot", "PolySi Swapped VdP")
-    def nvdp_n_tot(self):
-        return PQC_value.merge([self.dataseries['nvdp_n_f'], self.dataseries['nvdp_n_r']], "nvdp_N_tot", "N+ Swapped VdP both")
-    def nvdp_pstop_tot(self):
-        return PQC_value.merge([self.dataseries['nvdp_pstop_f'], self.dataseries['nvdp_pstop_r']], "nvdp_pstop_tot", "P-stop Swapped VdP")
-    
     def sortByTime(self):
         order = np.argsort(self.timestamps)
         #print(str(order))
         
         for key in self.dataseries:
-            if type(self.dataseries[key]) is PQC_value:
+            if type(self.dataseries[key]) is PQC_Values:
                 self.dataseries[key].rearrange(order)
             else:
                 self.dataseries[key][:] = [self.dataseries[key][i] for i in order]  # we want to keep the original object so references are preserved
@@ -274,7 +126,7 @@ class PQC_resultset:
             ret[i] = PQC_resultset(self.batch)
         
         for key in self.dataseries:
-            if type(self.dataseries[key]) is PQC_value:
+            if type(self.dataseries[key]) is PQC_Values:
                 ch = self.dataseries[key].split(itemsperclice)
             else:
                 ch = [i for i in make_chunks(self.dataseries[key], itemsperclice)]
@@ -298,7 +150,7 @@ class PQC_resultset:
         
         for i in range(0, len(dirs)):
 
-            for currflute in ["PQCFlutesLeft", "PQCFlutesRight", "PQCFluteLeft", "PQCFluteRight", "RL", "UL"]:   # we want both flutes if they are measured, but sometimes it's misspelled
+            for currflute in ["PQCFlutesLeft", "PQCFlutesRight", "PQCFluteLeft", "PQCFluteRight", "RL", "UL", "5Vfb"]:   # we want both flutes if they are measured, but sometimes it's misspelled
                 if len(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "cross"], blacklist=["reverse"])) < 1:
                     continue
 
@@ -362,15 +214,6 @@ class PQC_resultset:
                 self.dataseries['i_surf05'].append(i_surf05)
                 self.dataseries['i_bulk05'].append(i_bulk05)
                 
-                self.dataseries['nvdp_poly_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "ncross"], blacklist=["reverse"]), plotResults=False))
-                self.dataseries['nvdp_poly_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "reverse", "ncross"])))
-
-                self.dataseries['nvdp_n_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "ncross"], blacklist=["reverse"])))
-                self.dataseries['nvdp_n_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "reverse", "ncross"])))
-
-                self.dataseries['nvdp_pstop_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "ncross"], blacklist=["reverse"])))
-                self.dataseries['nvdp_pstop_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "reverse", "ncross"])))
-            
                 self.dataseries['vdp_bulk_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], None, whitelist=[currflute, "bulk", "cross"], blacklist=["reverse"])))
                 self.dataseries['vdp_bulk_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], None, whitelist=[currflute, "bulk", "reverse", "cross"])))
                 
@@ -382,10 +225,14 @@ class PQC_resultset:
                 self.dataseries['contact_n'].append(pqc.analyse_contact_data(pqc.find_all_files_from_path(dirs[i], "contact", whitelist=[currflute, "chain", "N"], single=True), printResults=False, plotResults=False))
                 
                 
-                c_mean, c_median, d = pqc.analyse_capacitor_data(pqc.find_all_files_from_path(dirs[i], "capacitor", whitelist=[currflute, "250mV", "10kHz"], blacklist=["mos"], single=True), printResults=False, plotResults=False)
-                self.dataseries['capacitor'].append(c_median)
-                self.dataseries['capacitor_tox'].append(d)
-        
+                c_mean, c_median, d = pqc.analyse_capacitor_data(pqc.find_all_files_from_path(dirs[i], "capacitor", whitelist=[currflute, "Left", "250mV", "10kHz"], blacklist=["mos"], single=True), printResults=False, plotResults=False)
+                self.dataseries['cap_l'].append(c_median)
+                self.dataseries['cap_l_tox'].append(d)
+                
+                c_mean, c_median, d = pqc.analyse_capacitor_data(pqc.find_all_files_from_path(dirs[i], "capacitor", whitelist=[currflute, "Right", "250mV", "10kHz"], blacklist=["mos"], single=True), printResults=False, plotResults=False)
+                self.dataseries['cap_r'].append(c_median)
+                self.dataseries['cap_r_tox'].append(d)
+                
                 
             
     def prettyPrint(self):
@@ -572,9 +419,6 @@ class PQC_resultset:
         self.histogram(self.vdp_n_tot(), histogramDir, rangeExtension=1.5e2)
         self.histogram(self.vdp_pstop_tot(), histogramDir, rangeExtension=1.5e2)        
 
-        self.histogram(self.nvdp_poly_tot(), histogramDir)
-        self.histogram(self.nvdp_n_tot(), histogramDir)
-        self.histogram(self.nvdp_pstop_tot(), histogramDir)   
         
     def shortLabel(self, i):
         fl = "x"
@@ -615,7 +459,7 @@ class PQC_resultset:
         f = open(os.path.join(self.getAnalysisFolderPath(path), "table1.tex"), "w")
         f.write("% automatically created table for batch " + self.batch + "\n\n")
         
-        f.write(PQC_value.headerToLatex())
+        f.write(PQC_Values.headerToLatex())
         
         # \\rowcolors{2}{gray!25}{white}
         
@@ -668,7 +512,7 @@ class PQC_resultset:
         f = open(os.path.join(self.getAnalysisFolderPath(path), "table2.tex"), "w")
         f.write("% automatically created table for batch " + self.batch + "\n\n")
         
-        f.write(PQC_value.headerToLatex())
+        f.write(PQC_Values.headerToLatex())
         
         f.write("""\\begin{center}
         \\fontsize{4pt}{5pt}\\selectfont
@@ -715,7 +559,7 @@ class PQC_resultset:
         f = open(os.path.join(self.getAnalysisFolderPath(path), "table3.tex"), "w")
         f.write("% automatically created table for batch " + self.batch + "\n\n")
         
-        f.write(PQC_value.headerToLatex())
+        f.write(PQC_Values.headerToLatex())
         
         f.write("""
         \\begin{center}
