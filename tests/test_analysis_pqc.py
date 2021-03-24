@@ -23,7 +23,7 @@ class AnalysisPQCTest(unittest.TestCase):
 
     def test_analyse_cv(self):
         r = analysis_pqc.analyse_cv(x, y)
-        self.assertEqual(r.status, analysis_pqc.STATUS_PASSED)
+        self.assertEqual(r.status, analysis_pqc.STATUS_FAILED)
 
     def test_analyse_mos(self):
         r = analysis_pqc.analyse_mos(x, y, cut_param=-1)
