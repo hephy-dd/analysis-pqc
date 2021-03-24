@@ -20,8 +20,6 @@ from analysis_pqc import params
 
 
 
-               
-
 class PQC_resultset:
     def __init__(self, batchname, dataseries=None):
         self.batch = batchname
@@ -164,7 +162,7 @@ class PQC_resultset:
                     self.timestamps.append(0)
                     
                 cross = "cross"
-                outname = self.labels[i]
+                outname = self.dataseries['xlabels'][-1]+"_"+currflute
                 outdir = os.path.join(self.outDir, "plots")
                 
                 self.dataseries['vdp_poly_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", cross], blacklist=["reverse"]), plotResults=False))
@@ -203,16 +201,16 @@ class PQC_resultset:
                 self.dataseries['rho'].append(rho)
                 self.dataseries['conc'].append(conc)
                 
-                dummy, v_fb2, t_ox, n_ox, c_acc_m = pqc.analyse_mos_data(pqc.find_most_recent_file(dirs[i], "mos", whitelist=[currflute, ]), printResults=False, plotResults=False)
+                dummy, v_fb2, t_ox, n_ox, c_acc_m = pqc.analyse_mos_data(pqc.find_most_recent_file(dirs[i], "mos", whitelist=[currflute, ]), outdir=outdir, outname=outname)
                 self.dataseries['v_fb2'].append(v_fb2)
                 self.dataseries['t_ox'].append(t_ox)
                 self.dataseries['n_ox'].append(n_ox)
                 self.dataseries['c_acc_m'].append(c_acc_m)
                 
-                i_surf, dummy = pqc.analyse_gcd_data(pqc.find_most_recent_file(dirs[i], "gcd", whitelist=[currflute, ]), printResults=False, plotResults=False)  # only i_surf valid
+                i_surf, dummy = pqc.analyse_gcd_data(pqc.find_most_recent_file(dirs[i], "gcd", whitelist=[currflute, ]), outdir=outdir, outname=outname)  # only i_surf valid
                 self.dataseries['i_surf'].append(i_surf)
                 
-                i_surf05, i_bulk05 = pqc.analyse_gcd_data(pqc.find_most_recent_file(dirs[i], "gcd05", whitelist=[currflute, ]), printResults=False, plotResults=False)  # for i_bulk
+                i_surf05, i_bulk05 = pqc.analyse_gcd_data(pqc.find_most_recent_file(dirs[i], "gcd05", whitelist=[currflute, ]), outdir=outdir, outname=outname+" GCD05")  # for i_bulk
                 self.dataseries['i_surf05'].append(i_surf05)
                 self.dataseries['i_bulk05'].append(i_bulk05)
                 
@@ -236,48 +234,7 @@ class PQC_resultset:
         self.dataseries['xlabels'].extend(PQC_Values.getStatLabels())
         self.dataseries['xflutes'].extend([""]*len(PQC_Values.getStatLabels()))
         self.dataseries['xtimestamps'].extend([""]*len(PQC_Values.getStatLabels()))
-            
-    def prettyPrint(self):
-        print("# serial                                 \tvdp_poly/kOhm/sq   vdp_n/Ohm/sq  vdp_pstop/kOhm/sq  lw_n/um   lwp2/um lwp4/um  cbk poly/kOhm cbk n/Ohm cap/pF c-tox/nm")
-        for i in range(0, len(self.labels)):
-            line = "{} {}  \t".format(self.labels[i], self.flutes[i])
-            line += "{:6.2f} {:6.2f}    ".format(self.dataseries['vdp_poly_f'].getValue(i), self.dataseries['vdp_poly_r'].getValue(i))
-            line += "{:6.1f} {:6.1f}    ".format(self.dataseries['vdp_n_f'].getValue(i), self.dataseries['vdp_n_r'].getValue(i))
-            line += "{:6.1f} {:6.1f}    ".format(self.dataseries['vdp_pstop_f'].getValue(i), self.dataseries['vdp_pstop_r'].getValue(i))
-            line += "{:8.2f} {:8.2f} {:8.2f}     ".format(self.dataseries['t_line_n'].getValue(i), self.dataseries['t_line_pstop2'].getValue(i), self.dataseries['t_line_pstop4'].getValue(i))
-            line += "{:8.2f} {:8.2f}".format(self.dataseries['r_contact_poly'].getValue(i), self.dataseries['r_contact_n'].getValue(i))
-            line += "{:8.2f} {:8.2f}".format(self.dataseries['capacitor'].getValue(i), self.dataseries['capacitor_tox'].getValue(i))
-            
-            print(line)
         
-        print("")
-        print("")
-        print("# serial                                 \t fet       vdp_met-clov       vdp_p-cr-br/kOhm/sq     lw_cb  v_bd   i600    V_fd  rho    dconc  contact chains")
-        print("#                                        \tv_th/V                                                 um     V      uA       V kOhmcm 1E12cm^-3 Poly/MOhm  N/kOhm  P/kOhm")
-        for i in range(0, len(self.labels)):
-            line = "{} {}  \t".format(self.labels[i], self.flutes[i])
-            line += "{:6.2f}  ".format(self.dataseries['v_th'].getValue(i))
-            line += "{:9.2E}  {:9.2E}   ".format(self.dataseries['vdp_metclo_f'].getValue(i), self.dataseries['vdp_metclo_r'].getValue(i))
-
-            line += "{:8.2f} {:8.2f}    ".format(self.dataseries['vdp_p_cross_bridge_f'].getValue(i), self.dataseries['vdp_p_cross_bridge_r'].getValue(i))
-            line += "{:8.2f}  ".format(self.dataseries['t_line_p_cross_bridge'].getValue(i))
-
-            line += "{:3.0f}  ".format(self.dataseries['v_bd'].getValue(i))
-            line += "{:6.2f}  {:6.2f}  {:4.2f}  {:4.2f}   ".format(self.dataseries['i600'].getValue(i), self.dataseries['v_fd'].getValue(i), self.dataseries['rho'].getValue(i), self.dataseries['conc'].getValue(i))
-            
-            line += "{:8.2f} {:8.2f}  {:8.2f}  ".format(self.dataseries['contact_poly'].getValue(i), self.dataseries['contact_n'].getValue(i), self.dataseries['contact_p'].getValue(i))
-            print(line)
-        print("")
-        print("")
-        print("# serial                                 \t                    mos                        gcd             gcd05            vdp_bulk           poly_r   met_meand")
-        print("#                                        \t v_fb/V    c_acc/pF   t_ox/um n_ox/1E10cm^-2 i_surf/pA  i_surf/pA   i_bulk/pA     kOhm/sq            MOhm      Ohm")
-        for i in range(0, len(self.labels)):
-            line = "{} {}  \t".format(self.labels[i], self.flutes[i])
-            line += "{:8.2f}    {:6.2f}    {:7.3f}  {:9.2f}     ".format(self.dataseries['v_fb2'].getValue(i), self.dataseries['c_acc_m'].getValue(i), self.dataseries['t_ox'].getValue(i), self.dataseries['n_ox'].getValue(i))
-            line += "{:8.2f}  {:8.2f}  {:8.2f}    ".format(self.dataseries['i_surf'].getValue(i), self.dataseries['i_surf05'].getValue(i), self.dataseries['i_bulk05'].getValue(i))
-            line += "{:8.2f} {:8.2f}    ".format(self.dataseries['vdp_bulk_f'].getValue(i), self.dataseries['vdp_bulk_r'].getValue(i))
-            line += "{:8.2f} {:8.2f}    ".format(self.dataseries['meander_poly'].getValue(i), self.dataseries['meander_metal'].getValue(i))
-            print(line)
         
     def statusbar(self, pqc_value_statistics, axes, single=True, start=-0.5, stop=0.5, label=''):
         relOK = len(pqc_value_statistics.values)/pqc_value_statistics.nTot
@@ -411,7 +368,7 @@ class PQC_resultset:
                 os.remove(f)
                 
         
-    def createHistograms(self, path):
+    def createHistograms(self):
         matplotlib.rcParams.update({'font.size': 14})
         
         histogramDir = self.outDir
@@ -455,6 +412,20 @@ class PQC_resultset:
             return s
         else:
             return re.sub(r'VPX','', s)
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
         
     # this could be done e.g. via df.to_latex() in pandas, but coloring the cells is then complicated, so done manually...

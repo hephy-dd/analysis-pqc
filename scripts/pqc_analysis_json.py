@@ -122,7 +122,7 @@ def analyse_cv_data(path, plotResults=True, printResults=print_results):
     return v_dep2, rho, conc
 
 
-def analyse_mos_data(path, plotResults=True, printResults=print_results):
+def analyse_mos_data(path, plotResults=True, printResults=print_results, outdir=None, outname=None):
     test = 'mos'
     
     if path is None:
@@ -147,8 +147,6 @@ def analyse_mos_data(path, plotResults=True, printResults=print_results):
         lbl = assign_label(path, test)
         c_acc_m = np.mean(c_acc)
 
-        fit_acc = [a_acc*x + b_acc for x in v]
-        fit_dep = [a_dep*i+b_dep for i in v]
     except:
         return np.nan, np.nan, np.nan, np.nan, np.nan
     annotate = 'V$_{{fb}}$: {} V (via intersection)\nV$_{{fb}}$: {} V (via inflection)\n\nt$_{{ox}}$: {} m\nn$_{{ox}}$: {} cm$^{{-2}}$'.format(round(v_fb2,2), round(v_fb1,2), round(t_ox, 2), round(n_ox, 2))
@@ -156,20 +154,31 @@ def analyse_mos_data(path, plotResults=True, printResults=print_results):
     x_loc = 0.15
     y_loc = 0.145
 
-    if plotResults:
+    if plotResults or outdir is not None:
         fig, ax = plt.subplots(1,1)
+        plot_curve(ax, v, c*1e12, 'MOS: '+outname, 'Bias Voltage / V', 'Capacitance / pF')
         #plt.ylim(0, 100)
-        fit_curve(ax, v, fit_acc, fit_dep)
+        fit_curve(ax, v_dep, np.array([a_dep*v+b_dep for v in v_dep])*1e12)
+        fit_curve(ax, v_acc, np.array([a_acc*v + b_acc for v in v_acc])*1e12)
         plt.axvline(x=v_fb2, color='black', linestyle='dashed')
-        plot_curve(ax, v, c, 'CV Curve', 'Voltage [V]', 'Capacitance [F]', lbl, annotate, x_loc, y_loc)
-
-    if printResults:
+        
+        
+        resstr = "v_fb:"+" {:8.2f} V\n".format(v_fb2)
+        fig.text(0.95, 0.33, resstr, bbox=dict(facecolor='deepskyblue', alpha=0.75), horizontalalignment='right', verticalalignment='top')
+        
+        if outdir is None:
+            plt.show()
+        else:
+            fig.savefig(os.path.join(outdir, "mos_"+outname+".png"))
+            plt.close()
+    
+    if printResults and outdir is None:
         print('%s: \tMOS: v_fb2: %.2e V\tc_acc: %.2e F\tt_ox: %.3e um\tn_ox: %.2e cm^-2' % (lbl, v_fb2, c_acc_m, t_ox, n_ox))
 
     return v_fb1, v_fb2, t_ox, n_ox, c_acc_m
 
 
-def analyse_gcd_data(path, plotResults=True, printResults=print_results):
+def analyse_gcd_data(path, plotResults=True, printResults=print_results, outdir=None, outname=None):
     test = 'gcd'
     
     if path is None:
@@ -186,25 +195,40 @@ def analyse_gcd_data(path, plotResults=True, printResults=print_results):
 
     lbl = assign_label(path, test)
 
-    i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, spl_dev, status = analyse_gcd(v,i_em)
+    gcd_result = analyse_gcd(v,i_em)
 
-    if plotResults and not math.isnan(i_surf) and not math.isnan(i_bulk):
+    if plotResults or outdir is not None:
         fig, ax = plt.subplots(1,1)
-        plot_curve(ax, v, i_em, 'I-V Curve GCD', 'Voltage [V]', 'Current [{}]'.format("A"), lbl, '', 0, 0)
-        fit_curve(ax, v_acc, i_acc, color='r')
-        fit_curve(ax, v_dep, i_dep, color='k')
-        fit_curve(ax, v_inv, i_inv, color='m')
+        plot_curve(ax, v, i_em*1e12, 'GCD: '+outname, 'Gate Voltage / V', 'Leakage Current / {}'.format("pA"))
+        try:
+            fit_curve(ax, gcd_result.v_acc, gcd_result.i_acc*1e12, color='r')
+            fit_curve(ax, gcd_result.v_dep, gcd_result.i_dep*1e12, color='k')
+            fit_curve(ax, gcd_result.v_inv, gcd_result.i_inv*1e12, color='m')
+        except (ValueError, ):
+            pass
+        resstr = "i_surf:"+" {:8.2f} pA\n".format(gcd_result.i_surf*1e12)
+        resstr += "i_bulk:"+" {:8.2f} pA\n".format(gcd_result.i_bulk*1e12)
+        resstr += "i_acc_relstd:"+" {:8.3f}%\n".format(gcd_result.i_acc_relstd*100)
+        resstr += "i_dep_relstd:"+" {:8.3f}%\n".format(gcd_result.i_dep_relstd*100)
+        resstr += "i_inv_relstd:"+" {:8.3f}%".format(gcd_result.i_inv_relstd*100)
+        fig.text(0.95, 0.33, resstr, bbox=dict(facecolor='deepskyblue', alpha=0.75), horizontalalignment='right', verticalalignment='top')
+        
+        if outdir is None:
+            plt.show()
+        else:
+            fig.savefig(os.path.join(outdir, "gcd_"+outname+".png"))
+            plt.close()
+    
+    if printResults and outdir is None:
+        print('%s: \tGCD: i_surf: %.2e A\t i_bulk: %.2e A' % (lbl, gcd_result.i_surf, gcd_result.i_bulk))
 
-    if printResults:
-        print('%s: \tGCD: i_surf: %.2e A\t i_bulk: %.2e A' % (lbl, i_surf, i_bulk))
-
-    return i_surf, i_bulk
+    return gcd_result.i_surf, gcd_result.i_bulk
 
 
 
 def analyse_fet_data(path, plotResults=True, printResults=print_results, outdir=None, outname=None):
     test = 'fet'
-    
+
     if path is None:
         return np.nan
 
@@ -213,6 +237,8 @@ def analyse_fet_data(path, plotResults=True, printResults=print_results, outdir=
     i_em = series.get('current_elm', np.array([]))
     i_src = series.get('current_vsrc', np.array([]))
     i_hvsrc = series.get('current_hvsrc', np.array([]))
+    
+    iz_em = i_em - i_em[0]
 
     if(len(v) < 3) or (len(i_em) < 3):
         return np.nan
@@ -226,7 +252,9 @@ def analyse_fet_data(path, plotResults=True, printResults=print_results, outdir=
     if plotResults or outdir is not None:
         fig,ax1 = plt.subplots()
         plt.title("FET: "+outname)
+        lns1a = ax1.plot(v,iz_em*1e6, ls='', marker='s', ms=3, color='tab:green', label='transfer characteristics - shifted')
         lns1 = ax1.plot(v,i_em*1e6, ls='', marker='s', ms=3, label='transfer characteristics')
+
         ax1.set_xlabel('V$_{GS}$ [V]')
         ax1.set_ylabel('I$_{D}$ [uA]')
         ax1.set_ylabel(r'I$_\mathrm{D}$ [uA]')
@@ -235,9 +263,14 @@ def analyse_fet_data(path, plotResults=True, printResults=print_results, outdir=
         ax2.tick_params(axis='y', labelcolor='tab:orange')
         ax2.set_ylabel(r'g$_\mathrm{m}$ [S]', color='tab:orange')
         lns3 = ax1.plot(v, fit*1e6, '--r', label="tangent")
-        lns = lns1+lns2+lns3
+        lns4 = ax1.plot([v_th, v_th], [-3, 3], '--k', label="tangent zero crossing")
+        lns = lns1+lns1a+lns2+lns3+lns4
         labs = [l.get_label() for l in lns]
+        
         plt.legend(lns, labs, loc='upper left')
+        ax1.grid(linestyle='dotted')
+        resstr = "V$_{th}$:"+" {:8.2f} V".format(v_th)
+        fig.text(0.85, 0.85, resstr, bbox=dict(facecolor='deepskyblue', alpha=0.75), horizontalalignment='right', verticalalignment='top')
         if outdir is None:
             plt.show()
         else:

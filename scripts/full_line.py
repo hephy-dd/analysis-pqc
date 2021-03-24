@@ -161,6 +161,7 @@ def main():
     parser.add_argument('-m', action='store_true', help='multibatch mode, e. g. for time analysis (experimental)')
     parser.add_argument('-o', default=None, help='override output directory location')
     parser.add_argument('-l', action='store_true', default=None, help='lazy evaluation: skip if the measurement folder is older than analysis folder')
+    parser.add_argument('-H', action='store_true', default=None, help='create histograms')
     args = parser.parse_args()
     
     outdir = args.o
@@ -173,7 +174,8 @@ def main():
         #pqc_results.prettyPrint()
         renderTemplates(pqc_results)
         
-        pqc_results.createHistograms(outdir)
+        if args.H:
+            pqc_results.createHistograms()
         #pqc_results.exportLatex(outdir)
         
         
