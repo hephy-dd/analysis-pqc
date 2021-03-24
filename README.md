@@ -7,7 +7,7 @@ Analysis for PQC measurements.
 Install using pip in a virtual environment.
 
 ```bash
-pip install git+https://github.com/hephy-dd/analysis-pqc.git@0.1.1
+pip install git+https://github.com/hephy-dd/analysis-pqc.git@0.2.0
 ```
 
 ## Local usage and development
