@@ -9,9 +9,12 @@ import warnings
 import numpy as np
 
 from scipy.interpolate import CubicSpline
+from scipy.stats import linregress
+import scipy.signal
 from collections import namedtuple
+import traceback
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 __all__ = [
     'STATUS_NONE',
@@ -57,7 +60,7 @@ def params(names):
 
 
 
-@params('a, b, x_fit, spl_dev, status')
+@params('a, b, x_fit, spl_dev, status, r_value')
 def line_regr_with_cuts(x, y, cut_param, debug=False):
     """
     Linear Regression with Cuts:
@@ -77,7 +80,7 @@ def line_regr_with_cuts(x, y, cut_param, debug=False):
     """
 
     # init
-    a = b = x_fit = spl_dev = -1
+    r_value = a = b = x_fit = spl_dev = -1
     status = STATUS_NONE
 
     # get spline fit, requires strictlty increasing array
@@ -94,7 +97,7 @@ def line_regr_with_cuts(x, y, cut_param, debug=False):
         try:
             x_fit = x[ idx_fit[0]:idx_fit[-1]+1 ]
             y_fit = y[ idx_fit[0]:idx_fit[-1]+1 ]
-            a, b = np.polyfit(x_fit, y_fit, 1)
+            a, b, r_value, p_value, std_err = scipy.stats.linregress(x_fit, y_fit)
             status = STATUS_PASSED
         except np.RankWarning:
             print("The array has too few data points. Try changing the cut_param parameter.")
@@ -103,7 +106,7 @@ def line_regr_with_cuts(x, y, cut_param, debug=False):
             print("The array seems empty. Try changing the cut_param parameter.")
             status = STATUS_FAILED
 
-    return a, b, x_fit, spl_dev, status
+    return a, b, x_fit, spl_dev, status, r_value
 
 
 
@@ -127,7 +130,7 @@ def analyse_iv(v, i, debug=False):
     """
 
     ## init
-    v_max = i_max = i_800 = i_600 = -1
+    v_max = i_max = i_800 = i_600 = np.nan
     status = STATUS_NONE
 
     ## init
@@ -139,11 +142,11 @@ def analyse_iv(v, i, debug=False):
     i_600 = np.array([ i[k] for k in range(len(v)) if np.abs(v[k]) == 600 ])
 
     if len(i_800) != 1:
-        i_800 = -1
+        i_800 = np.nan
     else:
         i_800 = i_800[0]
     if len(i_600) != 1:
-        i_600 = -1
+        i_600 = np.nan
     else:
         i_600 = i_600[0]
 
@@ -154,17 +157,19 @@ def analyse_iv(v, i, debug=False):
 
 
 @params('v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status')
-def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.03, debug=False):
+def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_windowsize=None, min_correl=0.1, debug=False):
     """
     Diode CV: Extract depletion voltage and resistivity.
 
     Parameters:
     v ... voltage
     c ... capacitance
-    area ... implant size in [m^2]
+    area ... implant size in [m^2] - defaults to quarter
     carrier ... majority charge carriers ['holes', 'electrons']
     cut_param ... used to cut on 1st derivative to id voltage regions
-
+    savgol_windowsize ... number of points to calculate the derivative, needs to be odd
+    min_correl ... minimum correlation coefficient to say that it worked
+    
     Returns:
     v_dep1 ... full depletion voltage via inflection
     v_dep2 ... full depletion voltage via intersection
@@ -173,9 +178,14 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.03, debug=Fa
     """
 
     # init
-    v_dep1 = v_dep2 = rho = conc = -1
-    a_rise = b_rise = v_rise = a_const = b_const = v_const = -1
+    v_dep1 = v_dep2 = rho = conc = np.nan
+    a_rise = b_rise = v_rise = a_const = b_const = v_const = np.nan
     status = STATUS_NONE
+    
+    if savgol_windowsize is None:
+        #savgol_windowsize = int(len(c)/40+1)*2+1  # a suitable off windowsie - making 20 windows along the whole measurement
+        savgol_windowsize = int(len(c)/30+1)*2+1  # a suitable off windowsie - making 15 windows along the whole measurement
+        # the window size needs to be an odd number, therefore this strange calculation
 
     # invert and square
     c = 1./c**2
@@ -183,25 +193,31 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.03, debug=Fa
     # get spline fit, requires strictlty increasing array
     y_norm = c / np.max(c)
     x_norm = np.arange(len(y_norm))
-    spl = CubicSpline(x_norm, y_norm)
-    spl_dev = spl(x_norm, 1)
+    #spl = CubicSpline(x_norm, y_norm)
+    #spl_dev = spl(x_norm, 1)
+    spl_dev = scipy.signal.savgol_filter(y_norm, window_length=savgol_windowsize, polyorder=1, deriv=1)
 
-    # get regions for indexing
-    idx_rise = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) > cut_param) ]
-    idx_const = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < cut_param) ]
+    idx_rise = []
+    idx_const = []
 
     with warnings.catch_warnings():
         warnings.filterwarnings('error')
 
         try:
+            # get regions for indexing
+            idx_rise = [ i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) > cut_param) ]  # the first and last value seems to be off sometimes
+            idx_const = [ i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) < cut_param) and i > idx_rise[-1] ]
+                    
+            
             v_rise = v[ idx_rise[0]:idx_rise[-1]+1 ]
             v_const = v[ idx_const[0]:idx_const[-1]+1 ]
             c_rise = c[ idx_rise[0]:idx_rise[-1]+1 ]
             c_const = c[ idx_const[0]:idx_const[-1]+1 ]
 
             # line fits to each region
-            a_rise, b_rise = np.polyfit(v_rise, c_rise, 1)
-            a_const, b_const = np.polyfit(v_const, c_const, 1)
+            a_rise, b_rise, r_value_rise, p_value_rise, std_err_rise = scipy.stats.linregress(v_rise, c_rise)
+            a_const, b_const, r_value_const, p_value_const, std_err_const = scipy.stats.linregress(v_const, c_const)
+            #print("c raise {:5.3f}, const {:5.3f}".format(r_value_rise,r_value_const))
 
             if carrier == CARRIER_HOLES:
                 mu = 450 * 1e-4
@@ -220,6 +236,15 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.03, debug=Fa
             conc = 2. / (1.6e-19 * 11.9 * 8.854e-12 * a_rise * area**2)
             rho = 1. / (mu * 1.6e-19 * conc)
             status = STATUS_PASSED
+        
+            if abs(r_value_rise) < min_correl or abs(r_value_const) < min_correl or status == STATUS_FAILED:
+                status = STATUS_FAILED
+                
+            #print("v_rise: "+str(v_rise))
+            #print("r rise: "+str(r_value_rise))
+            #print("r const: "+str(r_value_const))
+            #print("v_const: "+str(v_const))
+            
 
         except np.RankWarning:
             status = STATUS_FAILED
@@ -227,32 +252,36 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.03, debug=Fa
 
         except (ValueError, TypeError, IndexError):
             status = STATUS_FAILED
-            print("The array seems empty. Try changing the cut_param parameter.")
-
+            #print("The array seems empty. Try changing the cut_param parameter.")
+        
+        if status == STATUS_FAILED:
+            #print("The fit didn't work as expected, returning nan")
+            return np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, STATUS_FAILED
     return v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status
 
 
 
 @params('v_fb1, v_fb2, c_acc, c_inv, t_ox, n_ox, a_acc, b_acc, v_acc, a_dep, b_dep, v_dep, a_inv, b_inv, v_inv,  spl_dev, status')
-def analyse_mos(v, c, cut_param=0.03, debug=False):
+def analyse_mos(v, c, cut_param=0.03, debug=False, min_r_value=0.7):
     """
     Metal oxide Capacitor: Extract flatband voltage, oxide thickness and charge density.
 
     Parameters:
-    v ... voltage
-    c ... capacitance
+    v ... voltage (V)
+    c ... capacitance (F)
     cut_param ... used to cut on 1st derivative to id voltage regions
+    
 
     Returns:
-    v_fb1 ... flatband voltage via inflection
-    v_fb2 ... flatband voltage via intersection
-    t_ox ... oxide thickness
-    n_ox ... oxide charge density
+    v_fb1 ... flatband voltage via inflection (V)
+    v_fb2 ... flatband voltage via intersection (V)
+    t_ox ... oxide thickness (um)
+    n_ox ... oxide charge density (cm^-2)
     """
 
     ## init
-    v_fb1 = v_fb2 = t_ox = n_ox = -1
-    a_acc = b_acc = v_acc = a_dep = b_dep = v_dep = a_inv = b_inv = v_inv = spl_dev = -1
+    v_fb1 = v_fb2 = t_ox = n_ox = np.nan
+    a_acc = b_acc = v_acc = a_dep = b_dep = v_dep = a_inv = b_inv = v_inv = spl_dev = np.nan
     status = STATUS_NONE
 
     # take average of last 5 samples for accumulation and inversion capacitance
@@ -269,6 +298,7 @@ def analyse_mos(v, c, cut_param=0.03, debug=False):
     idx_acc = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < cut_param and v[i] > v[np.argmax(spl_dev)]) ]
     idx_dep = [ i for i in range(len(spl_dev)) if (v[i] > v[np.argmax(spl_dev)] - 0.25  and v[i] < v[np.argmax(spl_dev)] + 0.25) ]
     idx_inv = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < cut_param and v[i] < v[np.argmin(spl_dev)]) ]
+    
 
     with warnings.catch_warnings():
         warnings.filterwarnings('error')
@@ -282,36 +312,41 @@ def analyse_mos(v, c, cut_param=0.03, debug=False):
             c_inv = c[ idx_inv[0]:idx_inv[-1]+1 ]
 
             # line fits to each region
-            a_acc, b_acc = np.polyfit(v_acc, c_acc, 1)
-            a_dep, b_dep = np.polyfit(v_dep, c_dep, 1)
-            a_inv, b_inv = np.polyfit(v_inv, c_inv, 1)
+            a_acc, b_acc, r_value_acc, p_value, std_err = scipy.stats.linregress(v_acc, c_acc)
+            a_dep, b_dep, r_value_dep, p_value, std_err = scipy.stats.linregress(v_dep, c_dep)
+            a_inv, b_inv, r_value_inv, p_value, std_err = scipy.stats.linregress(v_inv, c_inv)
+            
+            #print("  r: "+str(r_value_acc)+"  "+str(r_value_dep)+"  "+str(r_value_inv))
+            
+            if (np.abs(np.array([r_value_acc, r_value_dep, r_value_inv])) > min_r_value).all():
+                #print("yes")
+                # flatband voltage via inflection
+                v_fb1 = v[np.argmax(spl_dev)]
 
-            # flatband voltage via inflection
-            v_fb1 = v[np.argmax(spl_dev)]
+                # flatband voltage via intersection
+                v_fb2 = (b_acc - b_dep) / (a_dep - a_acc)
 
-            # flatband voltage via intersection
-            v_fb2 = (b_acc - b_dep) / (a_dep - a_acc)
-
-            # note 1: Phi_MS of -0.69V is used as standard value, this correpsonds to a p-type bulk doping of 5e12 cm^-3
-            # note 2: We apply the bias voltage to the backplane while keeping the gate to ground, V_fb is therefore positive
-            n_ox = np.mean(c_acc) / (1.602e-19 * (0.1290**2)) * (0.69 + v_fb2)
-            t_ox = 3.9 * 8.85e-12 * (0.001290**2) / np.mean(c_acc) * 1e6
-            status = STATUS_PASSED
+                # note 1: Phi_MS of -0.69V is used as standard value, this correpsonds to a p-type bulk doping of 5e12 cm^-3
+                # note 2: We apply the bias voltage to the backplane while keeping the gate to ground, V_fb is therefore positive
+                n_ox = np.mean(c_acc) / (1.602e-19 * (0.1290**2)) * (0.69 + v_fb2)
+                t_ox = 3.9 * 8.85e-12 * (0.001290**2) / np.mean(c_acc) * 1e6
+                status = STATUS_PASSED
 
         except np.RankWarning:
             status = STATUS_FAILED
-            print("The array has too few data points. Try changing the cut_param parameter.")
+            print("rank warning")
 
         except (ValueError, TypeError, IndexError):
+            #traceback.print_exc()
             status = STATUS_FAILED
-            print("The array seems empty. Try changing the cut_param parameter.")
+            #print("errrrrrrr"+str(e))
 
     return v_fb1, v_fb2, c_acc, c_inv, t_ox, n_ox, a_acc, b_acc, v_acc, a_dep, b_dep, v_dep, a_inv, b_inv, v_inv, spl_dev, status
 
 
 
-@params('i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, spl_dev, status')
-def analyse_gcd(v, i, cut_param=0.01, debug=False):
+@params('i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, i_acc_relstd, i_dep_relstd, i_inv_relstd, spl_dev, status')
+def analyse_gcd(v, i, cut_param=0.01, debug=False, maxreldev=0.01):
     """
     Gate Controlled Diode: Generation currents.
 
@@ -319,6 +354,7 @@ def analyse_gcd(v, i, cut_param=0.01, debug=False):
     v ... voltage
     i ... current
     cut_param ... used to cut on 1st derivative to id voltage regions
+    maxreldev ... maximum relative (to the abs max in the three regions) standart deviation to consider measurement as good
 
     Returns:
     i_surf ... surface generation current
@@ -326,8 +362,8 @@ def analyse_gcd(v, i, cut_param=0.01, debug=False):
     """
 
     # init
-    i_surf = i_bulk = -1
-    i_acc = i_dep = i_inv = v_acc = v_dep = v_inv = spl_dev = -1
+    i_surf = i_bulk = np.nan
+    i_acc = i_dep = i_inv = v_acc = v_dep = v_inv = spl_dev = np.nan
     status = STATUS_NONE
 
     # get spline fit, requires strictlty increasing array
@@ -336,6 +372,11 @@ def analyse_gcd(v, i, cut_param=0.01, debug=False):
 
     spl = CubicSpline(x_norm, y_norm)
     spl_dev = spl(x_norm, 1)
+    
+    i_acc_relstd = np.nan
+    i_dep_relstd = np.nan
+    i_inv_relstd = np.nan
+        
 
     # get regions for indexing
     try:
@@ -351,8 +392,8 @@ def analyse_gcd(v, i, cut_param=0.01, debug=False):
         i_inv = i [ idx_inv[0]:idx_inv[-1]+1 ]
         
         if (len(v_acc) == 0):
-            v_acc = v[:5]
-            i_acc = i[:5]
+            v_acc = v[1:6]
+            i_acc = i[1:6]
         if (len(v_dep) == 0):
             v_dep = v[np.argmin(i):(np.argmin(i)+5)]
             i_dep = i[np.argmin(i):(np.argmin(i)+5)]
@@ -362,28 +403,48 @@ def analyse_gcd(v, i, cut_param=0.01, debug=False):
         
         # the selection above is not stable
         # until this is fixed stay with a simpler selection
-        v_acc = v[:5]
-        i_acc = i[:5]
+        v_acc = v[1:6]
+        i_acc = i[1:6]
         v_dep = v[np.argmin(i):(np.argmin(i)+5)]
         i_dep = i[np.argmin(i):(np.argmin(i)+5)]
         v_inv = v[-5:]
         i_inv = i[-5:]
-
+        
+        i_acc_avg = np.mean(i_acc)
+        i_dep_avg = np.mean(i_dep)
+        i_inv_avg = np.mean(i_inv)
+        
+        i_max = np.max(np.abs([i_dep_avg, i_inv_avg, i_acc_avg]))
+        
+        i_acc_relstd = np.std(i_acc)/i_max
+        i_dep_relstd = np.std(i_dep)/i_max
+        i_inv_relstd = np.std(i_inv)/i_max
+        
         # surface and bulk generation current
-        i_surf = np.mean(i_dep) - np.mean(i_inv)
-        i_bulk = np.mean(i_inv) - np.mean(i_acc)
+        i_surf = i_dep_avg - i_inv_avg
+        i_bulk = i_acc_avg - i_inv_avg
+        
+        if (np.array([i_acc_relstd, i_dep_relstd, i_inv_relstd]) > maxreldev).any():
+            i_surf = np.nan
+            i_bulk = np.nan
+            
+        if (np.array([i_acc_avg, i_dep_avg, i_inv_avg]) > 1e-3).any():  # electrometer overange condition
+            i_surf = np.nan
+            i_bulk = np.nan
+            
         status = STATUS_PASSED
 
     except (ValueError, TypeError, IndexError):
         status = STATUS_FAILED
-        print("The array seems empty. Try changing the cut_param parameter.")
+        i_surf = np.nan
+        i_bulk = np.nan
 
-    return i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, spl_dev, status
+    return i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, i_acc_relstd, i_dep_relstd, i_inv_relstd, spl_dev, status
 
 
 
 @params('v_th, a, b, spl_dev, status')
-def analyse_fet(v, i, debug=False):
+def analyse_fet(v, i, debug=False, numDev=6, thrMultDev=0.33):
     """
     Field Effect Transistor: Threshold voltage.
 
@@ -393,34 +454,41 @@ def analyse_fet(v, i, debug=False):
 
     Returns:
     v_th ... threshold voltage via tangent
+    
+    sanity check: at least numDev points after the maximum derivative
+     must be higher than the maximum times thrMultDev. then the measurement is considered as good
     """
 
     # init
-    v_th = -1
+    v_th = np.nan
     a = b = spl_dev = -1
     status = STATUS_NONE
 
     # get spline fit, requires strictlty increasing array
-    y_norm = i / np.max(i)
+    i = i - i[0]  # we are havng offset problems
+    y_norm = i / np.max(np.abs(i))
     x_norm = np.arange(len(y_norm))
     spl = CubicSpline(x_norm, y_norm)
     spl_dev = spl(x_norm, 1)
 
     # get tangent at max. of 1st derivative
-    i_0 = i[np.argmax(spl_dev)]
-    v_0 = v[np.argmax(spl_dev)]
-    a = (i[np.argmax(spl_dev)] - i[np.argmax(spl_dev)-1]) / (v[np.argmax(spl_dev)] - v[np.argmax(spl_dev)-1])
+    maximum = np.argmax(spl_dev)
+    i_0 = i[maximum]
+    v_0 = v[maximum]
+    a = (i[maximum] - i[maximum-1]) / (v[maximum] - v[maximum-1])
     b = i_0 - a*v_0
 
     # threshold voltage via tangent
-    v_th = - b / a
+    if a:
+        v_th = - b / a
     status = STATUS_PASSED
+    
+    if (spl_dev[maximum:(maximum+numDev)] > spl_dev[maximum]*thrMultDev).all() and maximum > numDev:
+        return v_th, a, b, spl_dev, status
+    return np.nan, a, b, spl_dev, status
 
-    return v_th, a, b, spl_dev, status
 
-
-
-@params('r_sheet, a, b, x_fit, spl_dev, status')
+@params('r_sheet, a, b, x_fit, spl_dev, status, r_value')
 def analyse_van_der_pauw(i, v, cut_param=1e-5, debug=False):
     """
     Van der Pauw: Extract sheet resistance.
@@ -434,10 +502,9 @@ def analyse_van_der_pauw(i, v, cut_param=1e-5, debug=False):
     r_sheet ... resistance per square
     """
 
-    a, b, x_fit, spl_dev, status = line_regr_with_cuts(i, v, cut_param, debug)
+    a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
     r_sheet = np.pi / np.log(2) * a
-
-    return r_sheet, a, b, x_fit, spl_dev, status
+    return r_sheet, a, b, x_fit, spl_dev, status, r_value
 
 
 
@@ -455,7 +522,7 @@ def analyse_cross(i, v, cut_param=1e-5, debug=False):
     r_sheet ... resistance per square
     """
 
-    a, b, x_fit, spl_dev, status = line_regr_with_cuts(i, v, cut_param, debug)
+    a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
     r_sheet = np.pi / np.log(2) * a
 
     return r_sheet, a, b, x_fit, spl_dev, status
@@ -463,7 +530,7 @@ def analyse_cross(i, v, cut_param=1e-5, debug=False):
 
 
 @params('t_line, a, b, x_fit, spl_dev, status')
-def analyse_linewidth(i, v, r_sheet=-1, cut_param=1e-5, debug=False):
+def analyse_linewidth(i, v, r_sheet=np.nan, cut_param=1e-5, debug=False):
     """
     Linewidth: Extract linewidth.
 
@@ -477,11 +544,8 @@ def analyse_linewidth(i, v, r_sheet=-1, cut_param=1e-5, debug=False):
     t_line ... linewidth in [um]
     """
 
-    a, b, x_fit, spl_dev, status = line_regr_with_cuts(i, v, cut_param, debug)
+    a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
     t_line = r_sheet * 128.5 * 1./a
-
-    if r_sheet == -1:
-        t_line = -1
 
     return t_line, a, b, x_fit, spl_dev, status
 
@@ -502,7 +566,7 @@ def analyse_cbkr(i, v, r_sheet=-1, cut_param=1e-5, debug=False):
     r_contact ... contact resistance
     """
 
-    a, b, x_fit, spl_dev, status = line_regr_with_cuts(i, v, cut_param, debug)
+    a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
 
     if r_sheet == -1:
         r_contact = -1
@@ -516,7 +580,7 @@ def analyse_cbkr(i, v, r_sheet=-1, cut_param=1e-5, debug=False):
 
 
 
-@params('r_contact, a, b, x_fit, spl_dev, status')
+@params('r_contact, a, b, x_fit, spl_dev, status, r_value')
 def analyse_contact(i, v, cut_param=1e-5, debug=False):
     """
     Contact Chain: Extract metal-implant contact resistance.
@@ -531,15 +595,15 @@ def analyse_contact(i, v, cut_param=1e-5, debug=False):
     r_contact ... contact resistance
     """
 
-    a, b, x_fit, spl_dev, status = line_regr_with_cuts(i, v, cut_param, debug)
+    a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
     r_contact = a
 
-    return r_contact, a, b, x_fit, spl_dev, status
+    return r_contact, a, b, x_fit, spl_dev, status, r_value
 
 
 
-@params('rho_sq, status')
-def analyse_meander(i, v, w=10, nsq=12835, debug=False):
+@params('r, status, r_value')
+def analyse_meander(i, v, cut_param=1e-5, debug=False):
     """
     Meander: Calculates specific resistance per square.
 
@@ -554,10 +618,11 @@ def analyse_meander(i, v, w=10, nsq=12835, debug=False):
     """
 
     status = STATUS_PASSED
-    r = v/i
-    rho_sq = np.mean(r * w / nsq)
-
-    return rho_sq, status
+    
+    a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
+    r = a
+    
+    return r, status, r_value
 
 
 
@@ -594,6 +659,8 @@ def analyse_capacitor(v, c, debug=False):
     c_mean ... mean capacitance
     c_median ... median capacitance
     """
+    
+    #print(str(c))
 
     status = STATUS_PASSED
     c_mean = np.mean(c)
