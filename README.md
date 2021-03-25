@@ -2,11 +2,22 @@
 
 Analysis for PQC measurements.
 
+## creating tables from templates:
+
+To enable a table, one must select the template from scripts/templates and make a symlink to scripts/templates-enabled
+
+templates that contain ```stdout``` will be sent to the stdout stream automatically, all others wirll be located in <outputdir>/tables/ 
+
+
+
+
+
 ## Install
 
 Install using pip in a virtual environment.
 
 ```bash
+not sure if this works...
 pip install git+https://github.com/hephy-dd/analysis-pqc.git@0.1.1
 ```
 

@@ -14,7 +14,7 @@ import scipy.signal
 from collections import namedtuple
 import traceback
 
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 
 __all__ = [
     'STATUS_NONE',
@@ -262,7 +262,7 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
 
 
 @params('v_fb1, v_fb2, c_acc, c_inv, t_ox, n_ox, a_acc, b_acc, v_acc, a_dep, b_dep, v_dep, a_inv, b_inv, v_inv,  spl_dev, status')
-def analyse_mos(v, c, cut_param=0.03, debug=False, min_r_value=0.7):
+def analyse_mos(v, c, cut_param=0.03, debug=False, min_r_value=0.65):
     """
     Metal oxide Capacitor: Extract flatband voltage, oxide thickness and charge density.
 

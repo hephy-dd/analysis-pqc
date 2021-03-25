@@ -19,14 +19,23 @@ from jinja2 import Template, Environment, FileSystemLoader
 def renderTemplates(pqc_resultset):
     # Create the jinja2 environment.
     # Notice the use of trim_blocks, which greatly helps control whitespace.
-    template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates-enabled")
+    template_dir = os.path.join(os.path.dirname(__file__), "templates-enabled")
     
     j2_env = Environment(loader=FileSystemLoader(template_dir),
                          trim_blocks=True)
-    
-    print(j2_env.get_template('stdout.txt').render(
-        batch=pqc_resultset.batch,
-        dataseries=pqc_resultset.dataseries))
+                         
+    templates = glob.glob(os.path.join(template_dir, "*"))
+    for f in templates:
+        filename = os.path.basename(f)
+        rendered_content = j2_env.get_template(os.path.basename(filename)).render(
+                batch=pqc_resultset.batch,
+                dataseries=pqc_resultset.dataseries)
+                
+        if "stdout" in filename:
+            print(rendered_content)
+        else:
+            with open(os.path.join(pqc_resultset.outDir, filename), "w") as fh:
+                fh.write(rendered_content)
     
     
 def plotTimeline(pqc_batches, path, printBatchNumbers=True):
@@ -140,7 +149,7 @@ def vdpPlotBoxplot(pqc_batches, path):
     
     
     
-def loadBatch(path, outdir=None, lazy=False):
+def loadBatch(path, outdir=None, lazy=False, create_plots=False):
     batchname = os.path.basename(os.path.normpath(path))
     print("Batch: "+batchname)
     pqc_results = PQC_resultset(batchname)
@@ -153,7 +162,7 @@ def loadBatch(path, outdir=None, lazy=False):
             exit(0)
     
     pqc_results.prepareAnalysisFolder(outdir)
-    pqc_results.analyze(path, outdir)
+    pqc_results.analyze(path, outdir, create_plots)
     
     return pqc_results
     
@@ -165,6 +174,8 @@ def main():
     parser.add_argument('-o', default=None, help='override output directory location')
     parser.add_argument('-l', action='store_true', default=None, help='lazy evaluation: skip if the measurement folder is older than analysis folder')
     parser.add_argument('-H', action='store_true', default=None, help='create histograms')
+    parser.add_argument('-P', action='store_true', default=None, help='create plots (for each single measurement used)')
+    
     #parser.add_argument('-d', action='store_true', default=None, help='create plots with debugging infos inside (e.g. correlation coefficients)')
     args = parser.parse_args()
     
@@ -173,7 +184,7 @@ def main():
         outdir = args.path
     
     if not args.m:
-        pqc_results = loadBatch(args.path, outdir, args.l)
+        pqc_results = loadBatch(args.path, outdir, args.l, args.P)
         
         #pqc_results.prettyPrint()
         renderTemplates(pqc_results)

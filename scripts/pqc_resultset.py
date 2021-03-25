@@ -139,7 +139,7 @@ class PQC_resultset:
 
         return ret
     
-    def analyze(self, basepath, outdir):
+    def analyze(self, basepath, outdir, create_plots):
         self.basepath = basepath
         dirs = glob.glob(os.path.join(basepath, "*"))
         dirs = [t for t in dirs if "analysis" not in t ]
@@ -163,7 +163,10 @@ class PQC_resultset:
                     
                 cross = "cross"
                 outname = self.dataseries['xlabels'][-1]+"_"+currflute
-                outdir = os.path.join(self.outDir, "plots")
+                if create_plots:
+                    outdir = self.plotDir
+                else:
+                    outdir = None
                 
                 self.dataseries['vdp_poly_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", cross], blacklist=["reverse"]), plotResults=False))
                 self.dataseries['vdp_poly_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "reverse", cross])))
@@ -181,7 +184,7 @@ class PQC_resultset:
                 self.dataseries['r_contact_n'].append(pqc.analyse_cbkr_data(pqc.find_most_recent_file(dirs[i], "cbkr", whitelist=[currflute, "n"]), r_sheet=self.dataseries['vdp_n_f'].values[-1], printResults=False, plotResults=False))
                 self.dataseries['r_contact_poly'].append(pqc.analyse_cbkr_data(pqc.find_most_recent_file(dirs[i], "cbkr", whitelist=[currflute, "Polysilicon"]), r_sheet=self.dataseries['vdp_poly_f'].values[-1], printResults=False, plotResults=False))
 
-                self.dataseries['v_th'].append(pqc.analyse_fet_data(pqc.find_most_recent_file(dirs[i], "fet", whitelist=[currflute, ]), outdir=outdir, outname=outname))
+                self.dataseries['v_th'].append(pqc.analyse_fet_data(pqc.find_most_recent_file(dirs[i], "fet", whitelist=[currflute, ]), outdir=outdir, outname=outname, printResults=False, plotResults=False))
 
                 self.dataseries['vdp_metclo_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "metal", "clover"], blacklist=["reverse"])))
                 self.dataseries['vdp_metclo_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "metal", "clover", "reverse"], blacklist=[])))
@@ -201,16 +204,16 @@ class PQC_resultset:
                 self.dataseries['rho'].append(rho)
                 self.dataseries['conc'].append(conc)
                 
-                dummy, v_fb2, t_ox, n_ox, c_acc_m = pqc.analyse_mos_data(pqc.find_most_recent_file(dirs[i], "mos", whitelist=[currflute, ]), outdir=outdir, outname=outname)
+                dummy, v_fb2, t_ox, n_ox, c_acc_m = pqc.analyse_mos_data(pqc.find_most_recent_file(dirs[i], "mos", whitelist=[currflute, ]), outdir=outdir, outname=outname, printResults=False, plotResults=False)
                 self.dataseries['v_fb2'].append(v_fb2)
                 self.dataseries['t_ox'].append(t_ox)
                 self.dataseries['n_ox'].append(n_ox)
                 self.dataseries['c_acc_m'].append(c_acc_m)
                 
-                i_surf, dummy = pqc.analyse_gcd_data(pqc.find_most_recent_file(dirs[i], "gcd", whitelist=[currflute, ]), outdir=outdir, outname=outname)  # only i_surf valid
+                i_surf, dummy = pqc.analyse_gcd_data(pqc.find_most_recent_file(dirs[i], "gcd", whitelist=[currflute, ]), outdir=outdir, outname=outname, printResults=False, plotResults=False)  # only i_surf valid
                 self.dataseries['i_surf'].append(i_surf)
                 
-                i_surf05, i_bulk05 = pqc.analyse_gcd_data(pqc.find_most_recent_file(dirs[i], "gcd05", whitelist=[currflute, ]), outdir=outdir, outname=outname+" GCD05")  # for i_bulk
+                i_surf05, i_bulk05 = pqc.analyse_gcd_data(pqc.find_most_recent_file(dirs[i], "gcd05", whitelist=[currflute, ]), outdir=outdir, outname=outname+" GCD05", printResults=False, plotResults=False)  # for i_bulk
                 self.dataseries['i_surf05'].append(i_surf05)
                 self.dataseries['i_bulk05'].append(i_bulk05)
                 
@@ -353,6 +356,7 @@ class PQC_resultset:
             basedir = self.basepath
         self.outDir = os.path.join(basedir, "analysis_"+self.batch)
         self.plotDir = os.path.join(self.outDir, "plots")
+        self.histogramDir = os.path.join(self.outDir, "histograms")
         try:
             os.mkdir(self.outDir)
         except OSError:
@@ -366,12 +370,18 @@ class PQC_resultset:
             files = glob.glob(os.path.join(self.plotDir, "*"))
             for f in files:
                 os.remove(f)
+        try:
+            os.mkdir(self.histogramDir)
+        except OSError:
+            files = glob.glob(os.path.join(self.histogramDir, "*"))
+            for f in files:
+                os.remove(f)
                 
         
     def createHistograms(self):
         matplotlib.rcParams.update({'font.size': 14})
         
-        histogramDir = self.outDir
+        histogramDir = outdir = os.path.join(self.outDir, "histograms")
         
         for key in self.dataseries:
             if not key.startswith('x'):
