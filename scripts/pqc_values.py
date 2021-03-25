@@ -73,7 +73,20 @@ class PQC_Values:
                  3: "{}/{}".format(len(stats.values), stats.nTot),
                  4: "{:2.0f}".format(len(stats.values)/stats.nTot*100.), }
             return sel.get(index-len(self.values), "error")
-    
+            
+    def getStatus(self, index):
+        if index >= len(self.values):
+            return 0
+        value = self.values[index]*self.showmultiplier
+        if np.isnan(value):
+            return 4  # nan
+        elif value > self.maxAllowed:
+            return 3  # too high
+        elif value < self.minAllowed:
+            return 2  # too low
+        return 1  # OK
+        
+        
     @staticmethod 
     def getStatLabels():
         return ["Median", "Average", "Std dev.", "OK/Tot.", "OK (rel)"]
