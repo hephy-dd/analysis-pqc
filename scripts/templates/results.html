@@ -1,8 +1,8 @@
 <html>
     <head>
         <style type="text/css" media="screen">
-            th {text-align:left;}
-            td {text-align:right;}
+            th {text-align:left; padding-left:10px; padding-right:10px; }
+            td {text-align:right; padding-left:10px; padding-right:10px; }
             
         </style>
         <!--h1 {color:red;}-->
@@ -16,9 +16,12 @@
     {% set valueformat='        <td style="{1:s};">{0:s}</td>\n' %}
     {% set colheaderformat='        <th>{0:s}</td>\n' %}
     {% set tableheaderformat='<h2>{0:s}</h2>\n' %}
+    {% set afterheaderrows= '<tr style="border-bottom:1px solid black"><td colspan="100%"><hr/></td></tr>'%}
     {% set startRowStr='    <tr>\n' %}
     {% set endRowStr='    </tr>\n' %}
-    {% set startTableStr='<table border="1">' %}
+    {% set afterresultrows= '<tr style="border-bottom:1px solid black"><td colspan="100%"><hr/></td></tr>'%}
+    {% set afterstatsrows= '<tr style="border-bottom:1px solid black"><td colspan="100%"><hr/></td></tr>'%}
+    {% set startTableStr='<table border="0">' %}
     {% set endTableStr='</table>' %}
     
     {% set statusdict={0: '', 1: '', 2: 'background-color:#edfc1b', 3: 'background-color:#fc8c0c', 4: 'background-color:#fc3f42'} %}
@@ -30,7 +33,7 @@
     {% set flute3=['i600', 'v_fd', 'rho', 'conc', 'meander_metal', 'vdp_metclo_f', 'vdp_metclo_r', 'vdp_p_cross_bridge_f', 'vdp_p_cross_bridge_r', 't_line_p_cross_bridge', 'vdp_bulk_f', 'vdp_bulk_r'] %}
     {% set flute4=['i_surf05', 'r_contact_n', 'contact_p', 'contact_n'] %}
     {# the first element contains the columns, the second the name for the flute #}
-    {% set tables=[(flute1, "flute 1"), (flute2, "flute 2"), (flute3, "flute 3"), (flute4, "flute 4")] %}
+    {% set tables=[(flute1, "Flute 1:"), (flute2, "Flute 2:"), (flute3, "Flute 3:"), (flute4, "Flute 4:")] %}
     
 
 
@@ -43,16 +46,17 @@
     {{ endRowStr }}
     {{ startRowStr }}{{ labelformat.format('#') }}{% for key in table[0] %}{{ colheaderformat.format(dataseries[key].unit) }}{% endfor %}
     {{ endRowStr }}
+    {{ afterheaderrows }}
     {% for i in range(0, dataseries['vdp_pstop_r'].len() ) %}
     {{ startRowStr }}{{ labelformat.format(dataseries['xlabels'][i]) }}{% for key in table[0] %}{{ valueformat.format(dataseries[key].getValueString(i), statusdict[dataseries[key].getStatus(i)]) }}{% endfor %}
     {{ endRowStr }}
     {% endfor %}
-
+    {{ afterresultrows }}
     {% for i in range(dataseries['vdp_pstop_r'].len(), dataseries['vdp_pstop_r'].len()+5) %}{{ startRowStr }}
     {{ labelformat.format(dataseries['xlabels'][i]) }}{% for key in table[0] %}{{ valueformat.format(dataseries[key].getValueString(i), statusdict[dataseries[key].getStatus(i)]) }}{% endfor %}
     {{ endRowStr }}
     {% endfor %}
-
+    {{ afterstatsrows }}
     {{ endTableStr }}
     {% endfor %}
     
