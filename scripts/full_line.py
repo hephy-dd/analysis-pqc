@@ -14,14 +14,17 @@ from pqc_resultset import PQC_resultset
 from datetime import timedelta, date
 from jinja2 import Template, Environment, FileSystemLoader
 
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 def renderTemplates(pqc_resultset):
     # Create the jinja2 environment.
     # Notice the use of trim_blocks, which greatly helps control whitespace.
-    j2_env = Environment(loader=FileSystemLoader(THIS_DIR),
+    template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates-enabled")
+    
+    j2_env = Environment(loader=FileSystemLoader(template_dir),
                          trim_blocks=True)
-    print(j2_env.get_template('templates/stdout.txt').render(
+    
+    print(j2_env.get_template('stdout.txt').render(
         batch=pqc_resultset.batch,
         dataseries=pqc_resultset.dataseries))
     
@@ -162,6 +165,7 @@ def main():
     parser.add_argument('-o', default=None, help='override output directory location')
     parser.add_argument('-l', action='store_true', default=None, help='lazy evaluation: skip if the measurement folder is older than analysis folder')
     parser.add_argument('-H', action='store_true', default=None, help='create histograms')
+    #parser.add_argument('-d', action='store_true', default=None, help='create plots with debugging infos inside (e.g. correlation coefficients)')
     args = parser.parse_args()
     
     outdir = args.o
