@@ -46,9 +46,9 @@
     
     var basedir= 'plots/';
     var postfix='.png';
-    let flute1_prefix = ['fet', 'mos'];
+    let flute1_prefix = ['fet', 'mos', 'vdp_poly_fwd', 'vdp_poly_rev', 'vdp_n_fwd', 'vdp_n_rev', 'vdp_p-stop_fwd', 'vdp_p-stop_rev'];
     let flute2_prefix = ['gcd'];
-    let flute3_prefix = ['iv_diodehalf', 'cv_diodehalf'];
+    let flute3_prefix = ['iv_diodehalf', 'cv_diodehalf', 'vdp_metal_fwd', 'vdp_metal_rev', 'vdp_p-edge_fwd', 'vdp_p-edge_rev'];
     let flute4_prefix = ['gcd05'];
     
     
@@ -74,7 +74,10 @@
         
         var image = document.createElement('img');
         
-        image.src = url;       
+        image.src = url;
+        var w = 400
+        image.width=w
+        image.height=(w*480)/640
 
         document.getElementById(parentId).appendChild(image);
     }

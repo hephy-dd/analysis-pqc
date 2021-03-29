@@ -31,7 +31,21 @@ class PQC_resultset:
         self.dataseries = {'xtimestamps': self.timestamps,
                            'xlabels':     self.labels,
                            'xflutes':     self.flutes,}
-
+                           
+        # =================================================== Flute 1 ===================================================
+        
+        self.dataseries['v_th'] = PQC_Values("fet", "FET Vth", 4., "V", stray=0.25)
+        
+        self.dataseries['v_fb2'] = PQC_Values("v_fb", "Flatband voltage", 2.5, "V", stray=0.33)
+        self.dataseries['t_ox'] = PQC_Values("t_ox", "Oxide thickness", 0.67, "um", stray=0.33)
+        self.dataseries['n_ox'] = PQC_Values("n_ox", "Oxide concentration", 10.5, "1E10cm^-3", 1e-10)
+        self.dataseries['c_acc_m'] = PQC_Values("c_acc", "Accumulation capacitance", 85., "pF", 1e12, stray=0.2)
+        
+        self.dataseries['cap_l'] = PQC_Values("cap_l", "Capacitor", 3., "pF", 1e12, stray=0.5)
+        self.dataseries['cap_r'] = PQC_Values("cap_r", "Capacitor", 3., "pF", 1e12, stray=0.5)
+        self.dataseries['cap_l_tox'] = PQC_Values("capl_tox", "Capacitor: Oxide Thickness", 1., "nm", 1e9, stray=0.5)
+        self.dataseries['cap_r_tox'] = PQC_Values("capr_tox", "Capacitor: Oxide Thickness", 1., "nm", 1e9, stray=0.5)
+        
         self.dataseries['vdp_poly_f'] = PQC_Values("vdpPoly", "Polysilicon VdP", 2.4, "kOhm/sq", 1e-3, stray=0.2)
         self.dataseries['vdp_poly_r'] = PQC_Values("vdpPoly_r", "Polysilicon VdP reverse", 2.4, "kOhm/sq", 1e-3, stray=0.2)
 
@@ -40,6 +54,34 @@ class PQC_resultset:
 
         self.dataseries['vdp_pstop_f'] = PQC_Values("vdpPstp", "P-stop VdP", 19., "kOhm/sq", 1e-3, stray=0.2)
         self.dataseries['vdp_pstop_r'] = PQC_Values("vdpPstp_r", "P-stop VdP reverse", 19., "kOhm/sq", 1e-3, stray=0.2)
+        
+        
+        
+        # =================================================== Flute 2 ===================================================
+        
+        self.dataseries['i_surf'] = PQC_Values("i_surf", "Surface current", 8., "pA", -1e12, stray=1)
+        
+        
+        
+        # =================================================== Flute 3 ===================================================
+        
+        self.dataseries['i600'] = PQC_Values("i600", "I @ 600V", 100., "uA", 1e6, stray=1.)
+        
+        self.dataseries['v_fd'] = PQC_Values("v_fd", "Full depletion Voltage", 260., "V", stray=0.33)
+        self.dataseries['rho'] = PQC_Values("rho", "rho", 3.5, "kOhm cm", 0.1)
+        self.dataseries['conc'] = PQC_Values("d_conc", "Doping Concentration", 3.5, "1E12cm^-3", 1e-18)
+        
+        
+        
+        # =================================================== Flute 4 ===================================================                   
+                           
+        self.dataseries['i_surf05'] = PQC_Values("i_surf05", "Surface current 05", 11., "pA", -1e12, stray=1)
+        self.dataseries['i_bulk05'] = PQC_Values("i_bulk05", "Bulk current 05", 0.7, "pA", -1e12, stray=1)
+        
+        
+        
+        
+
 
         self.dataseries['t_line_n'] = PQC_Values("lw_n", "Linewidth N+", 35., "um")
         self.dataseries['t_line_pstop2'] = PQC_Values("lw_pstp2", "Linewidth P-stop 2 Wire", 38., "um")
@@ -48,8 +90,6 @@ class PQC_resultset:
         self.dataseries['r_contact_n'] = PQC_Values("r_cont_n", "Rcontact N+", 27., "Ohm")
         self.dataseries['r_contact_poly'] = PQC_Values("r_cont_poly", "Rcontact polysilicon", 100., "kOhm", 1e-3)
 
-
-        self.dataseries['v_th'] = PQC_Values("fet", "FET Vth", 4., "V", stray=0.25)
 
         self.dataseries['vdp_metclo_f'] = PQC_Values("vdp_met", "Metal Cloverleaf VdP", 25., "mOhm/sq", 1e3)
         self.dataseries['vdp_metclo_r'] = PQC_Values("vdp_met_r", "Metal Cloverleaf VdP reverse", 25., "mOhm/sq", 1e3)
@@ -60,23 +100,6 @@ class PQC_resultset:
         self.dataseries['t_line_p_cross_bridge'] = PQC_Values("t_line_cb", "Linewidth cross bridge P", 35., "um")
 
         self.dataseries['v_bd'] = PQC_Values("v_bd", "Breakdown Voltage", 215., "V")
-
-
-        self.dataseries['i600'] = PQC_Values("i600", "I @ 600V", 100., "uA", 1e6, stray=1.)
-        self.dataseries['v_fd'] = PQC_Values("v_fd", "Full depletion Voltage", 260., "V", stray=0.33)
-        self.dataseries['rho'] = PQC_Values("rho", "rho", 3.5, "kOhm cm", 0.1)
-        self.dataseries['conc'] = PQC_Values("d_conc", "Doping Concentration", 3.5, "1E12cm^-3", 1e-18)
-
-
-        self.dataseries['v_fb2'] = PQC_Values("v_fb", "Flatband voltage", 2.5, "V", stray=0.33)
-
-        self.dataseries['t_ox'] = PQC_Values("t_ox", "Oxide thickness", 0.67, "um", stray=0.33)
-        self.dataseries['n_ox'] = PQC_Values("n_ox", "Oxide concentration", 10.5, "1E10cm^-3", 1e-10)
-        self.dataseries['c_acc_m'] = PQC_Values("c_acc", "Accumulation capacitance", 85., "pF", 1e12, stray=0.2)
-
-        self.dataseries['i_surf'] = PQC_Values("i_surf", "Surface current", 8., "pA", -1e12, stray=1)
-        self.dataseries['i_surf05'] = PQC_Values("i_surf05", "Surface current 05", 11., "pA", -1e12, stray=1)
-        self.dataseries['i_bulk05'] = PQC_Values("i_bulk05", "Bulk current 05", 0.7, "pA", -1e12, stray=1)
         
         self.dataseries['vdp_bulk_f'] = PQC_Values("vdpBulk", "Bulk VdP Cross", 66., "kOhm/sq", 1e-3, stray=0.8)
         self.dataseries['vdp_bulk_r'] = PQC_Values("vdpBulk_r", "Bulk VdP Cross rev", 66., "kOhm/sq", 1e-3, stray=0.8)
@@ -87,11 +110,6 @@ class PQC_resultset:
         self.dataseries['contact_poly'] = PQC_Values("cont_poly", "Contact Chain PolySi", 35., "MOhm", 1e-6, stray=0.5)
         self.dataseries['contact_p'] = PQC_Values("cont_p", "Contact Chain P", 85., "kOhm", 1e-3, stray=0.5)
         self.dataseries['contact_n'] = PQC_Values("cont_n", "Contact Chain N", 85., "kOhm", 1e-3, stray=0.5)
-        
-        self.dataseries['cap_l'] = PQC_Values("cap_l", "Capacitor", 3., "pF", 1e12, stray=0.5)
-        self.dataseries['cap_r'] = PQC_Values("cap_r", "Capacitor", 3., "pF", 1e12, stray=0.5)
-        self.dataseries['cap_l_tox'] = PQC_Values("capl_tox", "Capacitor: Oxide Thickness", 1., "nm", 1e9, stray=0.5)
-        self.dataseries['cap_r_tox'] = PQC_Values("capr_tox", "Capacitor: Oxide Thickness", 1., "nm", 1e9, stray=0.5)
         
         if dataseries is not None:
             self.dataseries = dataseries
@@ -196,20 +214,20 @@ class PQC_resultset:
                 self.dataseries['cap_r'].append(c_median)
                 self.dataseries['cap_r_tox'].append(d)
                 
-                self.dataseries['vdp_poly_f'].append(pqc.get_vdp_value(
-                    pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", cross], blacklist=["reverse"]), plotResults=False))
-                self.dataseries['vdp_poly_r'].append(pqc.get_vdp_value(
-                    pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "reverse", cross])))
+                self.dataseries['vdp_poly_f'].append(pqc.analyse_van_der_pauw_data(
+                    pqc.find_most_recent_file(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", cross], blacklist=["reverse"]), analysisOptions.pushPrefix("VdP_poly_fwd")))
+                self.dataseries['vdp_poly_r'].append(pqc.analyse_van_der_pauw_data(
+                    pqc.find_most_recent_file(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "reverse", cross]), analysisOptions.pushPrefix("VdP_poly_rev")))
 
-                self.dataseries['vdp_n_f'].append(pqc.get_vdp_value(
-                    pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", cross], blacklist=["reverse"])))
-                self.dataseries['vdp_n_r'].append(pqc.get_vdp_value(
-                    pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "reverse", cross])))
+                self.dataseries['vdp_n_f'].append(pqc.analyse_van_der_pauw_data(
+                    pqc.find_most_recent_file(dirs[i], "van_der_pauw", whitelist=[currflute, "n", cross], blacklist=["reverse"]), analysisOptions.pushPrefix("VdP_N_fwd")))
+                self.dataseries['vdp_n_r'].append(pqc.analyse_van_der_pauw_data(
+                    pqc.find_most_recent_file(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "reverse", cross]), analysisOptions.pushPrefix("VdP_N_rev")))
                 
-                self.dataseries['vdp_pstop_f'].append(pqc.get_vdp_value(
-                    pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", cross], blacklist=["reverse"])))
-                self.dataseries['vdp_pstop_r'].append(pqc.get_vdp_value(
-                    pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "reverse", cross])))
+                self.dataseries['vdp_pstop_f'].append(pqc.analyse_van_der_pauw_data(
+                    pqc.find_most_recent_file(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", cross], blacklist=["reverse"]), analysisOptions.pushPrefix("VdP_P-Stop_fwd")))
+                self.dataseries['vdp_pstop_r'].append(pqc.analyse_van_der_pauw_data(
+                    pqc.find_most_recent_file(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "reverse", cross]), analysisOptions.pushPrefix("VdP_P-Stop_rev")))
                 
                 
                 # =================================================== Flute 2 ===================================================
@@ -217,6 +235,8 @@ class PQC_resultset:
                 i_surf, dummy = pqc.analyse_gcd_data(
                     pqc.find_most_recent_file(dirs[i], "gcd", whitelist=[currflute, ]), analysisOptions.pushPrefix("GCD"))  # only i_surf valid
                 self.dataseries['i_surf'].append(i_surf)
+                
+                
                 
                 
                 # =================================================== Flute 3 ===================================================
@@ -232,6 +252,19 @@ class PQC_resultset:
                 self.dataseries['rho'].append(rho)
                 self.dataseries['conc'].append(conc)
                 
+                self.dataseries['vdp_metclo_f'].append(pqc.analyse_van_der_pauw_data(
+                    pqc.find_most_recent_file(dirs[i], "van_der_pauw", whitelist=[currflute, "metal", "clover"], blacklist=["reverse"]), analysisOptions.pushPrefix("VdP_Metal_fwd"), minCorrelation=0.95))
+                self.dataseries['vdp_metclo_r'].append(pqc.analyse_van_der_pauw_data(
+                    pqc.find_most_recent_file(dirs[i], "van_der_pauw", whitelist=[currflute, "metal", "clover", "reverse"], blacklist=[]), analysisOptions.pushPrefix("VdP_Metal_rev"), minCorrelation=0.95))
+
+                self.dataseries['vdp_p_cross_bridge_f'].append(pqc.analyse_van_der_pauw_data(
+                    pqc.find_most_recent_file(dirs[i], "van_der_pauw", whitelist=[currflute, "P", "cross_bridge"], blacklist=["reverse"]), analysisOptions.pushPrefix("VdP_P-edge_fwd")))
+                self.dataseries['vdp_p_cross_bridge_r'].append(pqc.analyse_van_der_pauw_data(
+                    pqc.find_most_recent_file(dirs[i], "van_der_pauw", whitelist=[currflute, "P", "cross_bridge", "reverse"]), analysisOptions.pushPrefix("VdP_P-edge_rev")))
+                    
+                self.dataseries['t_line_p_cross_bridge'].append(pqc.analyse_linewidth_data(
+                    pqc.find_most_recent_file(dirs[i], "linewidth", whitelist=[currflute, "P", "cross_bridge"]), r_sheet=self.dataseries['vdp_p_cross_bridge_f'].values[-1], printResults=False, plotResults=False))
+
                 
                 # =================================================== Flute 4 ===================================================
                 
@@ -255,13 +288,8 @@ class PQC_resultset:
                 self.dataseries['r_contact_poly'].append(pqc.analyse_cbkr_data(pqc.find_most_recent_file(dirs[i], "cbkr", whitelist=[currflute, "Polysilicon"]), r_sheet=self.dataseries['vdp_poly_f'].values[-1], printResults=False, plotResults=False))
 
                 
-                self.dataseries['vdp_metclo_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "metal", "clover"], blacklist=["reverse"])))
-                self.dataseries['vdp_metclo_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "metal", "clover", "reverse"], blacklist=[])))
-
-                self.dataseries['vdp_p_cross_bridge_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P", "cross_bridge"], blacklist=["reverse"])))
-                self.dataseries['vdp_p_cross_bridge_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P", "cross_bridge", "reverse"])))
-                self.dataseries['t_line_p_cross_bridge'].append(pqc.analyse_linewidth_data(pqc.find_most_recent_file(dirs[i], "linewidth", whitelist=[currflute, "P", "cross_bridge"]), r_sheet=self.dataseries['vdp_p_cross_bridge_f'].values[-1], printResults=False, plotResults=False))
-
+                
+                
                 self.dataseries['v_bd'].append(pqc.analyse_breakdown_data(pqc.find_most_recent_file(dirs[i], "breakdown", whitelist=[currflute, ]), printResults=False, plotResults=False))
 
                 self.dataseries['vdp_bulk_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], None, whitelist=[currflute, "bulk", "cross"], blacklist=["reverse"])))
@@ -465,178 +493,6 @@ class PQC_resultset:
             return re.sub(r'VPX','', s)
         
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    # this could be done e.g. via df.to_latex() in pandas, but coloring the cells is then complicated, so done manually...
-    def exportLatex(self, path):
-        self.exportLatex1(path)
-        self.exportLatex2(path)
-        self.exportLatex3(path)
-    
-    
-    def exportLatex1(self, path):
-        f = open(os.path.join(self.outDir, "table1.tex"), "w")
-        f.write("% automatically created table for batch " + self.batch + "\n\n")
-        
-        f.write(PQC_Values.headerToLatex())
-        
-        # \\rowcolors{2}{gray!25}{white}
-        
-        f.write("""\\begin{center}
-        
-        \\fontsize{4pt}{5pt}\\selectfont
-    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|r|r| } 
-        \\hline
-        """+self.shortBatch()+""" & \multicolumn{2}{ c|}{PolySi VdP} & \multicolumn{2}{c|}{N+ VdP} & \multicolumn{2}{c|}{P-Stop VdP} &
-        \multicolumn{3}{c|}{line thickness} & Capacitor & \multicolumn{2}{ c|}{Contact resistance} \\\\
-        Unit: & \multicolumn{2}{c|}{"""+self.dataseries['vdp_poly_f'].unit+"} & \multicolumn{2}{c|}{"+self.dataseries['vdp_n_f'].unit+"} & \multicolumn{2}{c|}{"+
-        self.dataseries['vdp_pstop_f'].unit+"} & \multicolumn{3}{c|}{"+self.dataseries['t_line_n'].unit+"} & "
-        +self.dataseries['capacitor'].unit+" & "+self.dataseries['r_contact_poly'].unit+" & "+self.dataseries['r_contact_n'].unit+"""\\\\
-         & forw & rev & forw & rev & forw & rev & N+ & p-stop2 & p-stop4 &  & PolySi & N+\\\\
-        \\hline\n
-        """)
-        
-        for i in range(0, len(self.labels)+5):
-            if i < len(self.labels):
-                line = "        \detokenize{"+self.shortLabel(i)+"}"
-            else:
-                line = self.dataseries['vdp_poly_f'].summaryDesciption(i)
-            line = line + " & " + self.dataseries['vdp_poly_f'].valueToLatex(i)
-            line = line + " & " + self.dataseries['vdp_poly_r'].valueToLatex(i)
-            line = line + " & " + self.dataseries['vdp_n_f'].valueToLatex(i)
-            line = line + " & " + self.dataseries['vdp_n_r'].valueToLatex(i)
-            line = line + " & " + self.dataseries['vdp_pstop_f'].valueToLatex(i)
-            line = line + " & " + self.dataseries['vdp_pstop_r'].valueToLatex(i)
-            
-            line = line + " & " + self.dataseries['t_line_n'].valueToLatex(i)
-            line = line + " & " + self.dataseries['t_line_pstop2'].valueToLatex(i)
-            line = line + " & " + self.dataseries['t_line_pstop4'].valueToLatex(i)
-            line = line + " & " + self.dataseries['capacitor'].valueToLatex(i)
-            line = line + " & " + self.dataseries['r_contact_poly'].valueToLatex(i)
-            line = line + " & " + self.dataseries['r_contact_n'].valueToLatex(i)
-            
-            f.write(line+"\\\\\n")
-        
-        
-        f.write("""        \\hline
-    \\end{tabular}
-\\end{center}""")
-        
-        f.close()
-     
-     
-     
-        
-    def exportLatex2(self, path):
-        f = open(os.path.join(self.outDir, "table2.tex"), "w")
-        f.write("% automatically created table for batch " + self.batch + "\n\n")
-        
-        f.write(PQC_Values.headerToLatex())
-        
-        f.write("""\\begin{center}
-        \\fontsize{4pt}{5pt}\\selectfont
-    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|r|r| } 
-        \\hline
-        """+self.shortBatch()+""" & \multicolumn{2}{ c|}{MetClover VdP} & \multicolumn{3}{c|}{P cross-bridge VdP/LW} & \multicolumn{2}{ c|}{Bulk VdP cross} & Vbd & I600 & \multicolumn{3}{c|}{Diode Half CV} \\\\
-        Unit: & """+" \multicolumn{2}{c|}{"+self.dataseries['vdp_metclo_f'].unit+"} & \multicolumn{2}{c|}{"+self.dataseries['vdp_p_cross_bridge_f'].unit+"} & "+self.dataseries['t_line_p_cross_bridge'].unit+ "& \multicolumn{2}{c|}{"+self.dataseries['vdp_bulk_f'].unit+"} & "+self.dataseries['v_bd'].unit+" & "+self.dataseries['i600'].unit+" & "+self.dataseries['v_fd'].unit+" & \detokenize{"+self.dataseries['rho'].unit+"} & \detokenize{"+self.dataseries['conc'].unit+"""}\\\\
-          & forw & rev & forw & rev & & forw & rev & & & Vfd & Bulk res. & dop. conc. \\\\
-        \\hline\n
-        """)
-        
-        for i in range(0, len(self.labels)+5):
-            if i < len(self.labels):
-                line = "        \detokenize{"+self.shortLabel(i)+"}"
-            else:
-                line = self.dataseries['v_th'].summaryDesciption(i)
-
-            line = line + " & " + self.dataseries['vdp_metclo_f'].valueToLatex(i)
-            line = line + " & " + self.dataseries['vdp_metclo_r'].valueToLatex(i)
-            line = line + " & " + self.dataseries['vdp_p_cross_bridge_f'].valueToLatex(i)
-            line = line + " & " + self.dataseries['vdp_p_cross_bridge_r'].valueToLatex(i)
-            line = line + " & " + self.dataseries['t_line_p_cross_bridge'].valueToLatex(i)
-            
-            line = line + " & " + self.dataseries['vdp_bulk_f'].valueToLatex(i)
-            line = line + " & " + self.dataseries['vdp_bulk_r'].valueToLatex(i)
-            
-            line = line + " & " + self.dataseries['v_bd'].valueToLatex(i)
-            line = line + " & " + self.dataseries['i600'].valueToLatex(i)
-            line = line + " & " + self.dataseries['v_fd'].valueToLatex(i)
-            line = line + " & " + self.dataseries['rho'].valueToLatex(i)
-            line = line + " & " + self.dataseries['conc'].valueToLatex(i)
-            
-            f.write(line+"\\\\\n")
-        
-        
-        f.write("""        \\hline
-    \\end{tabular}
-\\end{center}""")
-        
-        f.close()
-        
-        
-    def exportLatex3(self, path):
-        f = open(os.path.join(self.outDir, "table3.tex"), "w")
-        f.write("% automatically created table for batch " + self.batch + "\n\n")
-        
-        f.write(PQC_Values.headerToLatex())
-        
-        f.write("""
-        \\begin{center}
-        \\fontsize{4pt}{5pt}\\selectfont
-    \\begin{tabular}{ |l|r|r|r|r|r|r|r|r|r|r|r|r|} 
-        \\hline
-        """+self.shortBatch()+""" & FET & \multicolumn{4}{ c|}{MOS} & GCD & GCD05 & \multicolumn{2}{ c|}{Meander} & \multicolumn{3}{ c|}{Contact chain}\\\\
-        
-        Unit: & """+self.dataseries['v_th'].unit+" & "+self.dataseries['v_fb2'].unit+" & "+self.dataseries['c_acc_m'].unit+" & "+self.dataseries['t_ox'].unit+
-        " & \detokenize{"+self.dataseries['n_ox'].unit+"} & "+self.dataseries['i_surf'].unit+" & "+self.dataseries['i_surf05'].unit+" & "
-        +self.dataseries['meander_poly'].unit+" & "+self.dataseries['meander_metal'].unit+" & "+
-        self.dataseries['contact_poly'].unit+" & "+self.dataseries['contact_n'].unit+" & "+self.dataseries['contact_p'].unit+"""\\\\
-        
-         & Vth & Vfb &  C-acc & t-ox & n-ox & i-surf & i-surf05 & PolySi & Metal & PolySi & N+ & P \\\\
-        \\hline\n
-        """)
-        
-        for i in range(0, len(self.labels)+5):
-            if i < len(self.labels):
-                line = "        \detokenize{"+self.shortLabel(i)+"}"
-            else:
-                line = self.dataseries['v_fb2'].summaryDesciption(i)
-            line = line + " & " + self.dataseries['v_th'].valueToLatex(i)
-            line = line + " & " + self.dataseries['v_fb2'].valueToLatex(i)
-            line = line + " & " + self.dataseries['c_acc_m'].valueToLatex(i)
-            line = line + " & " + self.dataseries['t_ox'].valueToLatex(i)
-            line = line + " & " + self.dataseries['n_ox'].valueToLatex(i)
-            line = line + " & " + self.dataseries['i_surf'].valueToLatex(i)
-            line = line + " & " + self.dataseries['i_surf05'].valueToLatex(i)
-            #line = line + " & " + self.dataseries['i_bulk05'].valueToLatex(i)
-            
-            line = line + " & " + self.dataseries['meander_poly'].valueToLatex(i)
-            line = line + " & " + self.dataseries['meander_metal'].valueToLatex(i)
-            
-            line = line + " & " + self.dataseries['contact_poly'].valueToLatex(i)
-            line = line + " & " + self.dataseries['contact_n'].valueToLatex(i)
-            line = line + " & " + self.dataseries['contact_p'].valueToLatex(i)
-
-            
-            f.write(line+"\\\\\n")
-        
-        f.write("""        \\hline
-    \\end{tabular}
-\\end{center}""")
-        
-        f.close()
         
         
         
