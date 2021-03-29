@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>PQC Sample: </title>
+        <title>Loading...</title>
         
         <style type="text/css" media="screen">
             th {text-align:left; padding-left:10px; padding-right:10px; }
@@ -13,9 +13,15 @@
     </head>
     <body>
 
-    <h1>PQC Sample: </h1>
+    <h1>PQC Plots: <div id="headername"></div></h1>
     
+    <a href="JavaScript:window.close()">Close window</a>
     
+    <div id="plots">
+    
+    </div>
+    
+    <a href="JavaScript:window.close()">Close window</a>
     
     </body>
 </html>
@@ -35,7 +41,10 @@
     flute1_prefix.forEach((prefix)=> {
         var url = basedir + prefix + sample + postfix;
         loadImage(url);
-   });   
+   });
+   
+   document.getElementById("headername").innerHTML = sample
+   document.title = 'PQC: '+sample+ " Plots"
     
     
     function loadImage(url) {
@@ -43,9 +52,9 @@
         
         var image = document.createElement('img');
         
-        image.src = url;
+        image.src = url;       
 
-        document.body.appendChild(image);
+        document.getElementById("plots").appendChild(image);
     }
     
     function urlParam(name, w) {
