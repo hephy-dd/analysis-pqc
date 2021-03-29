@@ -32,7 +32,48 @@ from pqc_analysis_tools import *
 print_results = 1
 
 
-def analyse_iv_data(path, plotResults=True, printResults=print_results):
+class AnalysisOptions:
+    def __init__(self, plotImgBasedir=None, label=None):
+        self.plotWindow = False
+        self.print = False
+        self.plotImgBasedir = plotImgBasedir
+        self.label = label
+        self.prefixOverride = None
+        
+        self.plot = self.plotWindow or self.plotImgBasedir is not None
+        
+    # this is only temprary, we can reuse that object using once
+    # used e g for VdP where one analysis function is used more than once
+    def pushPrefix(self, prefixOverride):
+        self.prefixOverride = prefixOverride
+        return self
+    
+    def popPrefix(self, prefix):
+        if self.prefixOverride:
+            ret = self.prefixOverride
+            self.prefixOverride = None
+            return ret
+        else:
+            return prefix
+            
+    def peekPrefix(self, defaultPrefix):
+        if self.prefixOverride:
+            return self.prefixOverride
+        else:
+            return defaultPrefix
+            
+    def savePlot(self, defaultPrefix, fig):
+        if self.plotWindow:
+            plt.show()
+        else:
+            fig.savefig(os.path.join(self.plotImgBasedir, self.popPrefix(defaultPrefix).lower()+"_"+self.label+".png"))
+            plt.close()
+            
+    def plotTitle(self, defaultPrefix):
+        return self.peekPrefix(defaultPrefix) + ': ' + self.label
+
+
+def analyse_iv_data(path, analysisOptions=AnalysisOptions()):
     test = 'iv'
     if path is None:
         return np.nan, np.nan
@@ -54,20 +95,21 @@ def analyse_iv_data(path, plotResults=True, printResults=print_results):
 
     lbl = assign_label(path, test)
 
-    if plotResults:
+    if analysisOptions.plot:
         annotate = 'I$_{max}$' + ': {} {} @ {}{}'.format(round(i_max, 2), "A", max(v), "V") + '\n\nT$_{avg}$' + ': {:0.2f} $^\circ C$'.format(np.mean(temp)) \
           + '\n\n H$_{avg}$:' + '{:0.2f}'.format(np.mean(humidity)) + r'$\%$'
 
         fig,ax = plt.subplots(1,1)
-        plot_curve(ax, v, i, 'IV Curve', 'Reverse Bias Voltage [V]', 'Current [A]', lbl, annotate, x_loc, y_loc)
+        plot_curve(ax, v, i, analysisOptions.plotTitle("diode IV??"), 'Reverse Bias Voltage [V]', 'Current [A]', lbl, annotate, x_loc, y_loc)
+        analysisOptions.savePlot("diode_iv??", fig)
 
-    if printResults:
+    if analysisOptions.print:
         print('%s:  IV:\ti_600: %.3f uA\ti_800: %.3f uA' % (lbl, i_600*1e6, i_800*1e6))
 
     return i_600, i_800
 
 
-def analyse_cv_data(path, plotResults=True, printResults=print_results):
+def analyse_cv_data(path, analysisOptions=AnalysisOptions()):
     test = 'cv'
 
     if path is None:
@@ -107,22 +149,24 @@ def analyse_cv_data(path, plotResults=True, printResults=print_results):
 
     #fig1, ax1 = plt.subplots(1, 1)
     #plot_curve(ax1, v_norm, c_norm, 'CV curve', 'Voltage[{}]'.format(v_unit), 'Capacitance [{}]'.format(c_unit), lbl, annotate, x_loc, y_loc)
-    if plotResults:
+    if analysisOptions.plot:
         fig2, ax2 = plt.subplots(1,1)
         #ax2b = ax2.twinx()
         fit_curve(ax2, v_rise, a_rise * v_rise+ b_rise, color='ro')
         fit_curve(ax2, v_const, a_const * v_const+ b_const, color='kx')
         #fit_curve(ax2b, v_norm, spl_dev, color='mx')
-        plot_curve(ax2, v, 1./c**2, 'Full Depletion Voltage Estimation', 'Voltage[V]', '1/C$^{2}$ [F$^{-2}$]', lbl, '', 0, 0 )
+        plot_curve(ax2, v, 1./c**2, analysisOptions.plotTitle("CV??"), 'Voltage[V]', '1/C$^{2}$ [F$^{-2}$]', lbl, '', 0, 0 )
+        
+        analysisOptions.savePlot("diodecv??", fig2)
 
-    if printResults:
+    if analysisOptions.print:
     	#print(f"{lbl}: CV: v_fd: {}")
         print('%s: \tCV: v_fd: %.2e V\trho: %.2e Ohm\tconc: %.2e cm^-3' % (lbl, v_dep2, rho, conc*1e-6))
 
     return v_dep2, rho, conc
 
 
-def analyse_mos_data(path, plotResults=True, printResults=print_results, outdir=None, outname=None):
+def analyse_mos_data(path, analysisOptions=AnalysisOptions()):
     test = 'mos'
     
     if path is None:
@@ -154,9 +198,9 @@ def analyse_mos_data(path, plotResults=True, printResults=print_results, outdir=
     x_loc = 0.15
     y_loc = 0.145
 
-    if plotResults or outdir is not None:
+    if analysisOptions.plot:
         fig, ax = plt.subplots(1,1)
-        plot_curve(ax, v, c*1e12, 'MOS: '+outname, 'Bias Voltage / V', 'Capacitance / pF')
+        plot_curve(ax, v, c*1e12, analysisOptions.plotTitle("MOS"), 'Bias Voltage / V', 'Capacitance / pF')
         #plt.ylim(0, 100)
         fit_curve(ax, v_dep, np.array([a_dep*v+b_dep for v in v_dep])*1e12)
         fit_curve(ax, v_acc, np.array([a_acc*v + b_acc for v in v_acc])*1e12)
@@ -166,19 +210,15 @@ def analyse_mos_data(path, plotResults=True, printResults=print_results, outdir=
         resstr = "v_fb:"+" {:8.2f} V\n".format(v_fb2)
         fig.text(0.95, 0.33, resstr, bbox=dict(facecolor='deepskyblue', alpha=0.75), horizontalalignment='right', verticalalignment='top')
         
-        if outdir is None:
-            plt.show()
-        else:
-            fig.savefig(os.path.join(outdir, "mos_"+outname+".png"))
-            plt.close()
+        analysisOptions.savePlot("mos", fig)
     
-    if printResults and outdir is None:
+    if analysisOptions.print:
         print('%s: \tMOS: v_fb2: %.2e V\tc_acc: %.2e F\tt_ox: %.3e um\tn_ox: %.2e cm^-2' % (lbl, v_fb2, c_acc_m, t_ox, n_ox))
 
     return v_fb1, v_fb2, t_ox, n_ox, c_acc_m
 
 
-def analyse_gcd_data(path, plotResults=True, printResults=print_results, outdir=None, outname=None):
+def analyse_gcd_data(path, analysisOptions=AnalysisOptions()):
     test = 'gcd'
     
     if path is None:
@@ -197,9 +237,9 @@ def analyse_gcd_data(path, plotResults=True, printResults=print_results, outdir=
 
     gcd_result = analyse_gcd(v,i_em, maxreldev=0.03)
 
-    if plotResults or outdir is not None:
+    if analysisOptions.plot:
         fig, ax = plt.subplots(1,1)
-        plot_curve(ax, v, i_em*1e12, 'GCD: '+outname, 'Gate Voltage / V', 'Leakage Current / {}'.format("pA"))
+        plot_curve(ax, v, i_em*1e12, analysisOptions.plotTitle("GCD??"), 'Gate Voltage / V', 'Leakage Current / {}'.format("pA"))
         try:
             fit_curve(ax, gcd_result.v_acc, gcd_result.i_acc*1e12, color='r')
             fit_curve(ax, gcd_result.v_dep, gcd_result.i_dep*1e12, color='k')
@@ -213,25 +253,21 @@ def analyse_gcd_data(path, plotResults=True, printResults=print_results, outdir=
         resstr += "i_inv_relstd:"+" {:8.3f}%".format(gcd_result.i_inv_relstd*100)
         fig.text(0.95, 0.33, resstr, bbox=dict(facecolor='deepskyblue', alpha=0.75), horizontalalignment='right', verticalalignment='top')
         
-        if outdir is None:
-            plt.show()
-        else:
-            fig.savefig(os.path.join(outdir, "gcd_"+outname+".png"))
-            plt.close()
+        analysisOptions.savePlot("fet", fig)
     
-    if printResults and outdir is None:
+    if analysisOptions.print:
         print('%s: \tGCD: i_surf: %.2e A\t i_bulk: %.2e A' % (lbl, gcd_result.i_surf, gcd_result.i_bulk))
 
     return gcd_result.i_surf, gcd_result.i_bulk
 
 
 
-def analyse_fet_data(path, plotResults=True, printResults=print_results, outdir=None, outname=None):
+def analyse_fet_data(path, analysisOptions=AnalysisOptions()):
     test = 'fet'
 
     if path is None:
         return np.nan
-
+        
     series = read_json_file(path).get('series')
     v = series.get('voltage', np.array([]))
     i_em = series.get('current_elm', np.array([]))
@@ -249,9 +285,9 @@ def analyse_fet_data(path, plotResults=True, printResults=print_results, outdir=
 
     lbl = assign_label(path, test)
 
-    if plotResults or outdir is not None:
+    if analysisOptions.plot:
         fig,ax1 = plt.subplots()
-        plt.title("FET: "+outname)
+        plt.title( analysisOptions.plotTitle("FET"))
         lns1a = ax1.plot(v,iz_em*1e6, ls='', marker='s', ms=3, color='tab:green', label='transfer characteristics - shifted')
         lns1 = ax1.plot(v,i_em*1e6, ls='', marker='s', ms=3, label='transfer characteristics')
 
@@ -271,13 +307,10 @@ def analyse_fet_data(path, plotResults=True, printResults=print_results, outdir=
         ax1.grid(linestyle='dotted')
         resstr = "V$_{th}$:"+" {:8.2f} V".format(v_th)
         fig.text(0.85, 0.85, resstr, bbox=dict(facecolor='deepskyblue', alpha=0.75), horizontalalignment='right', verticalalignment='top')
-        if outdir is None:
-            plt.show()
-        else:
-            fig.savefig(os.path.join(outdir, "fet_"+outname+".png"))
-            plt.close()
+        
+        analysisOptions.savePlot("fet", fig)
 
-    if printResults and outdir is None:
+    if analysisOptions.print:
        print('%s: \tnFet: v_th: %.2e V' % (lbl, v_th))
 
     return v_th

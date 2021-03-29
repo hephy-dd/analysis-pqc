@@ -18,7 +18,17 @@
     <a href="JavaScript:window.close()">Close window</a>
     
     <div id="plots">
-    
+        <h2>Flute 1</h2>
+        <div id="fl1"> </div>
+        
+        <h2>Flute 2</h2>
+        <div id="fl2"> </div>
+        
+        <h2>Flute 3</h2>
+        <div id="fl3"> </div>
+        
+        <h2>Flute 4</h2>
+        <div id="fl4"> </div>
     </div>
     
     <a href="JavaScript:window.close()">Close window</a>
@@ -36,25 +46,37 @@
     
     var basedir= 'plots/';
     var postfix='.png';
-    let flute1_prefix = ['fet_', 'mos_', 'gcd_'];
-    
-    flute1_prefix.forEach((prefix)=> {
-        var url = basedir + prefix + sample + postfix;
-        loadImage(url);
-   });
-   
-   document.getElementById("headername").innerHTML = sample
-   document.title = 'PQC: '+sample+ " Plots"
+    let flute1_prefix = ['fet', 'mos'];
+    let flute2_prefix = ['gcd'];
+    let flute3_prefix = ['iv_diodehalf', 'cv_diodehalf'];
+    let flute4_prefix = ['gcd05'];
     
     
-    function loadImage(url) {
+    document.getElementById("headername").innerHTML = sample
+    document.title = 'PQC: '+sample+ " Plots"
+    
+    loadImages("fl1", flute1_prefix);
+    loadImages("fl2", flute2_prefix);
+    loadImages("fl3", flute3_prefix);
+    loadImages("fl4", flute4_prefix);
+    
+    
+    function loadImages(parentId, prefixes) {
+        prefixes.forEach((prefix)=> {
+            var url = basedir + prefix + "_" + sample + postfix;
+            loadImage(parentId, url);
+        });
+    }
+    
+    
+    function loadImage(parentId, url) {
         console.log(url);
         
         var image = document.createElement('img');
         
         image.src = url;       
 
-        document.getElementById("plots").appendChild(image);
+        document.getElementById(parentId).appendChild(image);
     }
     
     function urlParam(name, w) {

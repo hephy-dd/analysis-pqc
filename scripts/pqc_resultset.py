@@ -15,7 +15,7 @@ from matplotlib import colors
 from itertools import islice
 from pqc_values import PQC_Values, make_chunks
 from analysis_pqc import params
-
+from pqc_analysis_json import AnalysisOptions
 
 
 
@@ -164,30 +164,97 @@ class PQC_resultset:
                     self.timestamps.append(0)
                     
                 cross = "cross"
-                outname = self.dataseries['xlabels'][-1]
+                plotImgLabel = self.dataseries['xlabels'][-1]
                 if create_plots:
-                    outdir = self.plotDir
+                    plotImgBasedir = self.plotDir
                 else:
-                    outdir = None
+                    plotImgBasedir = None
                 
-                self.dataseries['vdp_poly_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", cross], blacklist=["reverse"]), plotResults=False))
-                self.dataseries['vdp_poly_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "reverse", cross])))
+                analysisOptions = AnalysisOptions(plotImgBasedir, plotImgLabel)
+                outdir = plotImgBasedir
+                outname = plotImgLabel
+                # =================================================== Flute 1 ===================================================
+                
+                self.dataseries['v_th'].append(pqc.analyse_fet_data(
+                    pqc.find_most_recent_file(dirs[i], "fet", whitelist=[currflute, ]), analysisOptions))
+                
+                dummy, v_fb2, t_ox, n_ox, c_acc_m = pqc.analyse_mos_data(
+                    pqc.find_most_recent_file(dirs[i], "mos", whitelist=[currflute, ]), analysisOptions)
+                self.dataseries['v_fb2'].append(v_fb2)
+                self.dataseries['t_ox'].append(t_ox)
+                self.dataseries['n_ox'].append(n_ox)
+                self.dataseries['c_acc_m'].append(c_acc_m)
+                
+                    
+                c_mean, c_median, d = pqc.analyse_capacitor_data(
+                    pqc.find_most_recent_file(dirs[i], "capacitor", whitelist=[currflute, "Left", "250mV", "10kHz"], blacklist=["mos"]), printResults=False, plotResults=False)
+                self.dataseries['cap_l'].append(c_median)
+                self.dataseries['cap_l_tox'].append(d)
+                
+                c_mean, c_median, d = pqc.analyse_capacitor_data(
+                    pqc.find_most_recent_file(dirs[i], "capacitor", whitelist=[currflute, "Right", "250mV", "10kHz"], blacklist=["mos"]), printResults=False, plotResults=False)
+                self.dataseries['cap_r'].append(c_median)
+                self.dataseries['cap_r_tox'].append(d)
+                
+                self.dataseries['vdp_poly_f'].append(pqc.get_vdp_value(
+                    pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", cross], blacklist=["reverse"]), plotResults=False))
+                self.dataseries['vdp_poly_r'].append(pqc.get_vdp_value(
+                    pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "Polysilicon", "reverse", cross])))
 
-                self.dataseries['vdp_n_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", cross], blacklist=["reverse"])))
-                self.dataseries['vdp_n_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "reverse", cross])))
+                self.dataseries['vdp_n_f'].append(pqc.get_vdp_value(
+                    pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", cross], blacklist=["reverse"])))
+                self.dataseries['vdp_n_r'].append(pqc.get_vdp_value(
+                    pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "n", "reverse", cross])))
                 
-                self.dataseries['vdp_pstop_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", cross], blacklist=["reverse"])))
-                self.dataseries['vdp_pstop_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "reverse", cross])))
+                self.dataseries['vdp_pstop_f'].append(pqc.get_vdp_value(
+                    pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", cross], blacklist=["reverse"])))
+                self.dataseries['vdp_pstop_r'].append(pqc.get_vdp_value(
+                    pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "P_stop", "reverse", cross])))
                 
-                self.dataseries['t_line_n'].append(pqc.analyse_linewidth_data(pqc.find_most_recent_file(dirs[i], "linewidth", whitelist=[currflute, "n"]), r_sheet=self.dataseries['vdp_n_f'].values[-1], printResults=False, plotResults=False))
-                self.dataseries['t_line_pstop2'].append(pqc.analyse_linewidth_data(pqc.find_most_recent_file(dirs[i], "linewidth", whitelist=[currflute, "P_stop", "2_wire"]), r_sheet=self.dataseries['vdp_pstop_f'].values[-1], printResults=False, plotResults=False))
-                self.dataseries['t_line_pstop4'].append(pqc.analyse_linewidth_data(pqc.find_most_recent_file(dirs[i], "linewidth", whitelist=[currflute, "P_stop", "4_wire"]), r_sheet=self.dataseries['vdp_pstop_f'].values[-1], printResults=False, plotResults=False))
+                
+                # =================================================== Flute 2 ===================================================
+                
+                i_surf, dummy = pqc.analyse_gcd_data(
+                    pqc.find_most_recent_file(dirs[i], "gcd", whitelist=[currflute, ]), analysisOptions.pushPrefix("GCD"))  # only i_surf valid
+                self.dataseries['i_surf'].append(i_surf)
+                
+                
+                # =================================================== Flute 3 ===================================================
+                
+                # we want this for FLute_3 and not Flute_1
+                i600, dummy = pqc.analyse_iv_data(
+                    pqc.find_most_recent_file(dirs[i], "iv", whitelist=[currflute, "3"]), analysisOptions.pushPrefix("IV_DiodeHalf"))
+                self.dataseries['i600'].append(i600)
+                
+                v_fd, rho, conc = pqc.analyse_cv_data(
+                    pqc.find_most_recent_file(dirs[i], "cv", whitelist=[currflute, "3"]), analysisOptions.pushPrefix("CV_DiodeHalf"))
+                self.dataseries['v_fd'].append(v_fd)
+                self.dataseries['rho'].append(rho)
+                self.dataseries['conc'].append(conc)
+                
+                
+                # =================================================== Flute 4 ===================================================
+                
+                i_surf05, i_bulk05 = pqc.analyse_gcd_data(
+                    pqc.find_most_recent_file(dirs[i], "gcd05", whitelist=[currflute, ]), analysisOptions.pushPrefix("GCD05"))  # for i_bulk
+                self.dataseries['i_surf05'].append(i_surf05)
+                self.dataseries['i_bulk05'].append(i_bulk05)
+                
+                
+                
+                # =================================================== Other ===================================================
+                
+                self.dataseries['t_line_n'].append(pqc.analyse_linewidth_data(
+                    pqc.find_most_recent_file(dirs[i], "linewidth", whitelist=[currflute, "n"]), r_sheet=self.dataseries['vdp_n_f'].values[-1], printResults=False, plotResults=False))
+                self.dataseries['t_line_pstop2'].append(pqc.analyse_linewidth_data(
+                    pqc.find_most_recent_file(dirs[i], "linewidth", whitelist=[currflute, "P_stop", "2_wire"]), r_sheet=self.dataseries['vdp_pstop_f'].values[-1], printResults=False, plotResults=False))
+                self.dataseries['t_line_pstop4'].append(pqc.analyse_linewidth_data(
+                    pqc.find_most_recent_file(dirs[i], "linewidth", whitelist=[currflute, "P_stop", "4_wire"]), r_sheet=self.dataseries['vdp_pstop_f'].values[-1], printResults=False, plotResults=False))
 
                 self.dataseries['r_contact_n'].append(pqc.analyse_cbkr_data(pqc.find_most_recent_file(dirs[i], "cbkr", whitelist=[currflute, "n"]), r_sheet=self.dataseries['vdp_n_f'].values[-1], printResults=False, plotResults=False))
                 self.dataseries['r_contact_poly'].append(pqc.analyse_cbkr_data(pqc.find_most_recent_file(dirs[i], "cbkr", whitelist=[currflute, "Polysilicon"]), r_sheet=self.dataseries['vdp_poly_f'].values[-1], printResults=False, plotResults=False))
 
-                self.dataseries['v_th'].append(pqc.analyse_fet_data(pqc.find_most_recent_file(dirs[i], "fet", whitelist=[currflute, ]), outdir=outdir, outname=outname, printResults=False, plotResults=False))
-
+                
                 self.dataseries['vdp_metclo_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "metal", "clover"], blacklist=["reverse"])))
                 self.dataseries['vdp_metclo_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "metal", "clover", "reverse"], blacklist=[])))
 
@@ -197,28 +264,6 @@ class PQC_resultset:
 
                 self.dataseries['v_bd'].append(pqc.analyse_breakdown_data(pqc.find_most_recent_file(dirs[i], "breakdown", whitelist=[currflute, ]), printResults=False, plotResults=False))
 
-                # we want this for FLute_3 and not Flute_1
-                i600, dummy = pqc.analyse_iv_data(pqc.find_most_recent_file(dirs[i], "iv", whitelist=[currflute, "3"]), printResults=False, plotResults=False)
-                self.dataseries['i600'].append(i600)
-                
-                v_fd, rho, conc = pqc.analyse_cv_data(pqc.find_most_recent_file(dirs[i], "cv", whitelist=[currflute, "3"]), printResults=False, plotResults=False)
-                self.dataseries['v_fd'].append(v_fd)
-                self.dataseries['rho'].append(rho)
-                self.dataseries['conc'].append(conc)
-                
-                dummy, v_fb2, t_ox, n_ox, c_acc_m = pqc.analyse_mos_data(pqc.find_most_recent_file(dirs[i], "mos", whitelist=[currflute, ]), outdir=outdir, outname=outname, printResults=False, plotResults=False)
-                self.dataseries['v_fb2'].append(v_fb2)
-                self.dataseries['t_ox'].append(t_ox)
-                self.dataseries['n_ox'].append(n_ox)
-                self.dataseries['c_acc_m'].append(c_acc_m)
-                
-                i_surf, dummy = pqc.analyse_gcd_data(pqc.find_most_recent_file(dirs[i], "gcd", whitelist=[currflute, ]), outdir=outdir, outname=outname, printResults=False, plotResults=False)  # only i_surf valid
-                self.dataseries['i_surf'].append(i_surf)
-                
-                i_surf05, i_bulk05 = pqc.analyse_gcd_data(pqc.find_most_recent_file(dirs[i], "gcd05", whitelist=[currflute, ]), outdir=outdir, outname=outname+" GCD05", printResults=False, plotResults=False)  # for i_bulk
-                self.dataseries['i_surf05'].append(i_surf05)
-                self.dataseries['i_bulk05'].append(i_bulk05)
-                
                 self.dataseries['vdp_bulk_f'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], None, whitelist=[currflute, "bulk", "cross"], blacklist=["reverse"])))
                 self.dataseries['vdp_bulk_r'].append(pqc.get_vdp_value(pqc.find_all_files_from_path(dirs[i], None, whitelist=[currflute, "bulk", "reverse", "cross"])))
                 
@@ -229,13 +274,7 @@ class PQC_resultset:
                 self.dataseries['contact_p'].append(pqc.analyse_contact_data(pqc.find_most_recent_file(dirs[i], "contact", whitelist=[currflute, "chain", "P"]), printResults=False, plotResults=False))
                 self.dataseries['contact_n'].append(pqc.analyse_contact_data(pqc.find_most_recent_file(dirs[i], "contact", whitelist=[currflute, "chain", "N"]), printResults=False, plotResults=False))
                 
-                c_mean, c_median, d = pqc.analyse_capacitor_data(pqc.find_most_recent_file(dirs[i], "capacitor", whitelist=[currflute, "Left", "250mV", "10kHz"], blacklist=["mos"]), printResults=False, plotResults=False)
-                self.dataseries['cap_l'].append(c_median)
-                self.dataseries['cap_l_tox'].append(d)
                 
-                c_mean, c_median, d = pqc.analyse_capacitor_data(pqc.find_most_recent_file(dirs[i], "capacitor", whitelist=[currflute, "Right", "250mV", "10kHz"], blacklist=["mos"]), printResults=False, plotResults=False)
-                self.dataseries['cap_r'].append(c_median)
-                self.dataseries['cap_r_tox'].append(d)
         self.dataseries['xlabels'].extend(PQC_Values.getStatLabels())
         self.dataseries['xflutes'].extend([""]*len(PQC_Values.getStatLabels()))
         self.dataseries['xtimestamps'].extend([""]*len(PQC_Values.getStatLabels()))
