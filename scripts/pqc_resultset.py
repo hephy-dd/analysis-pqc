@@ -148,12 +148,14 @@ class PQC_resultset:
         
         for i in range(0, len(dirs)):
 
-            for currflute in ["PQCFlutesLeft", "PQCFlutesRight", "PQCFluteLeft", "PQCFluteRight", "RL", "UL", "5Vfb"]:   # we want both flutes if they are measured, but sometimes it's misspelled
+            for currflute in ["PQCFlutesLeft", "PQCFlutesRight", "PQCFluteLeft", "PQCFluteRight", "RL", "UL", "5Vfb", "2Vfb"]:   # we want both flutes if they are measured, but sometimes it's misspelled
                 if len(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "cross"], blacklist=["reverse"])) < 1:
                     continue
-
-                self.labels.append(dirs[i].split("/")[-1])
+                
                 self.flutes.append(currflute)
+                la = dirs[i].split("/")[-1]
+                self.labels.append(la+"_"+currflute)
+
 
                 x = pqc.find_all_files_from_path(dirs[i], "van_der_pauw")
                 if i != []:
@@ -162,7 +164,7 @@ class PQC_resultset:
                     self.timestamps.append(0)
                     
                 cross = "cross"
-                outname = self.dataseries['xlabels'][-1]+"_"+currflute
+                outname = self.dataseries['xlabels'][-1]
                 if create_plots:
                     outdir = self.plotDir
                 else:

@@ -195,7 +195,7 @@ def analyse_gcd_data(path, plotResults=True, printResults=print_results, outdir=
 
     lbl = assign_label(path, test)
 
-    gcd_result = analyse_gcd(v,i_em)
+    gcd_result = analyse_gcd(v,i_em, maxreldev=0.03)
 
     if plotResults or outdir is not None:
         fig, ax = plt.subplots(1,1)

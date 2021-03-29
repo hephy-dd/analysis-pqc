@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>PQC Sample: </title>
+        
+        <style type="text/css" media="screen">
+            th {text-align:left; padding-left:10px; padding-right:10px; }
+            td {text-align:right; padding-left:10px; padding-right:10px; }
+            
+        </style>
+        <!--h1 {color:red;}-->
+    </head>
+    <body>
+
+    <h1>PQC Sample: </h1>
+    
+    
+    
+    </body>
+</html>
+
+
+
+
+
+<script type="text/javascript">
+    var sample = urlParam('sample');
+    //var sample = 'HPK_HGC538_10_200um_RL';
+    
+    var basedir= 'plots/';
+    var postfix='.png';
+    let flute1_prefix = ['fet_', 'mos_', 'gcd_'];
+    
+    flute1_prefix.forEach((prefix)=> {
+        var url = basedir + prefix + sample + postfix;
+        loadImage(url);
+   });   
+    
+    
+    function loadImage(url) {
+        console.log(url);
+        
+        var image = document.createElement('img');
+        
+        image.src = url;
+
+        document.body.appendChild(image);
+    }
+    
+    function urlParam(name, w) {
+        w = w || window;
+        var rx = new RegExp('[\&|\?]'+name+'=([^\&\#]+)'),
+            val = w.location.search.match(rx);
+        return !val ? '':val[1];
+    }
+
+
+</script>
