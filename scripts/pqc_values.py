@@ -64,6 +64,10 @@ class PQC_Values:
         
     def getValueString(self, index):
         if index < len(self.values):
+            if np.isnan(self.values[index]):
+                return "failed"
+            elif np.isinf(self.values[index]):
+                return "---"
             return num2str(self.values[index]*self.showmultiplier, self.expectedValue)
         else:
             stats = self.getStats()
@@ -78,7 +82,9 @@ class PQC_Values:
         if index >= len(self.values):
             return 0
         value = self.values[index]*self.showmultiplier
-        if np.isnan(value):
+        if np.isinf(value):
+            return 5  # nan
+        elif np.isnan(value):
             return 4  # nan
         elif value > self.maxAllowed:
             return 3  # too high
@@ -105,7 +111,7 @@ class PQC_Values:
         if maxAllowed is None:
             maxAllowed = self.maxAllowed
         
-        nTot = len(self.values)
+        nTot = len(np.array(self.values)[np.invert(np.isinf(np.array(self.values)))])
 
         selector = np.isfinite(np.array(self.values))
         
@@ -144,40 +150,5 @@ class PQC_Values:
         return new(name, nicename, parents[0].expectedValue, parents[0].unit, parents[0].showmultiplier, values=values, stray=parents[0].stray)
     
 
-    
-    # get a colorized value string for ise in latex, if the index is higher we get summary elemets
-    def valueToLatex(self, index):
-        if index < len(self.values):
-            value = self.values[index]*self.showmultiplier
-            vstr = num2str(value, self.expectedValue)
-                
-            if np.isnan(value):
-                return "\\nanval NaN"
-            elif value > self.maxAllowed:
-                return "\\highval "+vstr
-            elif value < self.minAllowed:
-                return "\\lowval "+vstr
-            return "\\okval "+vstr
-        else:
-            stats = self.getStats()
-            sel={
-                0: "\\okval "+num2str(stats.selMed, self.expectedValue),
-                1: "\\okval "+num2str(stats.selAvg, self.expectedValue),
-                2: "\\okval "+num2str(stats.selStd, self.expectedValue),
-                3: "\\okval {}/{}".format(len(stats.values), stats.nTot),
-                4: "\\okval {:2.0f}\\%".format(len(stats.values)/stats.nTot*100),
-             }
-        return sel.get(index-len(self.values), "\\nanval err")
-        
-    def summaryDesciption(self, index):
-        v = ["\\hline \nMedian", "Average", "Std dev", "\\hline \nOK/Tot", "OK (rel)"]
-        return v[index-len(self.values)]
-    
-    def headerToLatex():
-        return "\\def\\nanval{\\cellcolor[HTML]{aa0000}}\n" \
-               "\\def\\highval{\\cellcolor[HTML]{ff9900}}\n" \
-               "\\def\\lowval{\\cellcolor[HTML]{ffff00}}\n" \
-               "\\def\\okval{\\cellcolor[HTML]{ffffff}}\n\n"
-               
                
       

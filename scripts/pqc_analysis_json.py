@@ -32,6 +32,8 @@ from pqc_analysis_tools import *
 print_results = 1
 
 
+notMeasured = np.inf
+
 class AnalysisOptions:
     def __init__(self, plotImgBasedir=None, label=None):
         self.plotWindow = False
@@ -41,6 +43,7 @@ class AnalysisOptions:
         self.prefixOverride = None
         
         self.plot = self.plotWindow or self.plotImgBasedir is not None
+
         
     # this is only temprary, we can reuse that object using once
     # used e g for VdP where one analysis function is used more than once
@@ -76,7 +79,7 @@ class AnalysisOptions:
 def analyse_iv_data(path, analysisOptions=AnalysisOptions()):
     test = 'iv'
     if path is None:
-        return np.nan, np.nan
+        return notMeasured, notMeasured
 
     series = read_json_file(path).get('series')
     v = abs(series.get('voltage', np.array([])))
@@ -117,7 +120,7 @@ def analyse_cv_data(path, analysisOptions=AnalysisOptions()):
     test = 'cv'
 
     if path is None:
-        return np.nan, np.nan, np.nan
+        return notMeasured, notMeasured, notMeasured
 
     series = read_json_file(path).get('series')
     v = abs(series.get('voltage_hvsrc', np.array([])))
@@ -180,7 +183,7 @@ def analyse_mos_data(path, analysisOptions=AnalysisOptions()):
     test = 'mos'
     
     if path is None:
-        return np.nan, np.nan, np.nan, np.nan, np.nan
+        return notMeasured, notMeasured, notMeasured, notMeasured, notMeasured
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_hvsrc', np.array([]))
@@ -232,7 +235,7 @@ def analyse_gcd_data(path, analysisOptions=AnalysisOptions()):
     test = 'gcd'
     
     if path is None:
-        return np.nan, np.nan
+        return notMeasured, notMeasured
 
     series = read_json_file(path).get('series')
     v = series.get('voltage', np.array([]))
@@ -276,7 +279,7 @@ def analyse_fet_data(path, analysisOptions=AnalysisOptions()):
     test = 'fet'
 
     if path is None:
-        return np.nan
+        return notMeasured
         
     series = read_json_file(path).get('series')
     v = series.get('voltage', np.array([]))
@@ -330,7 +333,7 @@ def analyse_van_der_pauw_data(path, analysisOptions=AnalysisOptions(), minCorrel
     test = 'van-der-pauw'
     
     if path is None:
-        return np.nan
+        return notMeasured
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc', np.array([]))
@@ -375,7 +378,7 @@ def analyse_linewidth_data(path, r_sheet=np.nan, printResults=print_results, plo
     test = 'linewidth'
 
     if path is None:
-        return np.nan
+        return notMeasured
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc', np.array([]))
@@ -404,7 +407,7 @@ def analyse_cbkr_data(path, r_sheet=np.nan, printResults=print_results, plotResu
     test = 'cbkr'
 
     if path is None:
-        return np.nan
+        return notMeasured
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc', np.array([]))
@@ -435,7 +438,7 @@ def analyse_contact_data(path, minCorrelation=0.96, printResults=print_results, 
     test= 'contact'
 
     if path is None:
-        return np.nan
+        return notMeasured
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc', np.array([]))
@@ -463,7 +466,7 @@ def analyse_meander_data(path, printResults=print_results, plotResults=True):
     test = 'meander'
 
     if path is None:
-        return np.nan
+        return notMeasured
 
     series = read_json_file(path).get('series')
     
@@ -495,7 +498,7 @@ def analyse_breakdown_data(path, printResults=print_results, plotResults=True):
     test = 'breakdown'
 
     if path is None:
-        return np.nan
+        return notMeasured
 
     series = read_json_file(path).get('series')
     v = series.get('voltage', np.array([]))
@@ -530,7 +533,7 @@ def analyse_capacitor_data(path, printResults=print_results, plotResults=True):
     test = 'capacitor'
 
     if path is None:
-        return np.nan, np.nan, np.nan
+        return notMeasured, notMeasured, notMeasured
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_hvsrc', np.array([]))
