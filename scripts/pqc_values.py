@@ -71,7 +71,7 @@ class PQC_Values:
                  1: num2str(stats.selAvg, self.expectedValue),
                  2: num2str(stats.selStd, self.expectedValue),
                  3: "{}/{}".format(len(stats.values), stats.nTot),
-                 4: "{:2.0f}".format(len(stats.values)/stats.nTot*100.), }
+                 4: "{:2.0f}%".format(len(stats.values)/stats.nTot*100.), }
             return sel.get(index-len(self.values), "error")
             
     def getStatus(self, index):

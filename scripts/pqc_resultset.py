@@ -46,14 +46,14 @@ class PQC_resultset:
         self.dataseries['cap_l_tox'] = PQC_Values("capl_tox", "Capacitor: Oxide Thickness", 1., "nm", 1e9, stray=0.5)
         self.dataseries['cap_r_tox'] = PQC_Values("capr_tox", "Capacitor: Oxide Thickness", 1., "nm", 1e9, stray=0.5)
         
-        self.dataseries['vdp_poly_f'] = PQC_Values("vdpPoly", "Polysilicon VdP", 2.4, "kOhm/sq", 1e-3, stray=0.2)
-        self.dataseries['vdp_poly_r'] = PQC_Values("vdpPoly_r", "Polysilicon VdP reverse", 2.4, "kOhm/sq", 1e-3, stray=0.2)
+        self.dataseries['vdp_poly_f'] = PQC_Values("vdpPoly", "Polysilicon VdP", 2.2, "kOhm/sq", 1e-3, stray=0.3)
+        self.dataseries['vdp_poly_r'] = PQC_Values("vdpPoly_r", "Polysilicon VdP reverse", 2.2, "kOhm/sq", 1e-3, stray=0.3)
 
-        self.dataseries['vdp_n_f'] = PQC_Values("vdpN", "N+ VdP", 35., "Ohm/sq", stray=0.2)
-        self.dataseries['vdp_n_r'] = PQC_Values("vdpN_r", "N+ VdP reverse", 35., "Ohm/sq", stray=0.2)
+        self.dataseries['vdp_n_f'] = PQC_Values("vdpN", "N+ VdP", 35., "Ohm/sq", stray=0.3)
+        self.dataseries['vdp_n_r'] = PQC_Values("vdpN_r", "N+ VdP reverse", 35., "Ohm/sq", stray=0.3)
 
-        self.dataseries['vdp_pstop_f'] = PQC_Values("vdpPstp", "P-stop VdP", 19., "kOhm/sq", 1e-3, stray=0.2)
-        self.dataseries['vdp_pstop_r'] = PQC_Values("vdpPstp_r", "P-stop VdP reverse", 19., "kOhm/sq", 1e-3, stray=0.2)
+        self.dataseries['vdp_pstop_f'] = PQC_Values("vdpPstp", "P-stop VdP", 19., "kOhm/sq", 1e-3, stray=0.3)
+        self.dataseries['vdp_pstop_r'] = PQC_Values("vdpPstp_r", "P-stop VdP reverse", 19., "kOhm/sq", 1e-3, stray=0.3)
         
         
         
@@ -61,7 +61,13 @@ class PQC_resultset:
         
         self.dataseries['i_surf'] = PQC_Values("i_surf", "Surface current", 8., "pA", -1e12, stray=1)
         
+        self.dataseries['meander_poly'] = PQC_Values("meand_poly", "Polisilicon Resistor", 1.7, "MOhm", 1e-6, stray=0.5)
         
+        self.dataseries['t_line_n'] = PQC_Values("lw_n", "Linewidth N+", 35., "um")
+        self.dataseries['t_line_pstop2'] = PQC_Values("lw_pstp2", "Linewidth P-stop 2 Wire", 38., "um")
+        self.dataseries['t_line_pstop4'] = PQC_Values("lw_pstp4", "Linewidth P-stop 4 Wire", 55., "um")
+        
+        self.dataseries['v_bd'] = PQC_Values("v_bd", "Breakdown Voltage", 215., "V")
         
         # =================================================== Flute 3 ===================================================
         
@@ -71,6 +77,17 @@ class PQC_resultset:
         self.dataseries['rho'] = PQC_Values("rho", "rho", 3.5, "kOhm cm", 0.1)
         self.dataseries['conc'] = PQC_Values("d_conc", "Doping Concentration", 3.5, "1E12cm^-3", 1e-18)
         
+        self.dataseries['meander_metal'] = PQC_Values("meand_metal", "Metal Meander", 260., "Ohm", 1., stray=0.5)
+        
+        self.dataseries['vdp_metclo_f'] = PQC_Values("vdp_met", "Metal Cloverleaf VdP", 25., "mOhm/sq", 1e3)
+        self.dataseries['vdp_metclo_r'] = PQC_Values("vdp_met_r", "Metal Cloverleaf VdP reverse", 25., "mOhm/sq", 1e3)
+
+        self.dataseries['vdp_p_cross_bridge_f'] = PQC_Values("vdp_cb", "Cross Bridge VdP", 1.5, "kOhm/sq", 1e-3)
+        self.dataseries['vdp_p_cross_bridge_r'] = PQC_Values("vdp_cb_r", "Cross Bridge VdP reverse", 1.5, "kOhm/sq", 1e-3)
+        self.dataseries['t_line_p_cross_bridge'] = PQC_Values("t_line_cb", "Linewidth cross bridge P", 35., "um")
+
+        self.dataseries['vdp_bulk_f'] = PQC_Values("vdpBulk", "Bulk VdP Cross", 66., "kOhm/sq", 1e-3, stray=0.8)
+        self.dataseries['vdp_bulk_r'] = PQC_Values("vdpBulk_r", "Bulk VdP Cross rev", 66., "kOhm/sq", 1e-3, stray=0.8)
         
         
         # =================================================== Flute 4 ===================================================                   
@@ -78,34 +95,8 @@ class PQC_resultset:
         self.dataseries['i_surf05'] = PQC_Values("i_surf05", "Surface current 05", 11., "pA", -1e12, stray=1)
         self.dataseries['i_bulk05'] = PQC_Values("i_bulk05", "Bulk current 05", 0.7, "pA", -1e12, stray=1)
         
-        
-        
-        
-
-
-        self.dataseries['t_line_n'] = PQC_Values("lw_n", "Linewidth N+", 35., "um")
-        self.dataseries['t_line_pstop2'] = PQC_Values("lw_pstp2", "Linewidth P-stop 2 Wire", 38., "um")
-        self.dataseries['t_line_pstop4'] = PQC_Values("lw_pstp4", "Linewidth P-stop 4 Wire", 55., "um")
-
         self.dataseries['r_contact_n'] = PQC_Values("r_cont_n", "Rcontact N+", 27., "Ohm")
         self.dataseries['r_contact_poly'] = PQC_Values("r_cont_poly", "Rcontact polysilicon", 100., "kOhm", 1e-3)
-
-
-        self.dataseries['vdp_metclo_f'] = PQC_Values("vdp_met", "Metal Cloverleaf VdP", 25., "mOhm/sq", 1e3)
-        self.dataseries['vdp_metclo_r'] = PQC_Values("vdp_met_r", "Metal Cloverleaf VdP reverse", 25., "mOhm/sq", 1e3)
-
-        self.dataseries['vdp_p_cross_bridge_f'] = PQC_Values("vdp_cb", "Cross Bridge VdP", 1.5, "kOhm/sq", 1e-3)
-        self.dataseries['vdp_p_cross_bridge_r'] = PQC_Values("vdp_cb_r", "Cross Bridge VdP reverse", 1.5, "kOhm/sq", 1e-3)
-
-        self.dataseries['t_line_p_cross_bridge'] = PQC_Values("t_line_cb", "Linewidth cross bridge P", 35., "um")
-
-        self.dataseries['v_bd'] = PQC_Values("v_bd", "Breakdown Voltage", 215., "V")
-        
-        self.dataseries['vdp_bulk_f'] = PQC_Values("vdpBulk", "Bulk VdP Cross", 66., "kOhm/sq", 1e-3, stray=0.8)
-        self.dataseries['vdp_bulk_r'] = PQC_Values("vdpBulk_r", "Bulk VdP Cross rev", 66., "kOhm/sq", 1e-3, stray=0.8)
-        
-        self.dataseries['meander_poly'] = PQC_Values("meand_poly", "Polisilicon Resistor", 1.7, "MOhm", 1e-6, stray=0.5)
-        self.dataseries['meander_metal'] = PQC_Values("meand_metal", "Metal Meander", 260., "Ohm", 1., stray=0.5)
         
         self.dataseries['contact_poly'] = PQC_Values("cont_poly", "Contact Chain PolySi", 35., "MOhm", 1e-6, stray=0.5)
         self.dataseries['contact_p'] = PQC_Values("cont_p", "Contact Chain P", 85., "kOhm", 1e-3, stray=0.5)
@@ -166,9 +157,11 @@ class PQC_resultset:
         
         for i in range(0, len(dirs)):
 
-            for currflute in ["PQCFlutesLeft", "PQCFlutesRight", "PQCFluteLeft", "PQCFluteRight", "RL", "UL", "5Vfb", "2Vfb"]:   # we want both flutes if they are measured, but sometimes it's misspelled
+            for currflute in [""]:  #["PQCFlutesLeft", "PQCFlutesRight", "PQCFluteLeft", "PQCFluteRight", "RL", "UL", "5Vfb", "2Vfb"]:   # we want both flutes if they are measured, but sometimes it's misspelled
+                #currflute = ""
                 if len(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=[currflute, "cross"], blacklist=["reverse"])) < 1:
                     continue
+                
                 
                 self.flutes.append(currflute)
                 la = dirs[i].split("/")[-1]
