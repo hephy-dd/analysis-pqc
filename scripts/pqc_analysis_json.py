@@ -545,7 +545,7 @@ def analyse_capacitor_data(path, printResults=print_results, plotResults=True):
     y_loc = 0.5
     
     if len(v) < 1:
-        return np.nan
+        return np.nan, np.nan, np.nan
 
     c_mean, c_median, d, status = analyse_capacitor(v, c, debug=0)
 
