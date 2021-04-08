@@ -155,7 +155,7 @@ def loadBatch(path, outdir=None, lazy=False, create_plots=False):
     pqc_results = PQC_resultset(batchname)
     
     if lazy and outdir is not None:
-        anatime = os.path.getmtime(pqc_results.getAnalysisFolderPath(outdir))
+        anatime = os.path.getmtime(pqc_results.analysisFolder(outdir))
         meastime = os.path.getmtime(path)
         if anatime > meastime:
             print("lazy mode: nothing to do")
@@ -186,16 +186,14 @@ def main():
     if not args.m:
         pqc_results = loadBatch(args.path, outdir, args.l, args.P)
         
-        #pqc_results.prettyPrint()
         renderTemplates(pqc_results)
         
         if args.H:
             pqc_results.createHistograms()
-        #pqc_results.exportLatex(outdir)
         
         
     else:
-        print("Multibatch mode")
+        print("Multibatch mode - experimental!")
         dirs = glob.glob(os.path.join(args.path, "*"))
         dirs = [t for t in dirs if "histograms" not in t and "VPX" in t ]
         

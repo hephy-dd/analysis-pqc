@@ -424,11 +424,14 @@ class PQC_resultset:
         plt.close()
     
     
+    def analysisFolder(self, basedir=None):
+        return os.path.join(basedir, "analysis_"+self.batch)
+    
     # either creates or empties analysis folder
-    def prepareAnalysisFolder(self, basedir=None):
+    def prepareAnalysisFolder(self, basedir=None, lazy=False):
         if basedir is None:
             basedir = self.basepath
-        self.outDir = os.path.join(basedir, "analysis_"+self.batch)
+        self.outDir = self.analysisFolder(basedir)
         self.plotDir = os.path.join(self.outDir, "plots")
         self.histogramDir = os.path.join(self.outDir, "histograms")
         try:
