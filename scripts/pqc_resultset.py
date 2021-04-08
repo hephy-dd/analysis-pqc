@@ -236,6 +236,9 @@ class PQC_resultset:
                 self.dataseries['t_line_pstop4'].append(pqc.analyse_linewidth_data(
                     pqc.find_most_recent_file(dirs[i], "linewidth", whitelist=[currflute, "P_stop", "4_wire"]), r_sheet=self.dataseries['vdp_pstop_f'].values[-1], analysisOptions=analysisOptions.pushPrefix("lw_p4")))
 
+                  
+                self.dataseries['meander_poly'].append(pqc.analyse_meander_data(
+                    pqc.find_most_recent_file(dirs[i], "meander", whitelist=[currflute, "polysilicon"]), analysisOptions=analysisOptions.pushPrefix("meander_poly")))
                 
                 
                 # =================================================== Flute 3 ===================================================
@@ -270,6 +273,9 @@ class PQC_resultset:
                 self.dataseries['vdp_bulk_r'].append(pqc.analyse_van_der_pauw_data(
                     pqc.find_most_recent_file(dirs[i], "", whitelist=[currflute, "bulk", "reverse", "cross"]), analysisOptions.pushPrefix("VdP_bulk_rev"), minCorrelation=0.85))
                 
+                self.dataseries['meander_metal'].append(pqc.analyse_meander_data(
+                    pqc.find_most_recent_file(dirs[i], "meander", whitelist=[currflute, "metal"]), analysisOptions=analysisOptions.pushPrefix("meander_metal")))
+                  
                 
                 # =================================================== Flute 4 ===================================================
                 
@@ -287,13 +293,8 @@ class PQC_resultset:
                 self.dataseries['r_contact_poly'].append(pqc.analyse_cbkr_data(pqc.find_most_recent_file(dirs[i], "cbkr", whitelist=[currflute, "Polysilicon"]), r_sheet=self.dataseries['vdp_poly_f'].values[-1], printResults=False, plotResults=False))
 
                 
-                
-                
                 self.dataseries['v_bd'].append(pqc.analyse_breakdown_data(pqc.find_most_recent_file(dirs[i], "breakdown", whitelist=[currflute, ]), printResults=False, plotResults=False))
 
-                
-                self.dataseries['meander_metal'].append(pqc.analyse_meander_data(pqc.find_most_recent_file(dirs[i], "meander", whitelist=[currflute, "metal"]), printResults=False, plotResults=False))
-                self.dataseries['meander_poly'].append(pqc.analyse_meander_data(pqc.find_most_recent_file(dirs[i], "meander", whitelist=[currflute, "polysilicon"]), printResults=False, plotResults=False))
                 
                 self.dataseries['contact_poly'].append(pqc.analyse_contact_data(pqc.find_most_recent_file(dirs[i], "contact", whitelist=[currflute, "chain", "polysilicon"]), printResults=False, plotResults=False))
                 self.dataseries['contact_p'].append(pqc.analyse_contact_data(pqc.find_most_recent_file(dirs[i], "contact", whitelist=[currflute, "chain", "P"]), printResults=False, plotResults=False))

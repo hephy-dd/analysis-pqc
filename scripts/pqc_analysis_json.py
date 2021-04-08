@@ -244,7 +244,9 @@ def analyse_gcd_data(path, analysisOptions=AnalysisOptions()):
     i_hvsrc = series.get('current_hvsrc', np.array([]))
 
     if(len(v) == 0) or (len(i_em) == 0):
-        return np.nan, np.nan
+        gcd_result.i_surf = np.nan
+        gcd_result.i_bulk = np.nan
+        
 
     lbl = assign_label(path, test)
 
@@ -351,7 +353,6 @@ def analyse_van_der_pauw_data(path, analysisOptions=AnalysisOptions(), minCorrel
 
     fit = np.array([a*x +b for x in x_fit])
     if analysisOptions.plot:
-        
 
         if r_sheet > 1000.:
             resstr = "R$_{sheet}$:"+" {:8.2f} kOhm/sq\n".format(r_sheet*1e-3)
@@ -424,7 +425,7 @@ def analyse_cbkr_data(path, r_sheet=np.nan, printResults=print_results, plotResu
     i = series.get('current', np.array([]))
 
     if len(v) == 0:
-        return np.nan
+        r_contact = np.nan
 
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
@@ -461,7 +462,7 @@ def analyse_contact_data(path, minCorrelation=0.96, printResults=print_results, 
     r_contact, a, b, x_fit, spl_dev, status, r_value = analyse_contact(i, v, cut_param=0.01, debug=0)
     
     if abs(r_value) < minCorrelation:
-        return np.nan
+        r_contact = np.nan
 
     fit = [a*x+b for x in x_fit]
 
@@ -472,7 +473,7 @@ def analyse_contact_data(path, minCorrelation=0.96, printResults=print_results, 
 
 
 
-def analyse_meander_data(path, printResults=print_results, plotResults=True):
+def analyse_meander_data(path, analysisOptions=AnalysisOptions(), minCorrelation=0.99):
     test = 'meander'
 
     if path is None:
@@ -493,12 +494,25 @@ def analyse_meander_data(path, printResults=print_results, plotResults=True):
 
     r, status, r_value = analyse_meander(i, v)
     
-    if (r_value < 0.95):
-        return np.nan
+    if (r_value < minCorrelation):
+        r = np.nan
+        
+    #fit = np.array([r*x for x in x_fit])
+    if analysisOptions.plot:
+        if r > 1e6:
+            resstr = "R:"+" {:8.2f} MOhm\n".format(r*1e-6)
+        else:
+            resstr = "R:"+" {:8.2f} Ohm\n".format(r)
+        resstr += "correlation:"+" {:5.3f}".format(r_value)
+        
+        
+        fig, ax = plt.subplots(1,1)
+        #fit_curve(ax, x_fit*1e6, fit*1e3, 0)
+        plot_curve(ax, i*1e6, v*1e3, analysisOptions.plotTitle("Meander ???"), 'Current / uA', 'Voltage / mV', '', resstr, 0.9, 0.3)
+        analysisOptions.savePlot("meander___", fig)
 
-    if printResults:
-       print('%s: \tMeander: r: %.2e r_value: %.2f' % (lbl, r, r_value))
-
+    if analysisOptions.print:
+        print('%s: \tMeander: r: %.2e r_value: %.2f' % (lbl, r, r_value))
 
     return r
 
