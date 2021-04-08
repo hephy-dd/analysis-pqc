@@ -374,7 +374,7 @@ def analyse_van_der_pauw_data(path, analysisOptions=AnalysisOptions(), minCorrel
     return r_sheet
 
 
-def analyse_linewidth_data(path, r_sheet=np.nan, printResults=print_results, plotResults=True):
+def analyse_linewidth_data(path, r_sheet=np.nan, analysisOptions=AnalysisOptions(), minCorrelation=0.5):
     test = 'linewidth'
 
     if path is None:
@@ -389,15 +389,25 @@ def analyse_linewidth_data(path, r_sheet=np.nan, printResults=print_results, plo
 
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
-    t_line, a, b, x_fit, spl_dev, status = analyse_linewidth(i, v, r_sheet=r_sheet, cut_param=-1., debug=0)
+    t_line, a, b, x_fit, spl_dev, r_value, status = analyse_linewidth(i, v, r_sheet=r_sheet, cut_param=-1., min_correlation=minCorrelation, debug=0)
 
-    fit = [a*x +b for x in x_fit]
-    if plotResults:
-        fig, ax = plt.subplots(1, 1)
-        fit_curve(ax, x_fit, fit, 0)
-        plot_curve(ax, i, v, 'IV Curve', 'Current [A]', 'Voltage [V]', lbl, '', 0, 0)
+    fit = np.array([a*x +b for x in x_fit])
+    if analysisOptions.plot:
+        if a > 1000.:
+            resstr = "R:"+" {:8.2f} kOhm\n".format(a*1e-3)
+        else:
+            resstr = "R:"+" {:8.2f} Ohm\n".format(a)
+        resstr += "lw:"+" {:5.3f} um\n".format(t_line) 
+        resstr += "correlation:"+" {:5.3f}".format(r_value)
+        
+        
+        fig, ax = plt.subplots(1,1)
+        fit_curve(ax, x_fit*1e6, fit*1e3, 0)
+        plot_curve(ax, i*1e6, v*1e3, analysisOptions.plotTitle("VdP ???"), 'Current / uA', 'Voltage / mV', '', resstr, 0.9, 0.3)
+        analysisOptions.savePlot("vdp___", fig)
 
-    if printResults:
+
+    if analysisOptions.print:
         print('%s: \tLinewidth: %.2e um\t%s' % (lbl, t_line, lbl_vdp))
 
     return t_line
