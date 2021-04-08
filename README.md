@@ -4,9 +4,9 @@ Analysis for PQC measurements.
 
 ## creating tables from templates:
 
-To enable a table, one must select the template from scripts/templates and make a symlink to scripts/templates-enabled
+To enable one or more table output files, one must select the templates from scripts/templates and make a symlink to scripts/templates-enabled for each
 
-templates that contain ```stdout``` will be sent to the stdout stream automatically, all others wirll be located in <outputdir>/tables/ 
+templates that contain ```stdout``` will be sent to the stdout stream automatically, all others will be located in <outputdir>/tables/ 
 
 
 
@@ -36,6 +36,21 @@ pip install -r requirements.txt
 ```
 
 ## Run scripts
+
+Full line analysis (for whole batch)
+```bash
+python scripts/full_line.py [-h] [-o O] [-l] [-H] [-P] path
+```
+
+optional arguments:
+  -h, --help  show this help message and exit
+  -o PATH     override output directory location, a subdirectory will be created there: PATH/analysis_<batch-name>/
+  -l          lazy evaluation: skip if the measurement folder is older than analysis folder
+  -H          create histograms
+  -P          create plots (for each single measurement used)
+
+
+## Old scripts:
 
 Analyze JSON
 ```bash
