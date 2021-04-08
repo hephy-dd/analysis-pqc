@@ -5,6 +5,7 @@ Analysis for PQC measurements.
 ## creating tables from templates:
 
 To enable one or more table output files, one must select the templates from ```scripts/templates``` and make a symlink to ```scripts/templates-enabled``` for each
+
 the folder ```scripts/templates-enabled``` is in the gitignore and will not interfere with pulling new versions
 
 templates that contain ```stdout``` will be sent to the stdout stream automatically, all others will be located in <outputdir>/tables/ 
@@ -40,16 +41,19 @@ pip install -r requirements.txt
 
 Full line analysis (for whole batch)
 ```bash
-python scripts/full_line.py [-h] [-o O] [-l] [-H] [-P] path
+python scripts/full_line.py [-h] [-o OPATH] [-l] [-H] [-P] path
 ```
-
+```bash
+required arguments:
+  path        path to the folder of the batch - the "HPK_VPX12345_001_2-S_HM_WR" folders should be in this dir
+  
 optional arguments:
   -h, --help  show this help message and exit
-  -o PATH     override output directory location, a subdirectory will be created there: PATH/analysis_<batch-name>/
+  -o OPATH    override output directory location, a subdirectory will be created there: OPATH/analysis_<batch-name>/
   -l          lazy evaluation: skip if the measurement folder is older than analysis folder
   -H          create histograms
   -P          create plots (for each single measurement used)
-
+```
 
 ## Old scripts:
 
