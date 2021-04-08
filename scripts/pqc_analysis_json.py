@@ -375,7 +375,7 @@ def analyse_van_der_pauw_data(path, analysisOptions=AnalysisOptions(), minCorrel
     return r_sheet
 
 
-def analyse_linewidth_data(path, r_sheet=np.nan, analysisOptions=AnalysisOptions(), minCorrelation=0.5):
+def analyse_linewidth_data(path, r_sheet=np.nan, analysisOptions=AnalysisOptions(), minCorrelation=0.9):
     test = 'linewidth'
 
     if path is None:
@@ -414,7 +414,7 @@ def analyse_linewidth_data(path, r_sheet=np.nan, analysisOptions=AnalysisOptions
     return t_line
 
 
-def analyse_cbkr_data(path, r_sheet=np.nan, printResults=print_results, plotResults=True):
+def analyse_cbkr_data(path, r_sheet=np.nan, analysisOptions=AnalysisOptions(), minCorrelation=0.95):
     test = 'cbkr'
 
     if path is None:
@@ -430,22 +430,31 @@ def analyse_cbkr_data(path, r_sheet=np.nan, printResults=print_results, plotResu
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
 
-    r_contact, a, b, x_fit, spl_dev, status = analyse_cbkr(i, v, r_sheet, cut_param=0.01, debug=0)
-    fit = [a*x +b for x in x_fit]
+    r_contact, a, b, x_fit, spl_dev, r_value, status = analyse_cbkr(i, v, r_sheet, cut_param=0.01, debug=0)
+    x_fit = np.array(x_fit)
+    fit = np.array([a*x +b for x in x_fit])
 
-    if plotResults:
-        fig, ax = plt.subplots(1, 1)
-        fit_curve(ax, x_fit, fit, 0)
-        plot_curve(ax, i, v, 'IV Curve', 'Current [A]', 'Voltage [V]', lbl, '', 0, 0)
+    if analysisOptions.plot:
+        if r_contact > 1e3:
+            resstr = "R:"+" {:8.2f} kOhm\n".format(r_contact*1e-3)
+        else:
+            resstr = "R:"+" {:8.2f} Ohm\n".format(r_contact)
+        resstr += "correlation:"+" {:5.3f}".format(r_value)
+        
+        fig, ax = plt.subplots(1,1)
+        fit_curve(ax, x_fit*1e6, fit*1e3, 0)
+        #fit_curve(ax, x_fit, fit, 0)
+        plot_curve(ax, i*1e6, v*1e3, analysisOptions.plotTitle("CKBK ???"), 'Current / uA', 'Voltage / mV', '', resstr, 0.9, 0.3)
+        analysisOptions.savePlot("cbkr___", fig)
 
-    if printResults:
+    if analysisOptions.print:
        print('%s: \tcbkr: r_contact: %.2e Ohm\t%s' % (lbl, r_contact, lbl_vdp))
 
 
     return r_contact
 
 
-def analyse_contact_data(path, minCorrelation=0.96, printResults=print_results, plotResults=True):
+def analyse_contact_data(path, analysisOptions=AnalysisOptions(), minCorrelation=0.95):
     test= 'contact'
 
     if path is None:
@@ -464,9 +473,22 @@ def analyse_contact_data(path, minCorrelation=0.96, printResults=print_results, 
     if abs(r_value) < minCorrelation:
         r_contact = np.nan
 
-    fit = [a*x+b for x in x_fit]
+    x_fit = np.array(x_fit)
+    fit = np.array([a*x +b for x in x_fit])
 
-    if printResults:
+    if analysisOptions.plot:
+        if r_contact > 1e3:
+            resstr = "R:"+" {:8.2f} kOhm\n".format(r_contact*1e-3)
+        else:
+            resstr = "R:"+" {:8.2f} Ohm\n".format(r_contact)
+        resstr += "correlation:"+" {:5.3f}".format(r_value)
+
+        fig, ax = plt.subplots(1,1)
+        fit_curve(ax, x_fit*1e6, fit*1e3, 0)
+        plot_curve(ax, i*1e6, v*1e3, analysisOptions.plotTitle("Contact ???"), 'Current / uA', 'Voltage / mV', '', resstr, 0.9, 0.3)
+        analysisOptions.savePlot("contact___", fig)
+
+    if analysisOptions.print:
        print('%s: \tcontact: r_contact: %.2e Ohm, r_value: %.2f' % (lbl, r_contact, r_value))
 
     return r_contact

@@ -284,21 +284,28 @@ class PQC_resultset:
                 self.dataseries['i_surf05'].append(i_surf05)
                 self.dataseries['i_bulk05'].append(i_bulk05)
                 
+                self.dataseries['r_contact_n'].append(pqc.analyse_cbkr_data(
+                    pqc.find_most_recent_file(dirs[i], "cbkr", whitelist=[currflute, "n"]), r_sheet=self.dataseries['vdp_n_f'].values[-1], analysisOptions=analysisOptions.pushPrefix("cbkr_n")))
+                self.dataseries['r_contact_poly'].append(pqc.analyse_cbkr_data(
+                    pqc.find_most_recent_file(dirs[i], "cbkr", whitelist=[currflute, "Polysilicon"]), r_sheet=self.dataseries['vdp_poly_f'].values[-1], analysisOptions=analysisOptions.pushPrefix("cbkr_poly")))
+
                 
+                self.dataseries['contact_poly'].append(pqc.analyse_contact_data(
+                    pqc.find_most_recent_file(dirs[i], "contact", whitelist=[currflute, "chain", "polysilicon"]), analysisOptions.pushPrefix("contact_chain_poly")))
+                self.dataseries['contact_p'].append(pqc.analyse_contact_data(
+                    pqc.find_most_recent_file(dirs[i], "contact", whitelist=[currflute, "chain", "P"]),  analysisOptions.pushPrefix("contact_chain_p")))
+                self.dataseries['contact_n'].append(pqc.analyse_contact_data(
+                    pqc.find_most_recent_file(dirs[i], "contact", whitelist=[currflute, "chain", "N"]),  analysisOptions.pushPrefix("contact_chain_n")))
                 
                 # =================================================== Other ===================================================
                 
 
-                self.dataseries['r_contact_n'].append(pqc.analyse_cbkr_data(pqc.find_most_recent_file(dirs[i], "cbkr", whitelist=[currflute, "n"]), r_sheet=self.dataseries['vdp_n_f'].values[-1], printResults=False, plotResults=False))
-                self.dataseries['r_contact_poly'].append(pqc.analyse_cbkr_data(pqc.find_most_recent_file(dirs[i], "cbkr", whitelist=[currflute, "Polysilicon"]), r_sheet=self.dataseries['vdp_poly_f'].values[-1], printResults=False, plotResults=False))
-
+                
                 
                 self.dataseries['v_bd'].append(pqc.analyse_breakdown_data(pqc.find_most_recent_file(dirs[i], "breakdown", whitelist=[currflute, ]), printResults=False, plotResults=False))
 
                 
-                self.dataseries['contact_poly'].append(pqc.analyse_contact_data(pqc.find_most_recent_file(dirs[i], "contact", whitelist=[currflute, "chain", "polysilicon"]), printResults=False, plotResults=False))
-                self.dataseries['contact_p'].append(pqc.analyse_contact_data(pqc.find_most_recent_file(dirs[i], "contact", whitelist=[currflute, "chain", "P"]), printResults=False, plotResults=False))
-                self.dataseries['contact_n'].append(pqc.analyse_contact_data(pqc.find_most_recent_file(dirs[i], "contact", whitelist=[currflute, "chain", "N"]), printResults=False, plotResults=False))
+
                 
                 
         self.dataseries['xlabels'].extend(PQC_Values.getStatLabels())

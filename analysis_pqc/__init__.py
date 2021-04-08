@@ -534,7 +534,7 @@ def analyse_linewidth(i, v, r_sheet=np.nan, cut_param=1e-5, min_correlation=0.99
 
 
 
-@params('r_contact, a, b, x_fit, spl_dev, status')
+@params('r_contact, a, b, x_fit, spl_dev, r_value, status')
 def analyse_cbkr(i, v, r_sheet=-1, cut_param=1e-5, debug=False):
     """
     Cross Bridge Kelvin Resistance Structure: Extract contact resistance.
@@ -559,7 +559,7 @@ def analyse_cbkr(i, v, r_sheet=-1, cut_param=1e-5, debug=False):
         w = 33 # diffusion width
         r_contact = a - (4*r_sheet*d**2) / (3*w**2) * (1 + d/(2*w - 2*d))
 
-    return r_contact, a, b, x_fit, spl_dev, status
+    return r_contact, a, b, x_fit, spl_dev, r_value, status
 
 
 
