@@ -4,7 +4,8 @@ Analysis for PQC measurements.
 
 ## creating tables from templates:
 
-To enable one or more table output files, one must select the templates from scripts/templates and make a symlink to scripts/templates-enabled for each
+To enable one or more table output files, one must select the templates from ```scripts/templates``` and make a symlink to ```scripts/templates-enabled``` for each
+the folder ```scripts/templates-enabled``` is in the gitignore and will not interfere with pulling new versions
 
 templates that contain ```stdout``` will be sent to the stdout stream automatically, all others will be located in <outputdir>/tables/ 
 
