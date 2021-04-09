@@ -11,7 +11,24 @@ the folder ```scripts/templates-enabled``` is in the gitignore and will not inte
 templates that contain ```stdout``` will be sent to the stdout stream automatically, all others will be located in <outputdir>/tables/ 
 
 
+## Install for full-line scripts
 
+
+```bash
+    git clone
+    cd analysis-pqc
+    git checkout maximilian
+    
+    pip3 install -r requirements.txt
+    export PYTHONPATH=$PYTHONPATH:$(pwd)
+    
+    mkdir scripts/templates-enabled
+    ln scripts/templates/*.html scripts/templates-enabled/
+    
+    # for testing:
+    mkdir ../test-pqc
+    python3 scripts/full_line.py /home/measurements/PQC/Tracker/Production/Data/VPX35953/ -P -o ../test-pqc
+```
 
 
 ## Install
