@@ -156,13 +156,14 @@ class PQC_resultset:
         dirs.sort()
         
         for i in range(0, len(dirs)):
-            print(dirs[i])
-
+            # print the currently analyzing direcotry
+            print("[{:2.0f}%] Analyzing: {:}".format(i*100./len(dirs), os.path.basename(os.path.normpath(dirs[i]))))
+            
+            # this finds out if there is an empty directory, assuming that there is at least one vdp measurement
             if len(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=["cross"], blacklist=["reverse"])) < 1:
-                print("skipping incomplete measurement: " + dirs[i])
+                print(f"   skipping incomplete measurement: " + dirs[i])
                 continue
-            
-            
+
             self.flutes.append("")
             la = dirs[i].split("/")[-1]
             self.labels.append(la)
