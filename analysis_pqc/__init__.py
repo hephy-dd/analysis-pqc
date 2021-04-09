@@ -178,7 +178,9 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
 
     # init
     v_dep1 = v_dep2 = rho = conc = np.nan
-    a_rise = b_rise = v_rise = a_const = b_const = v_const = np.nan
+    a_rise = b_rise = a_const = b_const = np.nan
+    v_rise = []
+    v_const = []
     status = STATUS_NONE
     
     if savgol_windowsize is None:
@@ -280,7 +282,10 @@ def analyse_mos(v, c, cut_param=0.03, debug=False, min_r_value=0.4):
 
     ## init
     v_fb1 = v_fb2 = t_ox = n_ox = np.nan
-    a_acc = b_acc = v_acc = a_dep = b_dep = v_dep = a_inv = b_inv = v_inv = spl_dev = np.nan
+    a_acc = b_acc = a_dep = b_dep = a_inv = b_inv = spl_dev = np.nan
+    v_dep = []
+    v_inv = []
+    v_acc = []
     status = STATUS_NONE
 
     # take average of last 5 samples for accumulation and inversion capacitance
@@ -362,9 +367,11 @@ def analyse_gcd(v, i, cut_param=0.01, debug=False, maxreldev=0.01):
 
     # init
     i_surf = i_bulk = np.nan
-    i_acc = i_dep = i_inv = v_acc = v_dep = v_inv = spl_dev = np.nan
+    i_acc = i_dep = i_inv = spl_dev = np.nan
     status = STATUS_NONE
-
+    v_acc = []
+    v_dep = []
+    v_inv = []
     # get spline fit, requires strictlty increasing array
     y_norm = np.abs(i) / np.max(np.abs(i))
     x_norm = np.arange(len(y_norm))
