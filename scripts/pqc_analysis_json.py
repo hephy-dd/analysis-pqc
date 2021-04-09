@@ -244,8 +244,7 @@ def analyse_gcd_data(path, analysisOptions=AnalysisOptions()):
     i_hvsrc = series.get('current_hvsrc', np.array([]))
 
     if(len(v) == 0) or (len(i_em) == 0):
-        gcd_result.i_surf = np.nan
-        gcd_result.i_bulk = np.nan
+        return np.nan, np.nan
         
 
     lbl = assign_label(path, test)
