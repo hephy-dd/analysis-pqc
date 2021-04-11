@@ -13,24 +13,30 @@
 {% set flute=['v_th', 'v_fb2', 'c_acc_m', 't_ox', 'n_ox', 'vdp_poly_f', 'vdp_poly_r', 'vdp_n_f', 'vdp_n_r', 'vdp_pstop_f', 'vdp_pstop_r', 'cap_l', 'cap_r'] %}
 
 
+{% raw %}
 \def\nanval{\cellcolor[HTML]{aa0000}}
 \def\highval{\cellcolor[HTML]{ff9900}}
 \def\lowval{\cellcolor[HTML]{ffff00}}
 \def\okval{\cellcolor[HTML]{ffffff}}
 \def\notmeasval{\cellcolor[HTML]{95f9f9}}
 
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+{% endraw %}
 
 \begin{center}
     \fontsize{4pt}{5pt}\selectfont
-    \begin{tabular}{ |l|{% for col in flute %}r|{% endfor %} } 
+    \setlength{\tabcolsep}{0.35em} % for the horizontal padding
+    \begin{tabular}{ |l|{% for col in flute %}R{0.6cm}|{% endfor %} } 
         \hline
-        {{ startRowStr }}{{ labelformat.format('b') }}{% for key in flute %}{{ colheaderformat.format(dataseries[key].name) }}{% endfor %}{{ endRowStr }}
+        {{ startRowStr }}{{ labelformat.format('') }}{% for key in flute %}{{ colheaderformat.format(dataseries[key].name) }}{% endfor %}{{ endRowStr }}
         \hline
-        {{ startRowStr }}{{ labelformat.format('b') }}{% for key in flute %}{{ colheaderformat.format(dataseries[key].unit) }}{% endfor %}{{ endRowStr }}
+        {{ startRowStr }}{{ labelformat.format('') }}{% for key in flute %}{{ colheaderformat.format(dataseries[key].unit) }}{% endfor %}{{ endRowStr }}
         \hline
         
         {% for i in range(0, dataseries['vdp_pstop_r'].len() ) %}{{ startRowStr }}{{ labelformat.format(dataseries['xlabels'][i]) }}{% for key in flute %}{{ valueformat.format(dataseries[key].getValueString(i), statusdict[dataseries[key].getStatus(i)]) }}{% endfor %}{{ endRowStr }}{% endfor %}
-        
+        \hline
         {% for i in range(dataseries['vdp_pstop_r'].len(), dataseries['vdp_pstop_r'].len()+5) %}{{ startRowStr }}{{ labelformat.format(dataseries['xlabels'][i]) }}{% for key in flute %}{{ valueformat.format(dataseries[key].getValueString(i), statusdict[dataseries[key].getStatus(i)]) }}{% endfor %}{{ endRowStr }}{% endfor %}
 
         \hline
