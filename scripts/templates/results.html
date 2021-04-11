@@ -28,6 +28,7 @@
     {% set startTableStr='<table border="0">' %}
     {% set endTableStr='</table>' %}
     
+    {#             0: statistics-value, 1: ok value, 2: too low     3: too high,                   4: nan (ie failed fit, compliance...), 5: not measured (inf)  #}
     {% set statusdict={0: '', 1: '', 2: 'background-color:#edfc1b', 3: 'background-color:#fc8c0c', 4: 'background-color:#fc3f42', 5: 'background-color:#95f9f9'} %}
 
     

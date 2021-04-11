@@ -59,7 +59,7 @@ class PQC_Values:
                  1: stats.selAvg,
                  2: stats.selStd,
                  3: len(stats.values),
-                 4: len(stats.values)/stats.nTot*100., }
+                 4: len(stats.values)/stats.nTot, }
             return sel.get(index-len(self.values), "error")
         
     def getValueString(self, index):
@@ -75,7 +75,7 @@ class PQC_Values:
                  1: num2str(stats.selAvg, self.expectedValue),
                  2: num2str(stats.selStd, self.expectedValue),
                  3: "{}/{}".format(len(stats.values), stats.nTot),
-                 4: "{:2.0f}%".format(len(stats.values)/stats.nTot*100.), }
+                 4: "{:3.2f}".format(len(stats.values)/stats.nTot), }
             return sel.get(index-len(self.values), "error")
             
     def getStatus(self, index):
@@ -83,7 +83,7 @@ class PQC_Values:
             return 0
         value = self.values[index]*self.showmultiplier
         if np.isinf(value):
-            return 5  # nan
+            return 5  # inf
         elif np.isnan(value):
             return 4  # nan
         elif value > self.maxAllowed:

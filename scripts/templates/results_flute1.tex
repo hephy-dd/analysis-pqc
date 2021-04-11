@@ -1,0 +1,41 @@
+{# formatting options (ie html, text, latex): #}
+{% set labelformat='\\detokenize{{ {0:s} }} ' %}
+{% set valueformat='& {1:s} {0:s} ' %}
+{% set colheaderformat='& \\detokenize{{ {0:s} }} ' %}
+{% set startRowStr='' %}
+{% set endRowStr='\\\\\n' %}
+
+    {#             0: statistics-value, 1: ok value, 2: too low, 3: too high, 4: nan (ie failed fit, compliance...), 5: not measured (inf)  #}
+{% set statusdict={0: '\\okval', 1: '\\okval', 2: '\\lowval', 3: '\\highval', 4: '\\nanval', 5: '\\notmeasval'} %}
+
+
+{# shape options, values per table (here one flute each) #}
+{% set flute=['v_th', 'v_fb2', 'c_acc_m', 't_ox', 'n_ox', 'vdp_poly_f', 'vdp_poly_r', 'vdp_n_f', 'vdp_n_r', 'vdp_pstop_f', 'vdp_pstop_r', 'cap_l', 'cap_r'] %}
+
+
+\def\nanval{\cellcolor[HTML]{aa0000}}
+\def\highval{\cellcolor[HTML]{ff9900}}
+\def\lowval{\cellcolor[HTML]{ffff00}}
+\def\okval{\cellcolor[HTML]{ffffff}}
+\def\notmeasval{\cellcolor[HTML]{95f9f9}}
+
+
+\begin{center}
+    \fontsize{4pt}{5pt}\selectfont
+    \begin{tabular}{ |l|{% for col in flute %}r|{% endfor %} } 
+        \hline
+        {{ startRowStr }}{{ labelformat.format('b') }}{% for key in flute %}{{ colheaderformat.format(dataseries[key].name) }}{% endfor %}{{ endRowStr }}
+        \hline
+        {{ startRowStr }}{{ labelformat.format('b') }}{% for key in flute %}{{ colheaderformat.format(dataseries[key].unit) }}{% endfor %}{{ endRowStr }}
+        \hline
+        
+        {% for i in range(0, dataseries['vdp_pstop_r'].len() ) %}{{ startRowStr }}{{ labelformat.format(dataseries['xlabels'][i]) }}{% for key in flute %}{{ valueformat.format(dataseries[key].getValueString(i), statusdict[dataseries[key].getStatus(i)]) }}{% endfor %}{{ endRowStr }}{% endfor %}
+        
+        {% for i in range(dataseries['vdp_pstop_r'].len(), dataseries['vdp_pstop_r'].len()+5) %}{{ startRowStr }}{{ labelformat.format(dataseries['xlabels'][i]) }}{% for key in flute %}{{ valueformat.format(dataseries[key].getValueString(i), statusdict[dataseries[key].getStatus(i)]) }}{% endfor %}{{ endRowStr }}{% endfor %}
+
+        \hline
+    \end{tabular}
+\end{center}
+
+
+    
