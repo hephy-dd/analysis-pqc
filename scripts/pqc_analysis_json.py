@@ -340,7 +340,7 @@ def analyse_van_der_pauw_data(path, analysisOptions=AnalysisOptions(), minCorrel
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
 
-    if(len(v) == 0):
+    if len(v) <= 3 or len(i) <= 3:
         return np.nan
 
     lbl = assign_label(path, test)
@@ -384,7 +384,7 @@ def analyse_linewidth_data(path, r_sheet=np.nan, analysisOptions=AnalysisOptions
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
     
-    if len(v) < 3:
+    if len(v) <= 3 or len(i) <= 3:
         return np.nan
 
     lbl = assign_label(path, test)
@@ -423,8 +423,8 @@ def analyse_cbkr_data(path, r_sheet=np.nan, analysisOptions=AnalysisOptions(), m
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
 
-    if len(v) == 0:
-        r_contact = np.nan
+    if len(v) <= 3 or len(i) <= 3:
+        return np.nan
 
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
@@ -463,7 +463,7 @@ def analyse_contact_data(path, analysisOptions=AnalysisOptions(), minCorrelation
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
     
-    if len(v) == 0:
+    if len(v) <= 3 or len(i) <= 3:
         return np.nan
 
     lbl = assign_label(path, test)
@@ -508,7 +508,7 @@ def analyse_meander_data(path, analysisOptions=AnalysisOptions(), minCorrelation
         v = series.get('voltage', np.array([]))
         i = series.get('current_elm', np.array([]))
 
-    if len(v) < 3:
+    if len(v) <= 3 or len(i) <= 3:
         return np.nan
         
     lbl = assign_label(path, test)
@@ -557,7 +557,7 @@ def analyse_breakdown_data(path, printResults=print_results, plotResults=True):
     x_loc = 0.3
     y_loc = 0.5
     
-    if len(v) < 1:
+    if len(v) <= 3 or len(i) <= 3:
         return np.nan
 
     v_bd, status = analyse_breakdown(v, i_elm, debug=0)
@@ -589,7 +589,7 @@ def analyse_capacitor_data(path, printResults=print_results, plotResults=True):
     x_loc = 0.3
     y_loc = 0.5
     
-    if len(v) < 1:
+    if len(v) <= 3 or len(c) <= 3:
         return np.nan, np.nan, np.nan
 
     c_mean, c_median, d, status = analyse_capacitor(v, c, debug=0)
