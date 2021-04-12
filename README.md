@@ -20,6 +20,8 @@ templates that contain ```stdout``` will be sent to the stdout stream automatica
     git checkout maximilian
     
     pip3 install -r requirements.txt
+    pip3 install -r scripts/requirements.txt
+
     export PYTHONPATH=$PYTHONPATH:$(pwd)
     
     mkdir scripts/templates-enabled
