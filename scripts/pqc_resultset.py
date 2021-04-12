@@ -149,7 +149,7 @@ class PQC_resultset:
 
         return ret
     
-    def analyze(self, basepath, outdir, create_plots):
+    def analyze(self, basepath, outdir, create_plots, forceEval=False):
         self.basepath = basepath
         dirs = glob.glob(os.path.join(basepath, "*"))
         dirs = [t for t in dirs if "analysis" not in t ]
@@ -161,7 +161,7 @@ class PQC_resultset:
             print("[{:2.0f}%] Analyzing: {:}".format(i*100./len(dirs), os.path.basename(os.path.normpath(dirs[i]))))
             
             # this finds out if there is an empty directory, assuming that there is at least one vdp measurement
-            if len(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=["cross"], blacklist=["reverse"])) < 1:
+            if len(pqc.find_all_files_from_path(dirs[i], "van_der_pauw", whitelist=["cross"])) < 1 and not forceEval:
                 print(f"   skipping incomplete measurement: " + dirs[i])
                 continue
 
@@ -171,7 +171,7 @@ class PQC_resultset:
 
 
             x = pqc.find_all_files_from_path(dirs[i], "van_der_pauw")
-            if i != []:
+            if len(x) > 0:
                 self.timestamps.append(pqc.get_timestamp(x[-1]))
             else:
                 self.timestamps.append(0)

@@ -149,7 +149,7 @@ def vdpPlotBoxplot(pqc_batches, path):
     
     
     
-def loadBatch(path, outdir=None, lazy=False, create_plots=False):
+def loadBatch(path, outdir=None, lazy=False, create_plots=False, force_eval=False):
     batchname = os.path.basename(os.path.normpath(path))
     print("Batch: "+batchname)
     pqc_results = PQC_resultset(batchname)
@@ -162,7 +162,7 @@ def loadBatch(path, outdir=None, lazy=False, create_plots=False):
             exit(0)
     
     pqc_results.prepareAnalysisFolder(outdir)
-    pqc_results.analyze(path, outdir, create_plots)
+    pqc_results.analyze(path, outdir, create_plots, force_eval)
     
     return pqc_results
     
@@ -175,6 +175,7 @@ def main():
     parser.add_argument('-l', action='store_true', default=None, help='lazy evaluation: skip if the measurement folder is older than analysis folder')
     parser.add_argument('-H', action='store_true', default=None, help='create histograms')
     parser.add_argument('-P', action='store_true', default=None, help='create plots (for each single measurement used)')
+    parser.add_argument('-f', action='store_true', default=None, help='forece evaluating all directories (normally, only directroies with at least one VdP measurement are evaluated to prevent blank lines if the is a wrong file or so)')
     
     #parser.add_argument('-d', action='store_true', default=None, help='create plots with debugging infos inside (e.g. correlation coefficients)')
     args = parser.parse_args()
@@ -184,7 +185,7 @@ def main():
         outdir = args.path
     
     if not args.m:
-        pqc_results = loadBatch(args.path, outdir, args.l, args.P)
+        pqc_results = loadBatch(args.path, outdir, args.l, args.P, args.f)
         
         renderTemplates(pqc_results)
         
