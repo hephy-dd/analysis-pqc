@@ -29,7 +29,9 @@
 \begin{center}
     \fontsize{4pt}{5pt}\selectfont
     \setlength{\tabcolsep}{0.35em} % for the horizontal padding
-    \begin{tabular}{ |l|{% for col in flute %}R{0.6cm}|{% endfor %} } 
+    \begin{tabular}{ |l|{% for col in flute %}R{0.6cm}|{% endfor %} }
+        \hline
+        {{ extraheader }}
         \hline
         {{ startRowStr }}{{ labelformat.format('') }}{% for key in flute %}{{ colheaderformat.format(dataseries[key].name) }}{% endfor %}{{ endRowStr }}
         \hline
