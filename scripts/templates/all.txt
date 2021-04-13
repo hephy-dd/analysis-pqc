@@ -1,9 +1,11 @@
 
 {# this saves all pqc values to one big table  #}
-{% for key in dataseries %}{% if not key.startswith('x'):%}{{ dataseries[key].name }}   {% endif %}{% endfor %}
-#{% for key in dataseries %}{% if not key.startswith('x'):%}  {% endif %}{% endfor %}
+sample {% for key in dataseries %}{% if not key.startswith('x'):%}{{ dataseries[key].name }}   {% endif %}{% endfor %}
+
+#str {% for key in dataseries %}{% if not key.startswith('x'):%}{{ dataseries[key].unit }}  {% endif %}{% endfor %}
+
 {% for i in range(0, dataseries['vdp_pstop_r'].len() ) %}
-{% for key in dataseries %}
+{{ dataseries['xlabels'][i] }}   {% for key in dataseries %}
 {% if not key.startswith('x'):%}{{ dataseries[key].getValueString(i, False) }}       {% endif %}
 {% endfor %}
 
