@@ -10,39 +10,43 @@ Install using pip in a virtual environment.
 pip install git+https://github.com/hephy-dd/analysis-pqc.git@0.2.0
 ```
 
-## Local usage and development
+## Scripts
 
-Set `PYTHONPATH` environment variable to use the local package (if not using an virtual environment).
-
-```bash
-export PYTHONPATH=$PYTHONPATH:$(pwd)
-```
-
-**Note:** the package requires additional dependencies to be installed.
+Create a virtual environment for using the scripts.
 
 ```bash
-pip install -r requirements.txt
+python3 -m venv env
+. env/bin/activate  # . env/Scripts/activate on Windows
 ```
 
-## Run scripts
+Install the package and its additional dependencies required 
+by the analysis scripts.
 
-Analyze JSON
+```bash
+pip install .
+pip install -r scripts/requirements.txt
+```
+
+Run command `deactivate` to exit the virtual environment and
+`. env/bin/activate` to actiate it.
+
+Run `pip install .` again to apply local changes in the
+`analysis_pqc` pacakge.
+
+Alternatively run `python setup.py develop` once to install
+the package as local development source.
+
+### Analyze JSON
 ```bash
 python scripts/pqc_analysis_json.py <path> <analysis>
 ```
 
-Analyze text
+### Analyze text
 ```bash
 python scripts/pqc_analysis_txt.py -f <path/to/files>
 ```
 
-Convert text to JSON
+### Convert text to JSON
 ```bash
 python scripts/txt2json.py <input.txt> -o <output.json>
-```
-
-**Note:** the above scripts require additional dependencies to be installed.
-
-```bash
-pip install -r scripts/requirements.txt
 ```
