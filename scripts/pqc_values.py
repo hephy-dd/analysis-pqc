@@ -62,11 +62,11 @@ class PQC_Values:
                  4: len(stats.values)/stats.nTot, }
             return sel.get(index-len(self.values), "error")
         
-    def getValueString(self, index):
+    def getValueString(self, index, niceText=True):
         if index < len(self.values):
-            if np.isnan(self.values[index]):
+            if np.isnan(self.values[index]) and niceText:
                 return "failed"
-            elif np.isinf(self.values[index]):
+            elif np.isinf(self.values[index]) and niceText:
                 return "---"
             return num2str(self.values[index]*self.showmultiplier, self.expectedValue)
         else:
