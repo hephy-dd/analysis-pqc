@@ -99,7 +99,7 @@ class PQC_resultset:
         self.dataseries['r_contact_n'] = PQC_Values("r_cont_n", "Rcontact N+", 27., "Ohm")
         self.dataseries['r_contact_poly'] = PQC_Values("r_cont_poly", "Rcontact polysilicon", 100., "kOhm", 1e-3)
         
-        self.dataseries['contact_poly'] = PQC_Values("cont_poly", "Contact Chain PolySi", 35., "MOhm", 1e-6, stray=0.5)
+        self.dataseries['contact_poly'] = PQC_Values("cont_poly", "Contact Chain PolySi", 20., "MOhm", 1e-6, stray=0.5)
         self.dataseries['contact_p'] = PQC_Values("cont_p", "Contact Chain P", 85., "kOhm", 1e-3, stray=0.5)
         self.dataseries['contact_n'] = PQC_Values("cont_n", "Contact Chain N", 85., "kOhm", 1e-3, stray=0.5)
         
