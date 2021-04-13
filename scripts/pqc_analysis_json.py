@@ -243,7 +243,7 @@ def analyse_gcd_data(path, analysisOptions=AnalysisOptions()):
     i_src = series.get('current_vsrc', np.array([]))
     i_hvsrc = series.get('current_hvsrc', np.array([]))
 
-    if(len(v) == 0) or (len(i_em) == 0):
+    if(len(v) < 3) or (len(i_em) < 3):
         return np.nan, np.nan
         
 
