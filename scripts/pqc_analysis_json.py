@@ -288,10 +288,12 @@ def analyse_fet_data(path, analysisOptions=AnalysisOptions()):
     i_src = series.get('current_vsrc', np.array([]))
     i_hvsrc = series.get('current_hvsrc', np.array([]))
     
-    iz_em = i_em - i_em[0]
+    
 
     if(len(v) < 3) or (len(i_em) < 3):
         return np.nan
+        
+    iz_em = i_em - i_em[0]
 
     v_th, a, b, spl_dev, status = analyse_fet(v, i_em)
 
