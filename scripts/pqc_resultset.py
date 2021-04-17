@@ -271,9 +271,9 @@ class PQC_resultset:
 
             
             self.dataseries['vdp_bulk_f'].append(pqc.analyse_van_der_pauw_data(
-                pqc.find_most_recent_file(dirs[i], "", whitelist=["bulk", "cross"], blacklist=["reverse"]), analysisOptions.pushPrefix("VdP_bulk_fwd"), minCorrelation=0.85))
+                pqc.find_most_recent_file(dirs[i], whitelist=["bulk", "cross"], blacklist=["reverse"]), analysisOptions.pushPrefix("VdP_bulk_fwd"), minCorrelation=0.85))
             self.dataseries['vdp_bulk_r'].append(pqc.analyse_van_der_pauw_data(
-                pqc.find_most_recent_file(dirs[i], "", whitelist=["bulk", "reverse", "cross"]), analysisOptions.pushPrefix("VdP_bulk_rev"), minCorrelation=0.85))
+                pqc.find_most_recent_file(dirs[i], whitelist=["bulk", "reverse", "cross"]), analysisOptions.pushPrefix("VdP_bulk_rev"), minCorrelation=0.85))
             self.dataseries['vdp_bulk_rho'].append((self.dataseries['vdp_bulk_f'].values[-1]+self.dataseries['vdp_bulk_r'].values[-1])/2/18.52)
             
             self.dataseries['meander_metal'].append(pqc.analyse_meander_data(

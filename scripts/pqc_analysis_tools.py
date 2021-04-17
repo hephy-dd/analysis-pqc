@@ -28,7 +28,7 @@ __all__ = [
     'fit_curve'
 ]
 
-def find_all_files_from_path(path, test, whitelist=None, blacklist=None):
+def find_all_files_from_path(path, test=None, whitelist=None, blacklist=None):
     """
     returns a list of measurements for a given test
     optionally filters also with whitelist and blacklist (all whitelists must match and no blacklist match)
@@ -56,7 +56,7 @@ def find_all_files_from_path(path, test, whitelist=None, blacklist=None):
 
 
 
-def find_most_recent_file(path, test, whitelist=None, blacklist=None):
+def find_most_recent_file(path, test=None, whitelist=None, blacklist=None):
     """This function takes the pathfile and the name of test as inputs and
     returns the most recent file which corresponds to the selected test. This is obtained via the name,
     not with the timestamp, so it gives a warning if the names don'z match for all candidats
