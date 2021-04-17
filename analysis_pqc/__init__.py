@@ -657,6 +657,8 @@ def analyse_capacitor(v, c, debug=False):
     c_median = np.median(c)
 
     #oxide thickness
-    d = 3.9*8.85e-12*16900*1e-12/c_median
+    #  d = eps_r * epx_0 * area / capacitance
+    # area: (130 um)^2 = 16.9e-9 m^2
+    d = 3.9*8.85e-12*16.9*1e-9/c_median
 
     return c_mean, c_median, d, status
