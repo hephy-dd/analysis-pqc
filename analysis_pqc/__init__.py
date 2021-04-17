@@ -630,7 +630,10 @@ def analyse_breakdown(v, i, debug=False):
     """
 
     status = STATUS_PASSED
-    v_bd = v[-1]
+    v_bd = np.nan
+    if len(v) > 0:
+        v_bd = v[-1]
+        
 
     return v_bd, status
 

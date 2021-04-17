@@ -559,7 +559,7 @@ def analyse_breakdown_data(path, printResults=print_results, plotResults=True):
     x_loc = 0.3
     y_loc = 0.5
     
-    if len(v) <= 3 or len(i) <= 3:
+    if len(v) == 0:
         return np.nan
 
     v_bd, status = analyse_breakdown(v, i_elm, debug=0)
