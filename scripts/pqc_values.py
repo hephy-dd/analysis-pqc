@@ -23,15 +23,21 @@ This Object contains one parameter obtained via the PQC measurements, but for al
 the order in the array is cucial for the correct mapping, so be careful to reorder everything in the PQC_resultset.dataseries at once
 """
 class PQC_Values:
-    def __init__(self, name='na', nicename='na', expectedValue=0., unit='', showmultiplier=1e0, stray=0.5, values=None):
+    def __init__(self, name='na', nicename='na', expectedValue=0., unit='', showmultiplier=1e0, stray=0.5, values=None, minAllowed=None, maxAllowed=None):
         self.values = []
         self.name = name
         self.nicename = nicename
         self.unit = unit
         self.showmultiplier = showmultiplier
         self.expectedValue = expectedValue
-        self.minAllowed = expectedValue * (1-stray)
-        self.maxAllowed = expectedValue * (1+stray)
+        if minAllowed is not None:
+            self.minAllowed = minAllowed
+        else:
+            self.minAllowed = expectedValue * (1-stray)
+        if maxAllowed is not None:
+            self.maxAllowed = maxAllowed
+        else:
+            self.maxAllowed = expectedValue * (1+stray)
         self.stray = stray
         self.expectedValue = expectedValue
 

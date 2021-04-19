@@ -74,7 +74,7 @@ class PQC_resultset:
         self.dataseries['i600'] = PQC_Values("i600", "I @ 600V", 100., "uA", 1e6, stray=1.)
         
         self.dataseries['v_fd'] = PQC_Values("v_fd", "Full depletion Voltage", 260., "V", stray=0.33)
-        self.dataseries['rho'] = PQC_Values("rho", "rho", 3.5, "kOhm cm", 0.1)
+        self.dataseries['rho'] = PQC_Values("rho", "rho", 3.5, "kOhm cm", 0.1, minAllowed=3.5, maxAllowed=10.)
         self.dataseries['conc'] = PQC_Values("d_conc", "Doping Concentration", 3.5, "1E12cm^-3", 1e-18)
         
         self.dataseries['meander_metal'] = PQC_Values("meand_metal", "Metal Meander", 260., "Ohm", 1., stray=0.5)
@@ -88,7 +88,7 @@ class PQC_resultset:
 
         self.dataseries['vdp_bulk_f'] = PQC_Values("vdpBulk", "Bulk VdP Cross", 66., "kOhm/sq", 1e-3, stray=0.8)
         self.dataseries['vdp_bulk_r'] = PQC_Values("vdpBulk_r", "Bulk VdP Cross rev", 66., "kOhm/sq", 1e-3, stray=0.8)
-        self.dataseries['vdp_bulk_rho'] = PQC_Values("vdpBulk_rho", "Bulk VdP Resistivity", 3.5, "kOhm*cm", 1e-3, stray=0.8)
+        self.dataseries['vdp_bulk_rho'] = PQC_Values("vdpBulk_rho", "Bulk VdP Resistivity", 3.5, "kOhm*cm", 1e-3, minAllowed=3.5, maxAllowed=10.)
         
         
         # =================================================== Flute 4 ===================================================                   
