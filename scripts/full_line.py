@@ -155,11 +155,15 @@ def loadBatch(path, outdir=None, lazy=False, create_plots=False, force_eval=Fals
     pqc_results = PQC_resultset(batchname)
     
     if lazy and outdir is not None:
-        anatime = os.path.getmtime(pqc_results.analysisFolder(outdir))
-        meastime = os.path.getmtime(path)
-        if anatime > meastime:
-            print("lazy mode: nothing to do")
-            exit(0)
+        try:
+            anatime = os.path.getmtime(pqc_results.analysisFolder(outdir))
+            meastime = os.path.getmtime(path)
+            
+            if anatime > meastime:
+                print("lazy mode: nothing to do")
+                exit(0)
+        except FileNotFoundError:
+            print("lazy but first time")
     
     pqc_results.prepareAnalysisFolder(outdir)
     pqc_results.analyze(path, outdir, create_plots, force_eval)
