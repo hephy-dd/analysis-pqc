@@ -188,9 +188,10 @@ class PQC_resultset:
             outname = plotImgLabel
             # =================================================== Flute 1 ===================================================
             
+            
             self.dataseries['v_th'].append(pqc.analyse_fet_data(
                 pqc.find_most_recent_file(dirs[i], "fet", whitelist=[]), analysisOptions))
-            
+
             dummy, v_fb2, t_ox, n_ox, c_acc_m = pqc.analyse_mos_data(
                 pqc.find_most_recent_file(dirs[i], "mos", whitelist=[]), analysisOptions)
             self.dataseries['v_fb2'].append(v_fb2)
@@ -208,12 +209,12 @@ class PQC_resultset:
                 pqc.find_most_recent_file(dirs[i], "capacitor", whitelist=["Right", "250mV", "10kHz"], blacklist=["mos"]), printResults=False, plotResults=False)
             self.dataseries['cap_r'].append(c_median)
             self.dataseries['cap_r_tox'].append(d)
-            
+
             self.dataseries['vdp_poly_f'].append(pqc.analyse_van_der_pauw_data(
                 pqc.find_most_recent_file(dirs[i], "van_der_pauw", whitelist=["Polysilicon", cross], blacklist=["reverse"]), analysisOptions.pushPrefix("VdP_poly_fwd")))
             self.dataseries['vdp_poly_r'].append(pqc.analyse_van_der_pauw_data(
                 pqc.find_most_recent_file(dirs[i], "van_der_pauw", whitelist=["Polysilicon", "reverse", cross]), analysisOptions.pushPrefix("VdP_poly_rev")))
-
+            
             self.dataseries['vdp_n_f'].append(pqc.analyse_van_der_pauw_data(
                 pqc.find_most_recent_file(dirs[i], "van_der_pauw", whitelist=["n", cross], blacklist=["reverse"]), analysisOptions.pushPrefix("VdP_N_fwd")))
             self.dataseries['vdp_n_r'].append(pqc.analyse_van_der_pauw_data(
@@ -242,6 +243,9 @@ class PQC_resultset:
             self.dataseries['meander_poly'].append(pqc.analyse_meander_data(
                 pqc.find_most_recent_file(dirs[i], "meander", whitelist=["polysilicon"]), analysisOptions=analysisOptions.pushPrefix("meander_poly")))
             
+            self.dataseries['v_bd'].append(pqc.analyse_breakdown_data(
+                pqc.find_most_recent_file(dirs[i], "breakdown", whitelist=[]), analysisOptions))
+
             
             # =================================================== Flute 3 ===================================================
             
@@ -299,17 +303,6 @@ class PQC_resultset:
                 pqc.find_most_recent_file(dirs[i], "contact", whitelist=["chain", "P"]),  analysisOptions.pushPrefix("contact_chain_p")))
             self.dataseries['contact_n'].append(pqc.analyse_contact_data(
                 pqc.find_most_recent_file(dirs[i], "contact", whitelist=["chain", "N"]),  analysisOptions.pushPrefix("contact_chain_n")))
-            
-            # =================================================== Other ===================================================
-            
-
-            
-            
-            self.dataseries['v_bd'].append(pqc.analyse_breakdown_data(pqc.find_most_recent_file(dirs[i], "breakdown", whitelist=[]), printResults=False, plotResults=False))
-
-                
-
-                
                 
         self.dataseries['xlabels'].extend(PQC_Values.getStatLabels())
         self.dataseries['xflutes'].extend([""]*len(PQC_Values.getStatLabels()))

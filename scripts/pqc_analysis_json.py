@@ -52,7 +52,7 @@ class AnalysisOptions:
         return self
     
     def popPrefix(self, prefix):
-        if self.prefixOverride:
+        if self.prefixOverride is not None:
             ret = self.prefixOverride
             self.prefixOverride = None
             return ret
@@ -336,6 +336,7 @@ def analyse_van_der_pauw_data(path, analysisOptions=AnalysisOptions(), minCorrel
     test = 'van-der-pauw'
     
     if path is None:
+        analysisOptions.popPrefix("-")
         return notMeasured
 
     series = read_json_file(path).get('series')
@@ -343,6 +344,7 @@ def analyse_van_der_pauw_data(path, analysisOptions=AnalysisOptions(), minCorrel
     i = series.get('current', np.array([]))
 
     if len(v) <= 3 or len(i) <= 3:
+        analysisOptions.popPrefix("-")
         return np.nan
 
     lbl = assign_label(path, test)
@@ -380,6 +382,7 @@ def analyse_linewidth_data(path, r_sheet=np.nan, analysisOptions=AnalysisOptions
     test = 'linewidth'
 
     if path is None:
+        analysisOptions.popPrefix("-")
         return notMeasured
 
     series = read_json_file(path).get('series')
@@ -387,6 +390,7 @@ def analyse_linewidth_data(path, r_sheet=np.nan, analysisOptions=AnalysisOptions
     i = series.get('current', np.array([]))
     
     if len(v) <= 3 or len(i) <= 3:
+        analysisOptions.popPrefix("-")
         return np.nan
 
     lbl = assign_label(path, test)
@@ -419,6 +423,7 @@ def analyse_cbkr_data(path, r_sheet=np.nan, analysisOptions=AnalysisOptions(), m
     test = 'cbkr'
 
     if path is None:
+        analysisOptions.popPrefix("-")
         return notMeasured
 
     series = read_json_file(path).get('series')
@@ -459,6 +464,7 @@ def analyse_contact_data(path, analysisOptions=AnalysisOptions(), minCorrelation
     test= 'contact'
 
     if path is None:
+        analysisOptions.popPrefix("-")
         return notMeasured
 
     series = read_json_file(path).get('series')
@@ -466,6 +472,7 @@ def analyse_contact_data(path, analysisOptions=AnalysisOptions(), minCorrelation
     i = series.get('current', np.array([]))
     
     if len(v) <= 3 or len(i) <= 3:
+        analysisOptions.popPrefix("-")
         return np.nan
 
     lbl = assign_label(path, test)
@@ -500,6 +507,7 @@ def analyse_meander_data(path, analysisOptions=AnalysisOptions(), minCorrelation
     test = 'meander'
 
     if path is None:
+        analysisOptions.popPrefix("-")
         return notMeasured
 
     series = read_json_file(path).get('series')
@@ -511,6 +519,7 @@ def analyse_meander_data(path, analysisOptions=AnalysisOptions(), minCorrelation
         i = series.get('current_elm', np.array([]))
 
     if len(v) <= 3 or len(i) <= 3:
+        analysisOptions.popPrefix("-")
         return np.nan
         
     lbl = assign_label(path, test)
@@ -541,7 +550,7 @@ def analyse_meander_data(path, analysisOptions=AnalysisOptions(), minCorrelation
 
 
 
-def analyse_breakdown_data(path, printResults=print_results, plotResults=True):
+def analyse_breakdown_data(path, analysisOptions=AnalysisOptions()):
     test = 'breakdown'
 
     if path is None:
@@ -553,7 +562,8 @@ def analyse_breakdown_data(path, printResults=print_results, plotResults=True):
     i_elm = series.get('current_elm', np.array([]))
     temp = series.get('temperature_chuck', np.array([]))
     humidity = series.get('humidity_box', np.array([]))
-
+    
+    i = np.array(i)
 
     lbl = assign_label(path, test)
     x_loc = 0.3
@@ -562,15 +572,15 @@ def analyse_breakdown_data(path, printResults=print_results, plotResults=True):
     if len(v) == 0:
         return np.nan
 
-    v_bd, status = analyse_breakdown(v, i_elm, debug=0)
+    v_bd, status = analyse_breakdown(v, i, debug=0)
 
-    if plotResults:
+    if analysisOptions.plot:
         fig, ax = plt.subplots(1,1)
         annotate = 'V$_{{bd}}$: {} V \n\nT$_{{avg}}$ : {} \u00B0C \nH$_{{avg}}$: {} $\%$ '.format(v_bd, round(np.mean(temp),2), round(np.mean(humidity),2))
-        plot_curve(ax, v, i_elm, 'IV Curve', 'Voltage [V]', 'Current [A]', lbl, annotate, x_loc, y_loc)
+        plot_curve(ax, v, i*1e9, 'Dielectric Breakdown', 'Voltage / V', 'Current / nA', lbl, annotate, x_loc, y_loc)
+        analysisOptions.savePlot("breakdown", fig)
 
-
-    if printResults:
+    if analysisOptions.print:
        print('%s: \tBreakdown: v_bd: %.2e V' % (lbl, v_bd))
 
     return v_bd
