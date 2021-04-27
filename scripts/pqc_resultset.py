@@ -60,6 +60,7 @@ class PQC_resultset:
         # =================================================== Flute 2 ===================================================
         
         self.dataseries['i_surf'] = PQC_Values("i_surf", "Surface current", 8., "pA", -1e12, stray=1)
+        self.dataseries['s0'] = PQC_Values("s0", "Surface generation velocity", 1., "cm/s", stray=1)
         
         self.dataseries['meander_poly'] = PQC_Values("meand_poly", "Polisilicon Resistor", 1.7, "MOhm", 1e-6, stray=0.5)
         
@@ -94,6 +95,7 @@ class PQC_resultset:
         # =================================================== Flute 4 ===================================================                   
                            
         self.dataseries['i_surf05'] = PQC_Values("i_surf05", "Surface current 05", 11., "pA", -1e12, stray=1, maxAllowed=25.)
+        self.dataseries['s0_gcd05'] = PQC_Values("s0_gcd05", "Surface generation velocity GCD05", 1., "cm/s", stray=1)
         self.dataseries['i_bulk05'] = PQC_Values("i_bulk05", "Bulk current 05", 0.7, "pA", -1e12, stray=1)
         
         self.dataseries['r_contact_n'] = PQC_Values("r_cont_n", "Rcontact N+", 27., "Ohm")
@@ -231,6 +233,8 @@ class PQC_resultset:
             i_surf, dummy = pqc.analyse_gcd_data(
                 pqc.find_most_recent_file(dirs[i], "gcd", whitelist=[]), analysisOptions.pushPrefix("GCD"))  # only i_surf valid
             self.dataseries['i_surf'].append(i_surf)
+            self.dataseries['s0'].append(-i_surf/1.602e-19/7.01e9/0.505e-2)
+            # s0 = i_surf / q / ni[cm^-3] / Agate[cm^2]
             
             self.dataseries['t_line_n'].append(pqc.analyse_linewidth_data(
                 pqc.find_most_recent_file(dirs[i], "linewidth", whitelist=["n"]), r_sheet=self.dataseries['vdp_n_f'].values[-1], analysisOptions=analysisOptions.pushPrefix("lw_n")))
@@ -290,6 +294,7 @@ class PQC_resultset:
                 pqc.find_most_recent_file(dirs[i], "gcd05", whitelist=[]), analysisOptions.pushPrefix("GCD05"))  # for i_bulk
             self.dataseries['i_surf05'].append(i_surf05)
             self.dataseries['i_bulk05'].append(i_bulk05)
+            self.dataseries['s0_gcd05'].append(-i_surf05/1.602e-19/7.01e9/0.732e-2)
             
             self.dataseries['r_contact_n'].append(pqc.analyse_cbkr_data(
                 pqc.find_most_recent_file(dirs[i], "cbkr", whitelist=["n"]), r_sheet=self.dataseries['vdp_n_f'].values[-1], analysisOptions=analysisOptions.pushPrefix("cbkr_n")))
