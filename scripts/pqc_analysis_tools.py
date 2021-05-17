@@ -106,12 +106,16 @@ def read_json_file(filename):
     >>> series.get('voltage')
     array([0.0, 0.1, 0.2, 0.3])
     """
-    with open(filename) as f:
-        data = json.load(f)
-    # convert to numpy arrays
-    series = data.get('series', {})
-    for k, v in series.items():
-        series[k] = np.array(v)
+    data = json.loads('{ "series": {} }')
+    try:
+        with open(filename) as f:
+            data = json.load(f)
+        # convert to numpy arrays
+        series = data.get('series', json.loads("{}"))
+        for k, v in series.items():
+            series[k] = np.array(v)
+    except:
+        print("JSON error!")
     return data
 
 def get_timestamp(filename):
