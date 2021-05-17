@@ -89,7 +89,8 @@ class PQC_resultset:
 
         self.dataseries['vdp_bulk_f'] = PQC_Values("vdpBulk", "Bulk VdP Cross", 66., "kOhm/sq", 1e-3, stray=0.8)
         self.dataseries['vdp_bulk_r'] = PQC_Values("vdpBulk_r", "Bulk VdP Cross rev", 66., "kOhm/sq", 1e-3, stray=0.8)
-        self.dataseries['vdp_bulk_rho'] = PQC_Values("vdpBulk_rho", "Bulk VdP Resistivity", 3.5, "kOhm*cm", 1e-3, minAllowed=3.5, maxAllowed=10.)
+        self.dataseries['vdp_bulk_rho_old'] = PQC_Values("vdpBulk_rho_old", "Bulk VdP Resistivity (1.218)", 3.5, "kOhm*cm (1.218)", 1., minAllowed=3.5, maxAllowed=10.)
+        self.dataseries['vdp_bulk_rho'] = PQC_Values("vdpBulk_rho", "Bulk VdP Resistivity (1.081)", 3.5, "kOhm*cm (1.081)", 1., minAllowed=3.5, maxAllowed=10.)
         
         
         # =================================================== Flute 4 ===================================================                   
@@ -282,7 +283,11 @@ class PQC_resultset:
                 pqc.find_most_recent_file(dirs[i], whitelist=["bulk", "cross"], blacklist=["reverse"]), analysisOptions.pushPrefix("VdP_bulk_fwd"), minCorrelation=0.85))
             self.dataseries['vdp_bulk_r'].append(pqc.analyse_van_der_pauw_data(
                 pqc.find_most_recent_file(dirs[i], whitelist=["bulk", "reverse", "cross"]), analysisOptions.pushPrefix("VdP_bulk_rev"), minCorrelation=0.85))
-            self.dataseries['vdp_bulk_rho'].append((self.dataseries['vdp_bulk_f'].values[-1]+self.dataseries['vdp_bulk_r'].values[-1])/2/18.52)
+                
+            bulk_rsheet = (self.dataseries['vdp_bulk_f'].values[-1]+self.dataseries['vdp_bulk_r'].values[-1])/2
+            bulk_rho0 = bulk_rsheet * np.log(2.)*2.*187e-6/(2-np.sqrt(2.)) * 1e-1
+            self.dataseries['vdp_bulk_rho'].append(bulk_rho0*1.081)
+            self.dataseries['vdp_bulk_rho_old'].append(bulk_rho0*1.218)
             
             self.dataseries['meander_metal'].append(pqc.analyse_meander_data(
                 pqc.find_most_recent_file(dirs[i], "meander", whitelist=["metal"]), analysisOptions=analysisOptions.pushPrefix("meander_metal")))
