@@ -38,7 +38,7 @@ class PQC_resultset:
         
         self.dataseries['v_fb2'] = PQC_Values("v_fb", "Flatband voltage", 2.5, "V", stray=0.33)
         self.dataseries['t_ox'] = PQC_Values("t_ox", "Oxide thickness", 670., "nm", 1e3, stray=0.33)
-        self.dataseries['n_ox'] = PQC_Values("n_ox", "Oxide concentration", 10.5, "1E10cm^-3", 1e-10)
+        self.dataseries['n_ox'] = PQC_Values("n_ox", "Oxide concentration", 10.5, "1E10cm^-2", 1e-10)
         self.dataseries['c_acc_m'] = PQC_Values("c_acc", "Accumulation capacitance", 85., "pF", 1e12, stray=0.2)
         
         self.dataseries['cap_l'] = PQC_Values("cap_l", "Capacitor", 3., "pF", 1e12, stray=0.5)
