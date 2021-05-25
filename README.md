@@ -30,7 +30,7 @@ python setup.py develop
 Run full-line scripts
 
 ```bash
-python3 scripts/full_line.py /home/measurements/PQC/Tracker/Production/Data/VPX35953/ -P -o ../test-pqc
+python3 scripts/full_line.py /home/measurements/PQC/Tracker/Production/Data/VPX35953/ -P -t*.html -o ../test-pqc
 ```
 
 ## Install using pip
