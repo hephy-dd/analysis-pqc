@@ -10,4 +10,3 @@ sample {% for key in dataseries %}{% if not key.startswith('x'):%}{{ dataseries[
 {% endfor %}
 
 {% endfor %}
-

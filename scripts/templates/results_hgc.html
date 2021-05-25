@@ -1,20 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>PQC Batch {{ batch }}</title>
-        
-        <style type="text/css" media="screen">
-            th {text-align:left; padding-left:10px; padding-right:10px; }
-            td {text-align:right; padding-left:10px; padding-right:10px; }
-            
-        </style>
-        <!--h1 {color:red;}-->
-    </head>
-    <body>
+{% extends "include/doc.html" %}
 
+{% block title %}PQC Batch {{ batch }}{% endblock %}
+
+{% block body %}
     <h1>PQC Batch {{ batch }}: </h1>
-    
+
     {# formatting options (ie html, text, latex): #}
     {% set labelformat='        <th><a href="plotpage.html?sample={0:s}" target="_blank">{0:s}</a></th>\n' %}
     {% set valueformat='        <td style="{1:s};">{0:s}</td>\n' %}
@@ -27,10 +17,10 @@
     {% set afterstatsrows= '<tr style="border-bottom:1px solid black"><td colspan="100%"><hr/></td></tr>'%}
     {% set startTableStr='<table border="0">' %}
     {% set endTableStr='</table>' %}
-    
+
     {% set statusdict={0: '', 1: '', 2: 'background-color:#edfc1b', 3: 'background-color:#fc8c0c', 4: 'background-color:#fc3f42', 5: 'background-color:#95f9f9'} %}
 
-    
+
     {# shape options, values per table (here one flute each) #}
     {% set flute1=['v_th', 'v_fb2', 'c_acc_m', 't_ox', 'n_ox', 'vdp_n_f', 'vdp_n_r', 'vdp_pstop_f', 'vdp_pstop_r', 'cap_l', 'cap_r'] %}
     {% set flute2=['i_surf', 't_line_n', 't_line_pstop4', 't_line_pstop2', 'v_bd'] %}
@@ -38,7 +28,7 @@
     {% set flute4=['i_surf05', 'r_contact_n', 'contact_p', 'contact_n'] %}
     {# the first element contains the columns, the second the name for the flute #}
     {% set tables=[(flute1, "Flute 1:"), (flute2, "Flute 2:"), (flute3, "Flute 3:"), (flute4, "Flute 4:")] %}
-    
+
 
 
 
@@ -63,6 +53,5 @@
     {{ afterstatsrows }}
     {{ endTableStr }}
     {% endfor %}
-    
-    </body>
-</html>
+
+{% endblock body %}
