@@ -2,12 +2,6 @@
 
 Analysis for PQC measurements.
 
-## creating tables from templates:
-
-To enable one or more table output files, one must select the templates from ```scripts/templates``` and make a symlink to ```scripts/templates-enabled``` for each
-
-the folder ```scripts/templates-enabled``` is in the gitignore and will not interfere with pulling new versions
-
 ## Install for full-line scripts
 
 Clone the git repository
@@ -24,14 +18,19 @@ python3 -m venv env
 . env/bin/activate # env/Scripts/activate.bat on Windows
 python -m pip install -r requirements.txt
 python -m pip install -r scripts/requirements.txt
-python setup.py develop
+python setup.py install
 ```
 
 Run full-line scripts
 
 ```bash
-python3 scripts/full_line.py /home/measurements/PQC/Tracker/Production/Data/VPX35953/ -P -t*.html -o ../test-pqc
+python scripts/full_line.py /PQC/Tracker/Production/Data/VPX35953/ -P -t*.html -o ../test-pqc
 ```
+
+Use flag `-t` to select templates to render output files by specifying a `glob`
+expression with wildcard support. The flag can be set multiple times,
+eg. `-t*.html` for all html reports, `-t*.tex` for all LaTeX reports,
+or `-t*` for all.
 
 ## Install using pip
 

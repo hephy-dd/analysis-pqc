@@ -156,12 +156,20 @@ class PQC_resultset:
         return ret
 
     def analyze(self, basepath, outdir, create_plots, forceEval=False):
+
+        def is_dataset(path):
+            # Keep only directories
+            if not os.path.isdir(path):
+                return False
+            basename = os.path.basename(path)
+            # Skip existing analysis directories
+            if basename.startswith(self.OUTPUT_PREFIX):
+                return False
+            return True
+
         self.basepath = basepath
         dirs = glob.glob(os.path.join(basepath, "*"))
-        # Keep only directories
-        dirs = [t for t in dirs if os.path.isdir(t)]
-        # Skip existing analysis directories
-        dirs = [t for t in dirs if not t.startswith(self.OUTPUT_PREFIX) ]
+        dirs = [t for t in dirs if is_dataset(t)]
 
         dirs.sort()
 

@@ -39,7 +39,7 @@ def renderTemplates(pqc_resultset, templates=None):
         else:
             output_filename = os.path.join(pqc_resultset.outDir, filename)
             with open(output_filename, "w") as fh:
-                print(f"rendering file {output_filename}... ", end="")
+                print(f"rendering file {output_filename} ... ", end="")
                 fh.write(rendered_content)
                 print("done.")
 
@@ -186,7 +186,7 @@ def main():
     parser.add_argument('-H', dest='histograms', action='store_true', default=None, help='create histograms')
     parser.add_argument('-P', dest='plots', action='store_true', default=None, help='create plots (for each single measurement used)')
     parser.add_argument('-f', dest='force', action='store_true', default=None, help='force evaluating all directories (normally, only directroies with at least one VdP measurement are evaluated to prevent blank lines if the is a wrong file or so)')
-    parser.add_argument('-t', dest='templates', metavar='EXPR', action='append', default=[], help='Select templates to render (eg. -t*.tex -t*.html -tall.txt)')
+    parser.add_argument('-t', dest='templates', metavar='EXPR', action='append', default=[], help='select templates to render (eg. -t*.tex -t*.html -tall.txt)')
 
     #parser.add_argument('-d', action='store_true', default=None, help='create plots with debugging infos inside (e.g. correlation coefficients)')
     args = parser.parse_args()
