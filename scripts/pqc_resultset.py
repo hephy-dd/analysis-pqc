@@ -167,6 +167,7 @@ class PQC_resultset:
         self.flutes.append("")
         self.labels.append(os.path.basename(path))
 
+        # TODO
         x = pqc.find_all_files_from_path(path, "van_der_pauw")
         if len(x) > 0:
             self.timestamps.append(pqc.get_timestamp(x[-1]))
@@ -176,13 +177,11 @@ class PQC_resultset:
         cross = "cross"
         plotImgLabel = self.dataseries['xlabels'][-1]
         if create_plots:
-            plotImgBasedir = self.plot_dir
+            plot_dir = self.plot_dir
         else:
-            plotImgBasedir = None
+            plot_dir = None
 
-        options = AnalysisOptions(plotImgBasedir, plotImgLabel)
-        outdir = plotImgBasedir
-        outname = plotImgLabel
+        options = AnalysisOptions(plot_dir, plotImgLabel)
 
         # =================================================== Flute 1 ===================================================
 
@@ -407,22 +406,22 @@ class PQC_resultset:
 
         p1 = axes.bar(center, (relOK,), width, color="green", alpha=alpha)
         p2 = axes.bar(center, (relNan,), width, bottom=(relOK,), color="red", alpha=alpha)
-        p3 = axes.bar(center, (relTooHigh,), width, bottom=(relOK+relNan,), color="orange", alpha=alpha)
-        p4 = axes.bar(center, (relTooLow,), width, bottom=(relOK+relNan+relTooHigh,), color="yellow", alpha=alpha)
+        p3 = axes.bar(center, (relTooHigh,), width, bottom=(relOK + relNan,), color="orange", alpha=alpha)
+        p4 = axes.bar(center, (relTooLow,), width, bottom=(relOK + relNan + relTooHigh,), color="yellow", alpha=alpha)
 
         if single:
             minthreshhold = 0.02
         else:
             minthreshhold = 0.15
 
-        if single or label != '':
-            axes.text(center, relOK-minthreshhold/2, 'OK', horizontalalignment='center', verticalalignment='top')
+        if single or label:
+            axes.text(center, relOK - minthreshhold / 2, 'OK', horizontalalignment='center', verticalalignment='top')
             if relNan > minthreshhold:
-                axes.text(center, relOK+relNan-minthreshhold/2, 'Failed', horizontalalignment='center', verticalalignment='top')
+                axes.text(center, relOK + relNan-minthreshhold / 2, 'Failed', horizontalalignment='center', verticalalignment='top')
             if relTooHigh > minthreshhold:
-                axes.text(center, relOK+relNan+relTooHigh-minthreshhold/2, 'High', horizontalalignment='center', verticalalignment='top')
+                axes.text(center, relOK + relNan + relTooHigh-minthreshhold / 2, 'High', horizontalalignment='center', verticalalignment='top')
             if relTooLow > minthreshhold:
-                axes.text(center, relOK+relNan+relTooHigh+relTooLow-minthreshhold/2, 'Low', horizontalalignment='center', verticalalignment='top')
+                axes.text(center, relOK + relNan + relTooHigh + relTooLow-minthreshhold / 2, 'Low', horizontalalignment='center', verticalalignment='top')
 
         axes.text(center, 0.01, label, horizontalalignment='center', verticalalignment='bottom')
 
@@ -435,13 +434,13 @@ class PQC_resultset:
 
     def histogram(self, pqc_values, path, stray=1.4, range_extension=None):
         if range_extension is not None:
-            stats = pqc_values.getStats(min_allowed=0, max_allowed=pqc_values.max_allowed*range_extension)
+            stats = pqc_values.getStats(min_allowed=0, max_allowed=pqc_values.max_allowed * range_extension)
         else:
             stats = pqc_values.getStats()
 
 
         if len(stats.values) == 1 and stats.nNan == 1:
-            print("warning: skipping plot due to no valid results: "+pqc_values.name)
+            print(f"warning: skipping plot due to no valid results: {pqc_values.name}")
             return
 
         fig = plt.figure(figsize=(8, 6))
@@ -451,10 +450,10 @@ class PQC_resultset:
         ax0 = plt.subplot(gs[0])
 
         if range_extension is not None:
-            plt.title(self.batch + ": " + pqc_values.nicename + ", Ext: {:5.1E}".format(range_extension), fontsize=18)
+            plt.title(f"{self.batch}: {pqc_values.label}, Ext: {range_extension:5.1E}", fontsize=18)
             plt.ticklabel_format(axis='x', style='sci', scilimits=(-2,2))
         else:
-            plt.title(self.batch + ": " + pqc_values.nicename + "", fontsize=18)
+            plt.title(f"{self.batch}: {pqc_values.label}", fontsize=18)
 
         ax1 = plt.subplot(gs[1])
 

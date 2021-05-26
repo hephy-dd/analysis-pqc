@@ -10,6 +10,7 @@ import matplotlib
 from matplotlib import gridspec
 
 from jinja2 import Environment, FileSystemLoader
+import yaml
 
 from pqc_resultset import PQC_resultset
 
@@ -106,7 +107,7 @@ def plot_boxplot(pqc_batches, path, values=['vdp_poly_f', 'vdp_n_f', 'vdp_pstop_
 
     for i in range(0, len(values)):
         ax = plt.subplot(gs[i])
-        plt.title(pqc_batches[0].dataseries[values[i]].nicename, fontsize=13)
+        plt.title(pqc_batches[0].dataseries[values[i]].label, fontsize=13)
         plt.grid(axis='y', linestyle=':')
         ax.set_ylabel(pqc_batches[0].dataseries[values[i]].unit)
 
@@ -131,21 +132,21 @@ def plot_vdp_boxplot(pqc_batches, path):
 
     ax = plt.subplot(gs[0])
     plt.grid(axis='y', linestyle=':')
-    plt.title(pqc_batches[0].vdp_poly_tot().nicename, fontsize=15)
+    plt.title(pqc_batches[0].vdp_poly_tot().label, fontsize=15)
     ax.set_ylabel(pqc_batches[0].vdp_poly_tot().unit)
     data = [ b.vdp_poly_tot().getStats().values for b in pqc_batches ]
     ax.boxplot(data, labels=labels)
 
     ax = plt.subplot(gs[1])
     plt.grid(axis='y', linestyle=':')
-    plt.title(pqc_batches[0].vdp_n_tot().nicename, fontsize=15)
+    plt.title(pqc_batches[0].vdp_n_tot().label, fontsize=15)
     ax.set_ylabel(pqc_batches[0].vdp_n_tot().unit)
     data = [ b.vdp_n_tot().getStats().values for b in pqc_batches ]
     ax.boxplot(data, labels=labels)
 
     ax = plt.subplot(gs[2])
     plt.grid(axis='y', linestyle=':')
-    plt.title(pqc_batches[0].vdp_pstop_tot().nicename, fontsize=15)
+    plt.title(pqc_batches[0].vdp_pstop_tot().label, fontsize=15)
     ax.set_ylabel(pqc_batches[0].vdp_pstop_tot().unit)
     data = [ b.vdp_pstop_tot().getStats().values for b in pqc_batches ]
     ax.boxplot(data, labels=labels)
@@ -154,12 +155,42 @@ def plot_vdp_boxplot(pqc_batches, path):
     fig.savefig(os.path.join(path, "vdpBoxplot.png"))
     plt.close()
 
+def load_configuration(name):
+    filename = os.path.join(os.path.dirname(__file__), 'config', f'{name}.yaml')
+    if not os.path.isfile(filename):
+        raise ValueError("No such configuration: {name}")
+    with open(filename) as fp:
+        return yaml.safe_load(fp)
 
+def apply_configuration(dataseries, config):
+    if config is None:
+        config = {}
+    for key, d in config.get('pqc_values', {}).items():
+        series = dataseries.get(key)
+        if series is not None:
+            for name, value in d.items():
+                types = {
+                    'name': str,
+                    'label': str,
+                    'expected_value': float,
+                    'unit': str,
+                    'show_multiplier': float,
+                    'stray': float,
+                    'min_allowed': float,
+                    'max_allowed': float
+                }
+                if name in types:
+                    value = types.get(name)(value)
+                    setattr(series, name, value)
 
-def load_batch(path, outdir=None, lazy=False, create_plots=False, force_eval=False):
+def load_batch(path, outdir=None, lazy=False, create_plots=False,
+               force_eval=False, config=None):
     batchname = os.path.basename(os.path.normpath(path))
     print("Batch: "+batchname)
     pqc_results = PQC_resultset(batchname)
+
+    # Apply configuration
+    apply_configuration(pqc_results.dataseries, config)
 
     if lazy and outdir is not None:
         try:
@@ -186,13 +217,17 @@ def main():
     parser.add_argument('-l', dest='lazy', action='store_true', default=None, help='lazy evaluation: skip if the measurement folder is older than analysis folder')
     parser.add_argument('-H', dest='histograms', action='store_true', default=None, help='create histograms')
     parser.add_argument('-P', dest='plots', action='store_true', default=None, help='create plots (for each single measurement used)')
-    parser.add_argument('-f', dest='force', action='store_true', default=None, help='force evaluating all directories (normally, only directroies with at least one VdP measurement are evaluated to prevent blank lines if the is a wrong file or so)')
+    parser.add_argument('-f', dest='force', action='store_true', default=None, help='force evaluating all directories (normally, only directories with at least one VdP measurement are evaluated to prevent blank lines if the is a wrong file or so)')
     parser.add_argument('-t', dest='templates', metavar='EXPR', action='append', default=[], help='select templates to render (eg. -t*.tex -t*.html -tall.txt)')
+    parser.add_argument('-c', '--config', metavar='NAME', default='default', help='select custom configuration')
 
     #parser.add_argument('-d', action='store_true', default=None, help='create plots with debugging infos inside (e.g. correlation coefficients)')
     args = parser.parse_args()
 
     outdir = args.outdir or  args.path
+
+    # Load configuration
+    config = load_configuration(args.config)
 
     # Create output directory if not exists
     if not os.path.exists(outdir):
@@ -208,7 +243,7 @@ def main():
 
         for diri in dirs:
             print("Current dir: "+str(diri))
-            res = load_batch(diri)
+            res = load_batch(diri, config=config)
             res.sort_by_time()
             pqc_batches.append(res)
             pqc_slices.extend(res.split(4))
@@ -223,7 +258,7 @@ def main():
         plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "b"), values=['vdp_p_cross_bridge_f', 'vdp_p_cross_bridge_r', 't_line_p_cross_bridge', 'v_bd', 'i600', 'v_fd'])
         plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "c"), values=['rho', 'conc', 't_ox', 'n_ox', 'c_acc_m', 'i_surf'])
     else:
-        pqc_results = load_batch(args.path, outdir, lazy=args.lazy, create_plots=args.plots, force_eval=args.force)
+        pqc_results = load_batch(args.path, outdir, lazy=args.lazy, create_plots=args.plots, force_eval=args.force, config=config)
 
         render_templates(pqc_results, args.templates)
 

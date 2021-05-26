@@ -220,8 +220,8 @@ def analyse_mos_data(path, options=None):
         fig, ax = plt.subplots(1,1)
         plot_curve(ax, v, c*1e12, options.plotTitle("MOS"), 'Bias Voltage / V', 'Capacitance / pF')
         #plt.ylim(0, 100)
-        fit_curve(ax, v_dep, np.array([a_dep*v+b_dep for v in v_dep])*1e12)
-        fit_curve(ax, v_acc, np.array([a_acc*v + b_acc for v in v_acc])*1e12)
+        fit_curve(ax, v_dep, np.array([a_dep * v + b_dep for v in v_dep]) * 1e12)
+        fit_curve(ax, v_acc, np.array([a_acc * v + b_acc for v in v_acc]) * 1e12)
         plt.axvline(x=v_fb2, color='black', linestyle='dashed')
 
 
@@ -327,7 +327,7 @@ def analyse_fet_data(path, options=None):
         ax2.set_ylabel(r'g$_\mathrm{m}$ [S]', color='tab:orange')
         lns3 = ax1.plot(v, fit*1e6, '--r', label="tangent")
         lns4 = ax1.plot([v_th, v_th], [-3, 3], '--k', label="tangent zero crossing")
-        lns = lns1+lns1a+lns2+lns3+lns4
+        lns = lns1 + lns1a + lns2 + lns3 + lns4
         labs = [l.get_label() for l in lns]
 
         plt.legend(lns, labs, loc='upper left')

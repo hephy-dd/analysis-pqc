@@ -25,12 +25,12 @@ all samples measured the order in the array is cucial for the correct mapping,
 so be careful to reorder everything in the PQC_resultset.dataseries at once
 """
 class PQC_Values:
-    def __init__(self, name='na', nicename='na', expected_value=0., unit='',
+    def __init__(self, name='na', label='na', expected_value=0., unit='',
                  show_multiplier=1e0, stray=0.5, values=None, min_allowed=None,
                  max_allowed=None):
         self.values = []
         self.name = name
-        self.nicename = nicename
+        self.label = label
         self.unit = unit
         self.show_multiplier = show_multiplier
 
@@ -40,12 +40,12 @@ class PQC_Values:
             self.values = values
 
         if min_allowed is None:
-            self.min_allowed = expected_value * (1-stray)
+            self.min_allowed = expected_value * (1 - stray)
         else:
             self.min_allowed = min_allowed
 
         if max_allowed is None:
-            self.max_allowed = expected_value * (1+stray)
+            self.max_allowed = expected_value * (1 + stray)
         else:
             self.max_allowed = max_allowed
 
@@ -115,7 +115,7 @@ class PQC_Values:
     def split(self, junk_size):
         kwargs = {
             'name': self.name,
-            'nicename': self.nicename,
+            'label': self.label,
             'expected_value': self.expected_value,
             'unit': self.unit,
             'show_multiplier': self.show_multiplier,
@@ -164,6 +164,6 @@ class PQC_Values:
         return values, nTot, nNan, nTooHigh, nTooLow, totAvg, totStd, totMed, selAvg, selStd, selMed
 
     @classmethod
-    def merge(new, parents, name='na', nicename='na'):
+    def merge(new, parents, name='na', label='na'):
         values = np.concatenate( [t.values for t in parents])
-        return new(name, nicename, parents[0].expected_value, parents[0].unit, parents[0].show_multiplier, values=values, stray=parents[0].stray)
+        return new(name, label, parents[0].expected_value, parents[0].unit, parents[0].show_multiplier, values=values, stray=parents[0].stray)
