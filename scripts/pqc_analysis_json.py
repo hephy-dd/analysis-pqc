@@ -17,9 +17,7 @@ terminal.
 """
 
 import argparse
-import math
 import os
-import sys
 import glob
 
 import matplotlib.pyplot as plt
@@ -28,29 +26,25 @@ import numpy as np
 from analysis_pqc import *
 from pqc_analysis_tools import *
 
-
-print_results = 1
-
-
-notMeasured = np.inf
+NOT_MEASURED = np.inf
 
 class AnalysisOptions:
+
     def __init__(self, plotImgBasedir=None, label=None):
         self.plotWindow = False
         self.print = False
         self.plotImgBasedir = plotImgBasedir
         self.label = label
         self.prefixOverride = None
-        
+
         self.plot = self.plotWindow or self.plotImgBasedir is not None
 
-        
     # this is only temprary, we can reuse that object using once
     # used e g for VdP where one analysis function is used more than once
     def pushPrefix(self, prefixOverride):
         self.prefixOverride = prefixOverride
         return self
-    
+
     def popPrefix(self, prefix):
         if self.prefixOverride is not None:
             ret = self.prefixOverride
@@ -58,28 +52,33 @@ class AnalysisOptions:
             return ret
         else:
             return prefix
-            
+
     def peekPrefix(self, defaultPrefix):
         if self.prefixOverride:
             return self.prefixOverride
         else:
             return defaultPrefix
-            
+
     def savePlot(self, defaultPrefix, fig):
         if self.plotWindow:
             plt.show()
         else:
-            fig.savefig(os.path.join(self.plotImgBasedir, self.popPrefix(defaultPrefix).lower()+"_"+self.label+".png"))
+            prefix = self.popPrefix(defaultPrefix).lower()
+            filename = f"{prefix}_{self.label}.png"
+            fig.savefig(os.path.join(self.plotImgBasedir, filename))
             plt.close()
-            
+
     def plotTitle(self, defaultPrefix):
         return (self.peekPrefix(defaultPrefix) + ': ' + self.label).replace('_', ' ')
 
 
-def analyse_iv_data(path, analysisOptions=AnalysisOptions()):
+def analyse_iv_data(path, options=None):
     test = 'iv'
     if path is None:
-        return notMeasured, notMeasured
+        return NOT_MEASURED, NOT_MEASURED
+
+    if options is None:
+        options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
     v = abs(series.get('voltage', np.array([])))
@@ -98,29 +97,32 @@ def analyse_iv_data(path, analysisOptions=AnalysisOptions()):
 
     lbl = assign_label(path, test)
 
-    if analysisOptions.plot:
+    if options.plot:
         annotate = 'I$_{max}$' + ': {:6.2f} uA @ {:6.2f} V'.format(i_max*1e6, max(v)) + '\n'
         annotate += 'I$_{600V}$' + ': {:8.2f} uA '.format(i_600*1e6) + '\n'
-        
+
         annotate +='T$_{avg}$' + ': {:0.2f} $^\circ C$'.format(np.mean(temp)) + '\n'
         annotate +='rH$_{avg}$:' + '{:0.2f}'.format(np.mean(humidity)) + r'$\%$'
 
         fig,ax = plt.subplots(1,1)
-        plot_curve(ax, v, i*1e6, analysisOptions.plotTitle("diode IV??"), 'Reverse Bias Voltage / A', 'Current / uA', 'SMU', annotate, x_loc, y_loc)
-        plot_curve(ax, v, i_elm*1e6, analysisOptions.plotTitle("diode IV??"), 'Reverse Bias Voltage / A', 'Current / uA', 'Electrometer', annotate, x_loc, y_loc)
-        analysisOptions.savePlot("diode_iv??", fig)
+        plot_curve(ax, v, i*1e6, options.plotTitle("diode IV??"), 'Reverse Bias Voltage / A', 'Current / uA', 'SMU', annotate, x_loc, y_loc)
+        plot_curve(ax, v, i_elm*1e6, options.plotTitle("diode IV??"), 'Reverse Bias Voltage / A', 'Current / uA', 'Electrometer', annotate, x_loc, y_loc)
+        options.savePlot("diode_iv??", fig)
 
-    if analysisOptions.print:
+    if options.print:
         print('%s:  IV:\ti_600: %.3f uA\ti_800: %.3f uA' % (lbl, i_600*1e6, i_800*1e6))
 
     return i_600, i_800
 
 
-def analyse_cv_data(path, analysisOptions=AnalysisOptions()):
+def analyse_cv_data(path, options=None):
     test = 'cv'
 
     if path is None:
-        return notMeasured, notMeasured, notMeasured
+        return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED
+
+    if options is None:
+        options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
     v = abs(series.get('voltage_hvsrc', np.array([])))
@@ -156,34 +158,37 @@ def analyse_cv_data(path, analysisOptions=AnalysisOptions()):
 
     #fig1, ax1 = plt.subplots(1, 1)
     #plot_curve(ax1, v_norm, c_norm, 'CV curve', 'Voltage[{}]'.format(v_unit), 'Capacitance [{}]'.format(c_unit), lbl, annotate, x_loc, y_loc)
-    if analysisOptions.plot:
+    if options.plot:
         fig, ax2 = plt.subplots(1,1)
         #ax2b = ax2.twinx()
         fit_curve(ax2, v_rise, a_rise * v_rise+ b_rise, color='ro')
         fit_curve(ax2, v_const, a_const * v_const+ b_const, color='kx')
         #fit_curve(ax2b, v_norm, spl_dev, color='mx')
-        plot_curve(ax2, v, 1./c**2, analysisOptions.plotTitle("CV??"), 'Bias Voltage / V', '1/C$^{2}$ / F$^{-2}$', lbl, '', 0, 0 )
+        plot_curve(ax2, v, 1./c**2, options.plotTitle("CV??"), 'Bias Voltage / V', '1/C$^{2}$ / F$^{-2}$', lbl, '', 0, 0 )
         plt.axvline(x=v_dep2, color='green', linestyle='dashed')
-        
+
         resstr = "v_fd:"+" {:8.2f} V\n".format(v_dep2)
         resstr += "bulk res:"+" {:8.2f} kOhm cm\n".format(rho*0.1)
         resstr += "doping conc:"+" {:8.2f}*1E12cm^-3".format(conc*1e-18)
         fig.text(0.95, 0.33, resstr, bbox=dict(facecolor='deepskyblue', alpha=0.75), horizontalalignment='right', verticalalignment='top')
-        
-        analysisOptions.savePlot("diodecv??", fig)
 
-    if analysisOptions.print:
+        options.savePlot("diodecv??", fig)
+
+    if options.print:
     	#print(f"{lbl}: CV: v_fd: {}")
         print('%s: \tCV: v_fd: %.2e V\trho: %.2e Ohm\tconc: %.2e cm^-3' % (lbl, v_dep2, rho, conc*1e-6))
 
     return v_dep2, rho, conc
 
 
-def analyse_mos_data(path, analysisOptions=AnalysisOptions()):
+def analyse_mos_data(path, options=None):
     test = 'mos'
-    
+
     if path is None:
-        return notMeasured, notMeasured, notMeasured, notMeasured, notMeasured
+        return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, NOT_MEASURED
+
+    if options is None:
+        options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_hvsrc', np.array([]))
@@ -211,31 +216,34 @@ def analyse_mos_data(path, analysisOptions=AnalysisOptions()):
     x_loc = 0.15
     y_loc = 0.145
 
-    if analysisOptions.plot:
+    if options.plot:
         fig, ax = plt.subplots(1,1)
-        plot_curve(ax, v, c*1e12, analysisOptions.plotTitle("MOS"), 'Bias Voltage / V', 'Capacitance / pF')
+        plot_curve(ax, v, c*1e12, options.plotTitle("MOS"), 'Bias Voltage / V', 'Capacitance / pF')
         #plt.ylim(0, 100)
         fit_curve(ax, v_dep, np.array([a_dep*v+b_dep for v in v_dep])*1e12)
         fit_curve(ax, v_acc, np.array([a_acc*v + b_acc for v in v_acc])*1e12)
         plt.axvline(x=v_fb2, color='black', linestyle='dashed')
-        
-        
+
+
         resstr = "v_fb:"+" {:8.2f} V\n".format(v_fb2)
         fig.text(0.95, 0.33, resstr, bbox=dict(facecolor='deepskyblue', alpha=0.75), horizontalalignment='right', verticalalignment='top')
-        
-        analysisOptions.savePlot("mos", fig)
-    
-    if analysisOptions.print:
+
+        options.savePlot("mos", fig)
+
+    if options.print:
         print('%s: \tMOS: v_fb2: %.2e V\tc_acc: %.2e F\tt_ox: %.3e um\tn_ox: %.2e cm^-2' % (lbl, v_fb2, c_acc_m, t_ox, n_ox))
 
     return v_fb1, v_fb2, t_ox, n_ox, c_acc_m
 
 
-def analyse_gcd_data(path, analysisOptions=AnalysisOptions()):
+def analyse_gcd_data(path, options=None):
     test = 'gcd'
-    
+
     if path is None:
-        return notMeasured, notMeasured
+        return NOT_MEASURED, NOT_MEASURED
+
+    if options is None:
+        options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
     v = series.get('voltage', np.array([]))
@@ -245,15 +253,15 @@ def analyse_gcd_data(path, analysisOptions=AnalysisOptions()):
 
     if(len(v) < 3) or (len(i_em) < 3):
         return np.nan, np.nan
-        
+
 
     lbl = assign_label(path, test)
 
     gcd_result = analyse_gcd(v,i_em, maxreldev=0.03)
 
-    if analysisOptions.plot:
+    if options.plot:
         fig, ax = plt.subplots(1,1)
-        plot_curve(ax, v, i_em*1e12, analysisOptions.plotTitle("GCD??"), 'Gate Voltage / V', 'Leakage Current / {}'.format("pA"))
+        plot_curve(ax, v, i_em*1e12, options.plotTitle("GCD??"), 'Gate Voltage / V', 'Leakage Current / {}'.format("pA"))
         try:
             fit_curve(ax, gcd_result.v_acc, gcd_result.i_acc*1e12, color='r')
             fit_curve(ax, gcd_result.v_dep, gcd_result.i_dep*1e12, color='k')
@@ -266,33 +274,36 @@ def analyse_gcd_data(path, analysisOptions=AnalysisOptions()):
         resstr += "i_dep_relstd:"+" {:8.3f}%\n".format(gcd_result.i_dep_relstd*100)
         resstr += "i_inv_relstd:"+" {:8.3f}%".format(gcd_result.i_inv_relstd*100)
         fig.text(0.95, 0.33, resstr, bbox=dict(facecolor='deepskyblue', alpha=0.75), horizontalalignment='right', verticalalignment='top')
-        
-        analysisOptions.savePlot("fet", fig)
-    
-    if analysisOptions.print:
+
+        options.savePlot("fet", fig)
+
+    if options.print:
         print('%s: \tGCD: i_surf: %.2e A\t i_bulk: %.2e A' % (lbl, gcd_result.i_surf, gcd_result.i_bulk))
 
     return gcd_result.i_surf, gcd_result.i_bulk
 
 
 
-def analyse_fet_data(path, analysisOptions=AnalysisOptions()):
+def analyse_fet_data(path, options=None):
     test = 'fet'
 
     if path is None:
-        return notMeasured
-        
+        return NOT_MEASURED
+
+    if options is None:
+        options = AnalysisOptions()
+
     series = read_json_file(path).get('series')
     v = series.get('voltage', np.array([]))
     i_em = series.get('current_elm', np.array([]))
     i_src = series.get('current_vsrc', np.array([]))
     i_hvsrc = series.get('current_hvsrc', np.array([]))
-    
-    
+
+
 
     if(len(v) < 3) or (len(i_em) < 3):
         return np.nan
-        
+
     iz_em = i_em - i_em[0]
 
     v_th, a, b, spl_dev, status = analyse_fet(v, i_em)
@@ -301,9 +312,9 @@ def analyse_fet_data(path, analysisOptions=AnalysisOptions()):
 
     lbl = assign_label(path, test)
 
-    if analysisOptions.plot:
+    if options.plot:
         fig,ax1 = plt.subplots()
-        plt.title( analysisOptions.plotTitle("FET"))
+        plt.title( options.plotTitle("FET"))
         lns1a = ax1.plot(v,iz_em*1e6, ls='', marker='s', ms=3, color='tab:green', label='transfer characteristics - shifted')
         lns1 = ax1.plot(v,i_em*1e6, ls='', marker='s', ms=3, label='transfer characteristics')
 
@@ -318,44 +329,47 @@ def analyse_fet_data(path, analysisOptions=AnalysisOptions()):
         lns4 = ax1.plot([v_th, v_th], [-3, 3], '--k', label="tangent zero crossing")
         lns = lns1+lns1a+lns2+lns3+lns4
         labs = [l.get_label() for l in lns]
-        
+
         plt.legend(lns, labs, loc='upper left')
         ax1.grid(linestyle='dotted')
         resstr = "V$_{th}$:"+" {:8.2f} V".format(v_th)
         fig.text(0.85, 0.85, resstr, bbox=dict(facecolor='deepskyblue', alpha=0.75), horizontalalignment='right', verticalalignment='top')
-        
-        analysisOptions.savePlot("fet", fig)
 
-    if analysisOptions.print:
+        options.savePlot("fet", fig)
+
+    if options.print:
        print('%s: \tnFet: v_th: %.2e V' % (lbl, v_th))
 
     return v_th
 
 
-def analyse_van_der_pauw_data(path, analysisOptions=AnalysisOptions(), minCorrelation=0.99):
+def analyse_van_der_pauw_data(path, options=None, min_correlation=0.99):
     test = 'van-der-pauw'
-    
+
     if path is None:
-        analysisOptions.popPrefix("-")
-        return notMeasured
+        options.popPrefix("-")
+        return NOT_MEASURED
+
+    if options is None:
+        options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
 
     if len(v) <= 3 or len(i) <= 3:
-        analysisOptions.popPrefix("-")
+        options.popPrefix("-")
         return np.nan
 
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
     r_sheet, a, b, x_fit, spl_dev, status, r_value = analyse_van_der_pauw(i, v)
-    
-    if(abs(r_value) < minCorrelation):  # r_value is the correlation coefficient
+
+    if(abs(r_value) < min_correlation):  # r_value is the correlation coefficient
         r_sheet = np.nan
 
     fit = np.array([a*x +b for x in x_fit])
-    if analysisOptions.plot:
+    if options.plot:
 
         if r_sheet > 1000.:
             resstr = "R$_{sheet}$:"+" {:8.2f} kOhm/sq\n".format(r_sheet*1e-3)
@@ -364,67 +378,73 @@ def analyse_van_der_pauw_data(path, analysisOptions=AnalysisOptions(), minCorrel
         else:
             resstr = "R$_{sheet}$:"+" {:8.2f} Ohm/sq\n".format(r_sheet)
         resstr += "correlation:"+" {:5.3f}".format(r_value)
-        
-        
+
+
         fig, ax = plt.subplots(1,1)
         fit_curve(ax, x_fit*1e6, fit*1e3, 0)
-        plot_curve(ax, i*1e6, v*1e3, analysisOptions.plotTitle("VdP ???"), 'Current / uA', 'Voltage / mV', '', resstr, 0.9, 0.3)
-        analysisOptions.savePlot("vdp___", fig)
+        plot_curve(ax, i*1e6, v*1e3, options.plotTitle("VdP ???"), 'Current / uA', 'Voltage / mV', '', resstr, 0.9, 0.3)
+        options.savePlot("vdp___", fig)
 
-    if analysisOptions.print:
+    if options.print:
        #print('%s: \tvdp: r_sheet: %.2e Ohm/sq, raw: %.2e Ohm, correlation: %.2e  %s' % (lbl, r_sheet, a, r_value, lbl_vdp))  # lbl_vdp
         print('%s: \tvdp: r_sheet: %.2e Ohm/sq, raw: %.2e Ohm, correlation: %.2e  %s' % (lbl, r_sheet, a, r_value, lbl_vdp))  # lbl_vdp
 
     return r_sheet
 
 
-def analyse_linewidth_data(path, r_sheet=np.nan, analysisOptions=AnalysisOptions(), minCorrelation=0.9):
+def analyse_linewidth_data(path, r_sheet=np.nan, options=None, min_correlation=0.9):
     test = 'linewidth'
 
     if path is None:
-        analysisOptions.popPrefix("-")
-        return notMeasured
+        options.popPrefix("-")
+        return NOT_MEASURED
+
+    if options is None:
+        options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
-    
+
     if len(v) <= 3 or len(i) <= 3:
-        analysisOptions.popPrefix("-")
+        options.popPrefix("-")
         return np.nan
 
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
-    t_line, a, b, x_fit, spl_dev, r_value, status = analyse_linewidth(i, v, r_sheet=r_sheet, cut_param=-1., min_correlation=minCorrelation, debug=0)
+    t_line, a, b, x_fit, spl_dev, r_value, status = analyse_linewidth(i, v, r_sheet=r_sheet, cut_param=-1., min_correlation=min_correlation, debug=0)
 
     fit = np.array([a*x +b for x in x_fit])
-    if analysisOptions.plot:
+    if options.plot:
         if a > 1000.:
             resstr = "R:"+" {:8.2f} kOhm\n".format(a*1e-3)
         else:
             resstr = "R:"+" {:8.2f} Ohm\n".format(a)
-        resstr += "lw:"+" {:5.3f} um\n".format(t_line) 
+        resstr += "lw:"+" {:5.3f} um\n".format(t_line)
         resstr += "correlation:"+" {:5.3f}".format(r_value)
-        
-        
+
+
         fig, ax = plt.subplots(1,1)
         fit_curve(ax, x_fit*1e6, fit*1e3, 0)
-        plot_curve(ax, i*1e6, v*1e3, analysisOptions.plotTitle("VdP ???"), 'Current / uA', 'Voltage / mV', '', resstr, 0.9, 0.3)
-        analysisOptions.savePlot("vdp___", fig)
+        plot_curve(ax, i*1e6, v*1e3, options.plotTitle("VdP ???"), 'Current / uA', 'Voltage / mV', '', resstr, 0.9, 0.3)
+        options.savePlot("vdp___", fig)
 
 
-    if analysisOptions.print:
+    if options.print:
         print('%s: \tLinewidth: %.2e um\t%s' % (lbl, t_line, lbl_vdp))
 
     return t_line
 
 
-def analyse_cbkr_data(path, r_sheet=np.nan, analysisOptions=AnalysisOptions(), minCorrelation=0.95):
+def analyse_cbkr_data(path, r_sheet=np.nan, options=None, min_correlation=0.95):
     test = 'cbkr'
 
     if path is None:
-        analysisOptions.popPrefix("-")
-        return notMeasured
+        options.popPrefix("-")
+        return NOT_MEASURED
+
+    if options is None:
+        options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc', np.array([]))
@@ -440,51 +460,54 @@ def analyse_cbkr_data(path, r_sheet=np.nan, analysisOptions=AnalysisOptions(), m
     x_fit = np.array(x_fit)
     fit = np.array([a*x +b for x in x_fit])
 
-    if analysisOptions.plot:
+    if options.plot:
         if r_contact > 1e3:
             resstr = "R:"+" {:8.2f} kOhm\n".format(r_contact*1e-3)
         else:
             resstr = "R:"+" {:8.2f} Ohm\n".format(r_contact)
         resstr += "correlation:"+" {:5.3f}".format(r_value)
-        
+
         fig, ax = plt.subplots(1,1)
         fit_curve(ax, x_fit*1e6, fit*1e3, 0)
         #fit_curve(ax, x_fit, fit, 0)
-        plot_curve(ax, i*1e6, v*1e3, analysisOptions.plotTitle("CKBK ???"), 'Current / uA', 'Voltage / mV', '', resstr, 0.9, 0.3)
-        analysisOptions.savePlot("cbkr___", fig)
+        plot_curve(ax, i*1e6, v*1e3, options.plotTitle("CKBK ???"), 'Current / uA', 'Voltage / mV', '', resstr, 0.9, 0.3)
+        options.savePlot("cbkr___", fig)
 
-    if analysisOptions.print:
+    if options.print:
        print('%s: \tcbkr: r_contact: %.2e Ohm\t%s' % (lbl, r_contact, lbl_vdp))
 
 
     return r_contact
 
 
-def analyse_contact_data(path, analysisOptions=AnalysisOptions(), minCorrelation=0.95):
+def analyse_contact_data(path, options=None, min_correlation=0.95):
     test= 'contact'
 
     if path is None:
-        analysisOptions.popPrefix("-")
-        return notMeasured
+        options.popPrefix("-")
+        return NOT_MEASURED
+
+    if options is None:
+        options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
-    
+
     if len(v) <= 3 or len(i) <= 3:
-        analysisOptions.popPrefix("-")
+        options.popPrefix("-")
         return np.nan
 
     lbl = assign_label(path, test)
     r_contact, a, b, x_fit, spl_dev, status, r_value = analyse_contact(i, v, cut_param=0.01, debug=0)
-    
-    if abs(r_value) < minCorrelation:
+
+    if abs(r_value) < min_correlation:
         r_contact = np.nan
 
     x_fit = np.array(x_fit)
     fit = np.array([a*x +b for x in x_fit])
 
-    if analysisOptions.plot:
+    if options.plot:
         if r_contact > 1e3:
             resstr = "R:"+" {:8.2f} kOhm\n".format(r_contact*1e-3)
         else:
@@ -493,25 +516,28 @@ def analyse_contact_data(path, analysisOptions=AnalysisOptions(), minCorrelation
 
         fig, ax = plt.subplots(1,1)
         fit_curve(ax, x_fit*1e6, fit*1e3, 0)
-        plot_curve(ax, i*1e6, v*1e3, analysisOptions.plotTitle("Contact ???"), 'Current / uA', 'Voltage / mV', '', resstr, 0.9, 0.3)
-        analysisOptions.savePlot("contact___", fig)
+        plot_curve(ax, i*1e6, v*1e3, options.plotTitle("Contact ???"), 'Current / uA', 'Voltage / mV', '', resstr, 0.9, 0.3)
+        options.savePlot("contact___", fig)
 
-    if analysisOptions.print:
+    if options.print:
        print('%s: \tcontact: r_contact: %.2e Ohm, r_value: %.2f' % (lbl, r_contact, r_value))
 
     return r_contact
 
 
 
-def analyse_meander_data(path, analysisOptions=AnalysisOptions(), minCorrelation=0.99):
+def analyse_meander_data(path, options=None, min_correlation=0.99):
     test = 'meander'
 
     if path is None:
-        analysisOptions.popPrefix("-")
-        return notMeasured
+        options.popPrefix("-")
+        return NOT_MEASURED
+
+    if options is None:
+        options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
-    
+
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
     if (len(v) == 0):  # the polisilicon resistor uses a v-source and not a current source
@@ -519,42 +545,45 @@ def analyse_meander_data(path, analysisOptions=AnalysisOptions(), minCorrelation
         i = series.get('current_elm', np.array([]))
 
     if len(v) <= 3 or len(i) <= 3:
-        analysisOptions.popPrefix("-")
+        options.popPrefix("-")
         return np.nan
-        
+
     lbl = assign_label(path, test)
 
     r, status, r_value = analyse_meander(i, v)
-    
-    if (r_value < minCorrelation):
+
+    if (r_value < min_correlation):
         r = np.nan
-        
+
     #fit = np.array([r*x for x in x_fit])
-    if analysisOptions.plot:
+    if options.plot:
         if r > 1e6:
             resstr = "R:"+" {:8.2f} MOhm\n".format(r*1e-6)
         else:
             resstr = "R:"+" {:8.2f} Ohm\n".format(r)
         resstr += "correlation:"+" {:5.3f}".format(r_value)
-        
-        
+
+
         fig, ax = plt.subplots(1,1)
         #fit_curve(ax, x_fit*1e6, fit*1e3, 0)
-        plot_curve(ax, i*1e6, v*1e3, analysisOptions.plotTitle("Meander ???"), 'Current / uA', 'Voltage / mV', '', resstr, 0.9, 0.3)
-        analysisOptions.savePlot("meander___", fig)
+        plot_curve(ax, i*1e6, v*1e3, options.plotTitle("Meander ???"), 'Current / uA', 'Voltage / mV', '', resstr, 0.9, 0.3)
+        options.savePlot("meander___", fig)
 
-    if analysisOptions.print:
+    if options.print:
         print('%s: \tMeander: r: %.2e r_value: %.2f' % (lbl, r, r_value))
 
     return r
 
 
 
-def analyse_breakdown_data(path, analysisOptions=AnalysisOptions()):
+def analyse_breakdown_data(path, options=None):
     test = 'breakdown'
 
     if path is None:
-        return notMeasured
+        return NOT_MEASURED
+
+    if options is None:
+        options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
     v = series.get('voltage', np.array([]))
@@ -562,35 +591,38 @@ def analyse_breakdown_data(path, analysisOptions=AnalysisOptions()):
     i_elm = series.get('current_elm', np.array([]))
     temp = series.get('temperature_chuck', np.array([]))
     humidity = series.get('humidity_box', np.array([]))
-    
+
     i = np.array(i)
 
     lbl = assign_label(path, test)
     x_loc = 0.3
     y_loc = 0.5
-    
+
     if len(v) == 0:
         return np.nan
 
     v_bd, status = analyse_breakdown(v, i, debug=0)
 
-    if analysisOptions.plot:
+    if options.plot:
         fig, ax = plt.subplots(1,1)
         annotate = 'V$_{{bd}}$: {} V \n\nT$_{{avg}}$ : {} \u00B0C \nH$_{{avg}}$: {} $\%$ '.format(v_bd, round(np.mean(temp),2), round(np.mean(humidity),2))
         plot_curve(ax, v, i*1e9, 'Dielectric Breakdown', 'Voltage / V', 'Current / nA', lbl, annotate, x_loc, y_loc)
-        analysisOptions.savePlot("breakdown", fig)
+        options.savePlot("breakdown", fig)
 
-    if analysisOptions.print:
+    if options.print:
        print('%s: \tBreakdown: v_bd: %.2e V' % (lbl, v_bd))
 
     return v_bd
-    
-    
-def analyse_capacitor_data(path, printResults=print_results, plotResults=True):
+
+
+def analyse_capacitor_data(path, options=None):
     test = 'capacitor'
 
     if path is None:
-        return notMeasured, notMeasured, notMeasured
+        return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED
+
+    if options is None:
+        options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
     v = series.get('voltage_hvsrc', np.array([]))
@@ -600,17 +632,16 @@ def analyse_capacitor_data(path, printResults=print_results, plotResults=True):
     lbl = assign_label(path, test)
     x_loc = 0.3
     y_loc = 0.5
-    
+
     if len(v) <= 3 or len(c) <= 3:
         return np.nan, np.nan, np.nan
 
     c_mean, c_median, d, status = analyse_capacitor(v, c, debug=0)
 
-    if plotResults:
+    if options.plot:
         pass
 
-
-    if printResults:
+    if options.print:
        print('%s: \tCapacitance: %.2e F, ' % (lbl, c_median))
 
     return c_mean, c_median, d
@@ -624,7 +655,7 @@ def get_vdp_value(pathlist, printResults=False, plotResults=False):
     rs = np.nan
     for f in pathlist:
         #print(f)
-        rs = analyse_van_der_pauw_data(f, minCorrelation=.7)
+        rs = analyse_van_der_pauw_data(f, min_correlation=.7)
 
     return rs
 
@@ -644,14 +675,11 @@ def analyse_full_line_data(path):
     dirs = dirs*len(flutelist)   # we need to double it for the two flutes
     dirs.sort()
 
+    from pqc_resultset import PQC_resultset
+
     pqc_results = PQC_resultset(flutes)
     pqc_results.analyze(dirs)
-    pqc_results.prettyPrint()
-        
-
-    
-    
-
+    # pqc_results.prettyPrint()
 
     #outfile = open("outpit.dat",'w')
     #outfile.write("#serial\tflute\t")
@@ -664,7 +692,6 @@ def analyse_full_line_data(path):
     #    outfile.write(lebels[i]+"\t"+flutes[i]+"\t")
     #
     #outfile.close()
-
 
 functions = {
     'iv': analyse_iv_data,

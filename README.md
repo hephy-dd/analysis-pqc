@@ -29,8 +29,8 @@ python scripts/full_line.py /PQC/Tracker/Production/Data/VPX35953/ -P -t*.html -
 
 Use flag `-t` to select templates to render output files by specifying a `glob`
 expression with wildcard support. The flag can be set multiple times,
-eg. `-t*.html` for all html reports, `-t*.tex` for all LaTeX reports,
-or `-t*` for all.
+eg. `-t*.html` for all HTML reports, `-tresults.html` for a specific HTML
+report, `-t*.tex -t*.html` for all LaTeX and HTML reports, or `-t*` for all.
 
 ## Install using pip
 
@@ -81,11 +81,6 @@ Templates that contain ```stdout``` will be sent to the stdout stream automatica
 Analyze JSON
 ```bash
 python scripts/pqc_analysis_json.py <path> <analysis>
-```
-
-Analyze text
-```bash
-python scripts/pqc_analysis_txt.py -f <path/to/files>
 ```
 
 Convert text to JSON

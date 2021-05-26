@@ -38,12 +38,12 @@
     {{ startRowStr }}{{ labelformat.format('#') }}{% for key in table[0] %}{{ colheaderformat.format(dataseries[key].unit) }}{% endfor %}
     {{ endRowStr }}
     {{ afterheaderrows }}
-    {% for i in range(0, dataseries['vdp_pstop_r'].len() ) %}
+    {% for i in range(0, dataseries['vdp_pstop_r']|length ) %}
     {{ startRowStr }}{{ labelformat.format(dataseries['xlabels'][i]) }}{% for key in table[0] %}{{ valueformat.format(dataseries[key].getValueString(i), statusdict[dataseries[key].getStatus(i)]) }}{% endfor %}
     {{ endRowStr }}
     {% endfor %}
     {{ afterresultrows }}
-    {% for i in range(dataseries['vdp_pstop_r'].len(), dataseries['vdp_pstop_r'].len()+5) %}{{ startRowStr }}
+    {% for i in range(dataseries['vdp_pstop_r']|length, dataseries['vdp_pstop_r']|length+5) %}{{ startRowStr }}
     {{ labelformat.format(dataseries['xlabels'][i]) }}{% for key in table[0] %}{{ valueformat.format(dataseries[key].getValueString(i), statusdict[dataseries[key].getStatus(i)]) }}{% endfor %}
     {{ endRowStr }}
     {% endfor %}

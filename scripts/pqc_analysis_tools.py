@@ -5,16 +5,12 @@ analysis.
 import glob
 import json
 import os
-import sys
+import dateutil.parser as timestamp_parser
 
 import matplotlib.pyplot as plt
 import numpy as np
-import datetime
-import dateutil.parser as parser
-
 
 from analysis_pqc import *
-
 
 __all__ = [
     'find_most_recent_file',
@@ -43,7 +39,7 @@ def find_all_files_from_path(path, test=None, whitelist=None, blacklist=None):
     files = glob.glob(os.path.join(path_folder, "*.json"))
 
     files.sort()
-    
+
     for f in files:
         #the replace is necessary for van_der_pauw/van-der-pauw
         segments = [v.lower().replace("-", "_") for v in f.split('_')]
@@ -64,9 +60,9 @@ def find_most_recent_file(path, test=None, whitelist=None, blacklist=None):
     all_files = find_all_files_from_path(path, test, whitelist=whitelist, blacklist=blacklist)
     if len(all_files) == 0:
         return None
-       
+
     all_files.sort()  # the date should be the only difference, so we can sort
-    
+
     # when we mix up measurements this gives a warning here (if the name is not equal (except for the timestamp))
     basename_first = '_'.join(all_files[-1].split('_')[0:-1])
     for f in all_files:
@@ -75,7 +71,7 @@ def find_most_recent_file(path, test=None, whitelist=None, blacklist=None):
             print("Warning: heterogenous naming: "+os.path.basename(basename))
             print("   Info: first one was:       "+os.path.basename(basename_first))
             break  # we only want to show this once
-    
+
     return all_files[-1]
 
 
@@ -122,7 +118,7 @@ def get_timestamp(filename):
     ret = None
     with open(filename) as json_file:
         data = json.load(json_file)
-        ret = parser.parse(data['meta']['start_timestamp'])
+        ret = timestamp_parser.parse(data['meta']['start_timestamp'])
     return ret
 
 def units(data, unit):

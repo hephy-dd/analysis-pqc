@@ -15,13 +15,13 @@ batch {{ batch }}:
 
 {{ labelwidth.format('#') }}{% for key in table %}{{ valuewidth.format(dataseries[key].unit) }}{% endfor %}
 
-{% for i in range(0, dataseries['vdp_pstop_r'].len() ) %}
+{% for i in range(0, dataseries['vdp_pstop_r']|length ) %}
 {{ labelwidth.format(dataseries['xlabels'][i]) }}{% for key in table %}{{ valuewidth.format(dataseries[key].getValueString(i)) }}{% endfor %}
 
 {% endfor %}
 {{ labelwidth.format('--------------------') }}{% for key in table %}{{ valuewidth.format('-------') }}{% endfor %}
 
-{% for i in range(dataseries['vdp_pstop_r'].len(), dataseries['vdp_pstop_r'].len()+5) %}
+{% for i in range(dataseries['vdp_pstop_r']|length, dataseries['vdp_pstop_r']|length+5) %}
 {{ labelwidth.format(dataseries['xlabels'][i]) }}{% for key in table %}{{ valuewidth.format(dataseries[key].getValueString(i)) }}{% endfor %}
 
 {% endfor %}

@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 
 import argparse
-import os
 import glob
+import os
+from datetime import timedelta
 
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib import gridspec
-from pqc_resultset import PQC_resultset
-from datetime import timedelta
+
 from jinja2 import Environment, FileSystemLoader
 
+from pqc_resultset import PQC_resultset
 
-def renderTemplates(pqc_resultset, templates=None):
+def render_templates(pqc_resultset, templates=None):
     # Create the jinja2 environment.
     # Notice the use of trim_blocks, which greatly helps control whitespace.
     template_dir = os.path.join(os.path.dirname(__file__), "templates")
@@ -37,14 +38,14 @@ def renderTemplates(pqc_resultset, templates=None):
         if "stdout" in filename:
             print(rendered_content)
         else:
-            output_filename = os.path.join(pqc_resultset.outDir, filename)
+            output_filename = os.path.join(pqc_resultset.output_dir, filename)
             with open(output_filename, "w") as fh:
                 print(f"rendering file {output_filename} ... ", end="")
                 fh.write(rendered_content)
                 print("done.")
 
 
-def plotTimeline(pqc_batches, path, printBatchNumbers=True):
+def plot_timeline(pqc_batches, path, printBatchNumbers=True):
     print(path)
     matplotlib.rcParams.update({'font.size': 14})
 
@@ -90,18 +91,18 @@ def plotTimeline(pqc_batches, path, printBatchNumbers=True):
     fig.autofmt_xdate()
 
     fig.tight_layout(h_pad=1.0)
-    fig.savefig(path+"Timeline.png")
+    fig.savefig(os.path.join(path, "Timeline.png"))
     plt.close()
 
 
-def plotBoxplot(pqc_batches, path, values=['vdp_poly_f', 'vdp_n_f', 'vdp_pstop_f', 'vdp_poly_r', 'vdp_n_r', 'vdp_pstop_r']):
+def plot_boxplot(pqc_batches, path, values=['vdp_poly_f', 'vdp_n_f', 'vdp_pstop_f', 'vdp_poly_r', 'vdp_n_r', 'vdp_pstop_r']):
     print(path)
     matplotlib.rcParams.update({'font.size': 12})
 
     fig = plt.figure(figsize=(8, 6))
 
     gs = gridspec.GridSpec(int(len(values) / 2), 2)
-    labels = [ b.shortBatch(vpx=False) for b in pqc_batches ]
+    labels = [ b.short_batch(vpx=False) for b in pqc_batches ]
 
     for i in range(0, len(values)):
         ax = plt.subplot(gs[i])
@@ -116,17 +117,17 @@ def plotBoxplot(pqc_batches, path, values=['vdp_poly_f', 'vdp_n_f', 'vdp_pstop_f
             ax.set_xticklabels([])
 
     fig.tight_layout(h_pad=1.0)
-    fig.savefig(path+"Boxplot.png")
+    fig.savefig(os.path.join(path, "Boxplot.png"))
     plt.close()
 
-def vdpPlotBoxplot(pqc_batches, path):
+def plot_vdp_boxplot(pqc_batches, path):
     print(path)
     matplotlib.rcParams.update({'font.size': 14})
 
     fig = plt.figure(figsize=(8, 6))
 
     gs = gridspec.GridSpec(3, 1)
-    labels = [ b.shortBatch() for b in pqc_batches ]
+    labels = [ b.short_batch() for b in pqc_batches ]
 
     ax = plt.subplot(gs[0])
     plt.grid(axis='y', linestyle=':')
@@ -150,19 +151,19 @@ def vdpPlotBoxplot(pqc_batches, path):
     ax.boxplot(data, labels=labels)
 
     fig.tight_layout(h_pad=1.0)
-    fig.savefig(path+"vdpBoxplot.png")
+    fig.savefig(os.path.join(path, "vdpBoxplot.png"))
     plt.close()
 
 
 
-def loadBatch(path, outdir=None, lazy=False, create_plots=False, force_eval=False):
+def load_batch(path, outdir=None, lazy=False, create_plots=False, force_eval=False):
     batchname = os.path.basename(os.path.normpath(path))
     print("Batch: "+batchname)
     pqc_results = PQC_resultset(batchname)
 
     if lazy and outdir is not None:
         try:
-            anatime = os.path.getmtime(pqc_results.analysisFolder(outdir))
+            anatime = os.path.getmtime(pqc_results.analysis_dir(outdir))
             meastime = os.path.getmtime(path)
 
             if anatime > meastime:
@@ -171,8 +172,8 @@ def loadBatch(path, outdir=None, lazy=False, create_plots=False, force_eval=Fals
         except FileNotFoundError:
             print("lazy but first time")
 
-    pqc_results.prepareAnalysisFolder(outdir)
-    pqc_results.analyze(path, outdir, create_plots, force_eval)
+    pqc_results.prepare_analysis_dir(outdir)
+    pqc_results.analyze(path, create_plots=create_plots, force_eval=force_eval)
 
     return pqc_results
 
@@ -207,27 +208,27 @@ def main():
 
         for diri in dirs:
             print("Current dir: "+str(diri))
-            res = loadBatch(diri)
-            res.sortByTime()
+            res = load_batch(diri)
+            res.sort_by_time()
             pqc_batches.append(res)
             pqc_slices.extend(res.split(4))
-        #    #res.createHistograms(args.path)
+        #    #res.create_histograms(args.path)
 
         print(f"loaded {len(pqc_batches)} batches")
-        plotTimeline(pqc_batches, os.path.join(args.path, 'histograms', 'batch'))
-        plotTimeline(pqc_slices, os.path.join(args.path, "histograms", "fine"), printBatchNumbers=False)
+        plot_timeline(pqc_batches, os.path.join(args.path, 'histograms', 'batch'))
+        plot_timeline(pqc_slices, os.path.join(args.path, "histograms", "fine"), printBatchNumbers=False)
 
-        vdpPlotBoxplot(pqc_batches, os.path.join(args.path, "histograms") + '/') # TODO
-        plotBoxplot(pqc_batches, os.path.join(args.path, "histograms", "a"), values=['t_line_n', 'r_contact_n', 't_line_pstop2', 't_line_pstop4', 'r_contact_poly', 'v_th'])
-        plotBoxplot(pqc_batches, os.path.join(args.path, "histograms", "b"), values=['vdp_p_cross_bridge_f', 'vdp_p_cross_bridge_r', 't_line_p_cross_bridge', 'v_bd', 'i600', 'v_fd'])
-        plotBoxplot(pqc_batches, os.path.join(args.path, "histograms", "c"), values=['rho', 'conc', 't_ox', 'n_ox', 'c_acc_m', 'i_surf'])
+        plot_vdp_boxplot(pqc_batches, os.path.join(args.path, "histograms"))
+        plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "a"), values=['t_line_n', 'r_contact_n', 't_line_pstop2', 't_line_pstop4', 'r_contact_poly', 'v_th'])
+        plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "b"), values=['vdp_p_cross_bridge_f', 'vdp_p_cross_bridge_r', 't_line_p_cross_bridge', 'v_bd', 'i600', 'v_fd'])
+        plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "c"), values=['rho', 'conc', 't_ox', 'n_ox', 'c_acc_m', 'i_surf'])
     else:
-        pqc_results = loadBatch(args.path, outdir, lazy=args.lazy, create_plots=args.plots, force_eval=args.force)
+        pqc_results = load_batch(args.path, outdir, lazy=args.lazy, create_plots=args.plots, force_eval=args.force)
 
-        renderTemplates(pqc_results, args.templates)
+        render_templates(pqc_results, args.templates)
 
         if args.histograms:
-            pqc_results.createHistograms()
+            pqc_results.create_histograms()
 
     plt.show()
 
