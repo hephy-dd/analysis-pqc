@@ -16,6 +16,18 @@ import pqc_analysis_json as pqc
 from pqc_values import PQC_Values, make_chunks
 from pqc_analysis_json import AnalysisOptions
 
+__all__ = [
+    'Histogram',
+    'PQC_resultset'
+]
+
+class Histogram:
+
+    def __init__(self, filename, *, title=None, description=None):
+        self.filename = filename
+        self.title = title or ""
+        self.description = description or ""
+
 class PQC_resultset:
 
     OUTPUT_PREFIX = 'analysis_'
@@ -29,6 +41,7 @@ class PQC_resultset:
         self.output_dir = None # TODO
         self.plot_dir = None # TODO
         self.histogram_dir = None # TODO
+        self.histograms = []
 
         if dataseries is None:
             self.dataseries = {
@@ -433,11 +446,11 @@ class PQC_resultset:
 
 
     def histogram(self, pqc_values, path, stray=1.4, range_extension=None):
+        # Plot stats
         if range_extension is not None:
             stats = pqc_values.getStats(min_allowed=0, max_allowed=pqc_values.max_allowed * range_extension)
         else:
             stats = pqc_values.getStats()
-
 
         if len(stats.values) == 1 and stats.nNan == 1:
             print(f"warning: skipping plot due to no valid results: {pqc_values.name}")
@@ -445,18 +458,20 @@ class PQC_resultset:
 
         fig = plt.figure(figsize=(8, 6))
 
-
         gs = gridspec.GridSpec(1, 2, width_ratios=[10, 1])
         ax0 = plt.subplot(gs[0])
 
+        # Plot title
         if range_extension is not None:
-            plt.title(f"{self.batch}: {pqc_values.label}, Ext: {range_extension:5.1E}", fontsize=18)
+            title = f"{self.batch}: {pqc_values.label}, Ext: {range_extension:5.1E}"
             plt.ticklabel_format(axis='x', style='sci', scilimits=(-2,2))
         else:
-            plt.title(f"{self.batch}: {pqc_values.label}", fontsize=18)
+            title = f"{self.batch}: {pqc_values.label}"
+        plt.title(title, fontsize=18)
 
         ax1 = plt.subplot(gs[1])
 
+        # Plot description
         if range_extension is not None:
             #ax0.hist(pqc_values.value, bins=50, facecolor='blueviolet', alpha=1, edgecolor='black', linewidth=1)
             ax0.hist(stats.values, bins=50, range=[0, pqc_values.max_allowed*range_extension], facecolor='blueviolet', alpha=1, edgecolor='black', linewidth=1)
@@ -493,11 +508,18 @@ class PQC_resultset:
 
         fig.tight_layout(h_pad=1.0)
         if range_extension is not None:
-            fig.savefig(os.path.join(path, f"{pqc_values.name}_erhist.png"))
+            filename = os.path.join(path, f"{pqc_values.name}_erhist.png")
         else:
-            fig.savefig(os.path.join(path, f"{pqc_values.name}_hist.png"))
+            filename = os.path.join(path, f"{pqc_values.name}_hist.png")
+        fig.savefig(filename)
         plt.close()
 
+        # Append histogram to resultset
+        self.histograms.append(Histogram(
+            filename,
+            title=title,
+            description=descNum
+        ))
 
     def analysis_dir(self, base_dir=None):
         return os.path.join(base_dir or "", f"{self.OUTPUT_PREFIX}{self.batch}")

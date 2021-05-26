@@ -1,4 +1,4 @@
-{% extends "include/doc.html" %}
+{% extends "include/hist.html" %}
 
 {% block title %}PQC Batch {{ batch }}{% endblock %}
 
@@ -51,5 +51,7 @@
     {{ afterstatsrows }}
     {{ endTableStr }}
     {% endfor %}
+
+{{ super() }}
 
 {% endblock body %}

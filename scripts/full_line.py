@@ -32,7 +32,8 @@ def render_templates(pqc_resultset, templates=None):
         filename = os.path.basename(filename)
         rendered_content = j2_env.get_template(filename).render(
             batch=pqc_resultset.batch,
-            dataseries=pqc_resultset.dataseries
+            dataseries=pqc_resultset.dataseries,
+            histograms=pqc_resultset.histograms
         )
 
         # Handle special stdout templates
@@ -41,7 +42,7 @@ def render_templates(pqc_resultset, templates=None):
         else:
             output_filename = os.path.join(pqc_resultset.output_dir, filename)
             with open(output_filename, "w") as fh:
-                print(f"rendering file {output_filename} ... ", end="")
+                print(f"rendering file {output_filename} ... ", end="", flush=True)
                 fh.write(rendered_content)
                 print("done.")
 
@@ -184,7 +185,7 @@ def apply_configuration(dataseries, config):
                     setattr(series, name, value)
 
 def load_batch(path, outdir=None, lazy=False, create_plots=False,
-               force_eval=False, config=None):
+               create_histograms=False, force_eval=False, config=None):
     batchname = os.path.basename(os.path.normpath(path))
     print("Batch: "+batchname)
     pqc_results = PQC_resultset(batchname)
@@ -205,6 +206,12 @@ def load_batch(path, outdir=None, lazy=False, create_plots=False,
 
     pqc_results.prepare_analysis_dir(outdir)
     pqc_results.analyze(path, create_plots=create_plots, force_eval=force_eval)
+
+    # Render histograms (optional)
+    if create_histograms:
+        print(f"rendering histograms... ", end="", flush=True)
+        pqc_results.create_histograms()
+        print("done.")
 
     return pqc_results
 
@@ -258,12 +265,17 @@ def main():
         plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "b"), values=['vdp_p_cross_bridge_f', 'vdp_p_cross_bridge_r', 't_line_p_cross_bridge', 'v_bd', 'i600', 'v_fd'])
         plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "c"), values=['rho', 'conc', 't_ox', 'n_ox', 'c_acc_m', 'i_surf'])
     else:
-        pqc_results = load_batch(args.path, outdir, lazy=args.lazy, create_plots=args.plots, force_eval=args.force, config=config)
+        pqc_results = load_batch(args.path, outdir,
+            lazy=args.lazy,
+            create_plots=args.plots,
+            create_histograms=args.histograms,
+            force_eval=args.force,
+            config=config
+        )
 
+        # Render templates
         render_templates(pqc_results, args.templates)
 
-        if args.histograms:
-            pqc_results.create_histograms()
 
     plt.show()
 

@@ -3,14 +3,18 @@ from itertools import islice
 from analysis_pqc import params
 import numpy as np
 
+__all__ = [
+    'num2str',
+    'make_chunks',
+    'PQC_Values'
+]
+
 def num2str(num, basenum=None):
     if basenum is None:
         basenum = num
     if basenum < 10:
-        ret = "{:4.2f}".format(num)
-    else:
-        ret = "{:4.1f}".format(num)
-    return ret
+        return format(num, '4.2f')
+    return format(num, '4.1f')
 
 
 def make_chunks(data, size):
@@ -19,12 +23,14 @@ def make_chunks(data, size):
     for i in range(0, len(data), size):
         yield [k for k in islice(it, size)]
 
-"""
-This Object contains one parameter obtained via the PQC measurements, but for
-all samples measured the order in the array is cucial for the correct mapping,
-so be careful to reorder everything in the PQC_resultset.dataseries at once
-"""
+
 class PQC_Values:
+    """
+    This class holds one parameter obtained via the PQC measurements, but for
+    all samples measured the order in the array is cucial for the correct mapping,
+    so be careful to reorder everything in the PQC_resultset.dataseries at once.
+    """
+
     def __init__(self, name='na', label='na', expected_value=0., unit='',
                  show_multiplier=1e0, stray=0.5, values=None, min_allowed=None,
                  max_allowed=None):

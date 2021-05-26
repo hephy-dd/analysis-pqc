@@ -26,6 +26,22 @@ import numpy as np
 from analysis_pqc import *
 from pqc_analysis_tools import *
 
+__all__ = [
+    'AnalysisOptions',
+    'analyse_iv_data',
+    'analyse_cv_data',
+    'analyse_mos_data',
+    'analyse_gcd_data',
+    'analyse_fet_data',
+    'analyse_van_der_pauw_data',
+    'analyse_linewidth_data',
+    'analyse_cbkr_data',
+    'analyse_contact_data',
+    'analyse_meander_data',
+    'analyse_breakdown_data',
+    'analyse_capacitor_data'
+]
+
 NOT_MEASURED = np.inf
 
 class AnalysisOptions:
@@ -69,7 +85,8 @@ class AnalysisOptions:
             plt.close()
 
     def plotTitle(self, defaultPrefix):
-        return (self.peekPrefix(defaultPrefix) + ': ' + self.label).replace('_', ' ')
+        prefix = self.peekPrefix(defaultPrefix)
+        return (f"{prefix}: {self.label}").replace('_', ' ')
 
 
 def analyse_iv_data(path, options=None):
@@ -167,9 +184,9 @@ def analyse_cv_data(path, options=None):
         plot_curve(ax2, v, 1./c**2, options.plotTitle("CV??"), 'Bias Voltage / V', '1/C$^{2}$ / F$^{-2}$', lbl, '', 0, 0 )
         plt.axvline(x=v_dep2, color='green', linestyle='dashed')
 
-        resstr = "v_fd:"+" {:8.2f} V\n".format(v_dep2)
-        resstr += "bulk res:"+" {:8.2f} kOhm cm\n".format(rho*0.1)
-        resstr += "doping conc:"+" {:8.2f}*1E12cm^-3".format(conc*1e-18)
+        resstr = f"v_fd: {v_dep2:8.2f} V\n"
+        resstr += f"bulk res: {rho * 0.1:8.2f} kOhm cm\n"
+        resstr += f"doping conc: {conc * 1e-18:8.2f}*1E12cm^-3"
         fig.text(0.95, 0.33, resstr, bbox=dict(facecolor='deepskyblue', alpha=0.75), horizontalalignment='right', verticalalignment='top')
 
         options.savePlot("diodecv??", fig)
@@ -225,7 +242,7 @@ def analyse_mos_data(path, options=None):
         plt.axvline(x=v_fb2, color='black', linestyle='dashed')
 
 
-        resstr = "v_fb:"+" {:8.2f} V\n".format(v_fb2)
+        resstr = f"v_fb: {v_fb2:8.2f} V\n"
         fig.text(0.95, 0.33, resstr, bbox=dict(facecolor='deepskyblue', alpha=0.75), horizontalalignment='right', verticalalignment='top')
 
         options.savePlot("mos", fig)
@@ -281,7 +298,6 @@ def analyse_gcd_data(path, options=None):
         print('%s: \tGCD: i_surf: %.2e A\t i_bulk: %.2e A' % (lbl, gcd_result.i_surf, gcd_result.i_bulk))
 
     return gcd_result.i_surf, gcd_result.i_bulk
-
 
 
 def analyse_fet_data(path, options=None):
@@ -525,7 +541,6 @@ def analyse_contact_data(path, options=None, min_correlation=0.95):
     return r_contact
 
 
-
 def analyse_meander_data(path, options=None, min_correlation=0.99):
     test = 'meander'
 
@@ -558,9 +573,9 @@ def analyse_meander_data(path, options=None, min_correlation=0.99):
     #fit = np.array([r*x for x in x_fit])
     if options.plot:
         if r > 1e6:
-            resstr = "R:"+" {:8.2f} MOhm\n".format(r*1e-6)
+            resstr = f"R: {r*1e-6:8.2f} MOhm\n"
         else:
-            resstr = "R:"+" {:8.2f} Ohm\n".format(r)
+            resstr = f"R: {r:8.2f} Ohm\n"
         resstr += "correlation:"+" {:5.3f}".format(r_value)
 
 
@@ -570,10 +585,9 @@ def analyse_meander_data(path, options=None, min_correlation=0.99):
         options.savePlot("meander___", fig)
 
     if options.print:
-        print('%s: \tMeander: r: %.2e r_value: %.2f' % (lbl, r, r_value))
+        print(f"{lbl}: \tMeander: r: {r:.2e} r_value: {r_value:.2f}")
 
     return r
-
 
 
 def analyse_breakdown_data(path, options=None):
@@ -647,7 +661,6 @@ def analyse_capacitor_data(path, options=None):
     return c_mean, c_median, d
 
 
-
 def get_vdp_value(pathlist, printResults=False, plotResults=False):
     """helper function to get best vdp result"""
     r_sheet = np.nan
@@ -693,7 +706,7 @@ def analyse_full_line_data(path):
     #
     #outfile.close()
 
-functions = {
+FUNCTIONS = {
     'iv': analyse_iv_data,
     'cv': analyse_cv_data,
     'fet': analyse_fet_data,
@@ -709,34 +722,37 @@ functions = {
 }
 
 
-def analyse_file(path, test):
-    if test == 'all':
-        for f in functions.values():
-            print(f)
-            f(path)
-    elif test in functions:
-        functions.get(test)(path)
+def analyse_file(path, test, show_plots=False):
+    if test in FUNCTIONS:
+        options = AnalysisOptions()
+        options.print = True
+        options.plot = show_plots
+        options.plotWindow = show_plots
+        r = FUNCTIONS.get(test)(path, options=options)
     else:
         raise ValueError(f"no such test: '{test}'")
-
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('path')
     parser.add_argument('test')
+    parser.add_argument('-p', dest='plot', action='store_true', help="plot results in window")
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
 
+    if not os.path.isdir(args.path):
+        raise OSError(f"not a directory: {args.path}")
+
     if args.test == 'full-line':
         analyse_full_line_data(args.path)
         plt.show()
         return 0
     elif args.test == 'all':
-        tests = functions.keys()
+        tests = FUNCTIONS.keys()
     else:
         tests = [args.test]
 
@@ -745,8 +761,7 @@ def main():
         filedir = find_all_files_from_path(args.path, None)
         filedir = np.sort(filedir)
         for f in filedir:
-         #  print(f)
-           analyse_file(f, test)
+           analyse_file(f, test, show_plots=args.plot)
         plt.show()
 
 if __name__ =="__main__":
