@@ -7,6 +7,7 @@
 
     {# formatting options (ie html, text, latex): #}
     {% set labelformat='        <th><a href="plotpage.html?sample={0:s}" target="_blank">{0:s}</a></th>\n' %}
+    {% set labelformat_empty='        <th>{0:s}</th>\n' %}
     {% set valueformat='        <td style="{1:s};">{0:s}</td>\n' %}
     {% set colheaderformat='        <th>{0:s}</th>\n' %}
     {% set tableheaderformat='<h2>{0:s}</h2>\n' %}
@@ -33,9 +34,9 @@
     {% for table in tables %}
     {{ tableheaderformat.format(table[1]) }}
     {{ startTableStr }}
-    {{ startRowStr }}{{ labelformat.format('#') }}{% for key in table[0] %}{{ colheaderformat.format(dataseries[key].name) }}{% endfor %}
+    {{ startRowStr }}{{ labelformat_empty.format('#') }}{% for key in table[0] %}{{ colheaderformat.format(dataseries[key].name) }}{% endfor %}
     {{ endRowStr }}
-    {{ startRowStr }}{{ labelformat.format('#') }}{% for key in table[0] %}{{ colheaderformat.format(dataseries[key].unit) }}{% endfor %}
+    {{ startRowStr }}{{ labelformat_empty.format('#') }}{% for key in table[0] %}{{ colheaderformat.format(dataseries[key].unit) }}{% endfor %}
     {{ endRowStr }}
     {{ afterheaderrows }}
     {% for i in range(0, dataseries['vdp_pstop_r']|length ) %}
@@ -44,7 +45,7 @@
     {% endfor %}
     {{ afterresultrows }}
     {% for i in range(dataseries['vdp_pstop_r']|length, dataseries['vdp_pstop_r']|length+5) %}{{ startRowStr }}
-    {{ labelformat.format(dataseries['xlabels'][i]) }}{% for key in table[0] %}{{ valueformat.format(dataseries[key].getValueString(i), statusdict[dataseries[key].getStatus(i)]) }}{% endfor %}
+    {{ labelformat_empty.format(dataseries['xlabels'][i]) }}{% for key in table[0] %}{{ valueformat.format(dataseries[key].getValueString(i), statusdict[dataseries[key].getStatus(i)]) }}{% endfor %}
     {{ endRowStr }}
     {% endfor %}
     {{ afterstatsrows }}

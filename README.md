@@ -59,7 +59,7 @@ pip install -r requirements.txt
 
 Full line analysis (for whole batch)
 ```bash
-python scripts/full_line.py [-h] [-o DIR] [-l] [-H] [-P] path
+python scripts/full_line.py [-h] [-o DIR] [-l] [-H] [-P] [-t EXPR] [-c NAME] path
 ```
 ```bash
 required arguments:
@@ -72,6 +72,7 @@ optional arguments:
   -H          create histograms
   -P          create plots (for each single measurement used)
   -t EXPR     select templates to render (eg. -t*.tex -t*.html or -t* for all)
+  -c NAME     load custom configuration by name
 ```
 
 Templates that contain ```stdout``` will be sent to the stdout stream automatically, all others will be located in <outputdir>/tables/
