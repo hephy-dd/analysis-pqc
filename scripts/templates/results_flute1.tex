@@ -1,0 +1,7 @@
+{% set flute=['v_th', 'v_fb2', 'c_acc_m', 't_ox', 'n_ox', 'vdp_poly_f', 'vdp_poly_r', 'vdp_n_f', 'vdp_n_r', 'vdp_pstop_f', 'vdp_pstop_r', 'cap_l', 'cap_r'] %}
+
+{% set extraheader=' & FET & \multicolumn{4}{ c|}{MOS Quarter} & \multicolumn{2}{ c|}{Polysilicon VdP} & \multicolumn{2}{ c|}{n+ VdP} & \multicolumn{2}{ c|}{p-stop VdP} & \multicolumn{2}{ c|}{Capacitor} \\\\' %}
+
+{% extends 'include/latex.tex' %}
+
+{# for some reason the relative path does not work, so we have to make do with the links #}

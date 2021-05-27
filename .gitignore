@@ -1,3 +1,8 @@
+scripts/analysis_pqc.py
+tests/analysis_pqc.py
+
+scripts/templates-enabled/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

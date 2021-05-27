@@ -1,0 +1,35 @@
+{% extends "include/tables.html" %}
+
+{% block body %}
+{{ super() }}
+{% if histograms|length %}
+    <h2>Histograms</h2>
+
+    <input id="histogram_filter" type="text" placeholder="Filter...">
+
+    <div id="histograms">
+{% for histogram in histograms %}
+      <img src="{{ histogram.filename }}" title="{{ histogram.title }}" width="400" height="300">
+{% endfor %}
+    </div>
+{% endif %}
+
+    <script type="text/javascript">
+    (function(){
+      var input = document.getElementById("histogram_filter");
+      input.addEventListener("keyup", function() {
+        var filter, div, img, i;
+        filter = input.value.toUpperCase();
+        div = document.getElementById("histograms");
+        img = div.getElementsByTagName("img");
+        for (i = 0; i < img.length; i++) {
+          if (img[i].title.toUpperCase().indexOf(filter) > -1) {
+            img[i].style.display = "";
+          } else {
+            img[i].style.display = "none";
+          }
+        }
+      });
+    })();
+    </script>
+{% endblock body %}

@@ -1,0 +1,75 @@
+{% extends "include/doc.html" %}
+
+{% block title %}Loading...{% endblock %}
+
+{% block body %}
+    <h1>PQC Plots: <div id="headername"></div></h1>
+
+    <a href="#" title="Close window" onclick="window.close()">Close window</a>
+
+    <div id="plots">
+        <h2>Flute 1</h2>
+        <div id="fl1"></div>
+
+        <h2>Flute 2</h2>
+        <div id="fl2"></div>
+
+        <h2>Flute 3</h2>
+        <div id="fl3"></div>
+
+        <h2>Flute 4</h2>
+        <div id="fl4"></div>
+    </div>
+
+    <a href="#" title="Close window" onclick="window.close()">Close window</a>
+
+    <script type="text/javascript">
+    (function() {
+      var sample = urlParam('sample');
+      //var sample = 'HPK_HGC538_10_200um_RL';
+
+      var basedir = 'plots/';
+      var postfix = '.png';
+      var flute1_prefix = ['fet', 'mos', 'vdp_poly_fwd', 'vdp_poly_rev', 'vdp_n_fwd', 'vdp_n_rev', 'vdp_p-stop_fwd', 'vdp_p-stop_rev'];
+      var flute2_prefix = ['gcd', 'lw_n', 'lw_p4', 'lw_p2', 'meander_poly', 'breakdown'];
+      var flute3_prefix = ['iv_diodehalf', 'cv_diodehalf', 'vdp_metal_fwd', 'vdp_metal_rev', 'vdp_p-edge_fwd', 'vdp_p-edge_rev', 'lw_p-edge', 'vdp_bulk_fwd', 'vdp_bulk_rev', , 'meander_metal'];
+      var flute4_prefix = ['gcd05', 'contact_chain_poly', 'contact_chain_n', 'contact_chain_p', 'cbkr_poly', 'cbkr_n'];
+
+      document.getElementById("headername").innerHTML = sample
+      document.title = "PQC: " + sample + " Plots"
+
+      loadImages("fl1", flute1_prefix);
+      loadImages("fl2", flute2_prefix);
+      loadImages("fl3", flute3_prefix);
+      loadImages("fl4", flute4_prefix);
+
+      function loadImages(parentId, prefixes) {
+          prefixes.forEach((prefix)=> {
+              var url = basedir + prefix + "_" + sample + postfix;
+              loadImage(parentId, url);
+          });
+      }
+
+      function loadImage(parentId, url) {
+          console.log(url);
+
+          var image = document.createElement('img');
+
+          image.src = url;
+          var w = 400
+          image.width = w;
+          image.height = (w * 480) / 640;
+
+          document.getElementById(parentId).appendChild(image);
+      }
+
+      function urlParam(name, w) {
+          w = w || window;
+          var rx = new RegExp('[\&|\?]'+name+'=([^\&\#]+)'),
+              val = w.location.search.match(rx);
+          return !val ? '':val[1];
+      }
+    })();
+    </script>
+
+{% endblock body %}

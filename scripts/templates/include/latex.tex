@@ -1,0 +1,48 @@
+{# generic latex table-template, 'flute' must be an array with the desired values to show in the table #}
+
+
+
+{# formatting options (ie html, text, latex): #}
+{% set labelformat='\\detokenize{{ {0:s} }} ' %}
+{% set valueformat='& {1:s} {0:s} ' %}
+{% set colheaderformat='& \\detokenize{{ {0:s} }} ' %}
+{% set startRowStr='' %}
+{% set endRowStr='\\\\\n' %}
+
+    {#             0: statistics-value, 1: ok value, 2: too low, 3: too high, 4: nan (ie failed fit, compliance...), 5: not measured (inf)  #}
+{% set statusdict={0: '\\okval', 1: '\\okval', 2: '\\lowval', 3: '\\highval', 4: '\\nanval', 5: '\\notmeasval'} %}
+
+
+
+{% raw %}
+\def\nanval{\cellcolor[HTML]{aa0000}}
+\def\highval{\cellcolor[HTML]{ff9900}}
+\def\lowval{\cellcolor[HTML]{ffff00}}
+\def\okval{\cellcolor[HTML]{ffffff}}
+\def\notmeasval{\cellcolor[HTML]{d4fcfc}}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+{% endraw %}
+
+\begin{center}
+    \fontsize{4pt}{5pt}\selectfont
+    \setlength{\tabcolsep}{0.35em} % for the horizontal padding
+    \begin{tabular}{ |l|{% for col in flute %}R{0.6cm}|{% endfor %} }
+        \hline
+        {{ extraheader }}
+        \hline
+        {{ startRowStr }}{{ labelformat.format('') }}{% for key in flute %}{{ colheaderformat.format(dataseries[key].name) }}{% endfor %}{{ endRowStr }}
+        \hline
+        {{ startRowStr }}{{ labelformat.format('') }}{% for key in flute %}{{ colheaderformat.format(dataseries[key].unit) }}{% endfor %}{{ endRowStr }}
+        \hline
+        
+        {% for i in range(0, dataseries['vdp_pstop_r']|length ) %}{{ startRowStr }}{{ labelformat.format(dataseries['xlabels'][i]) }}{% for key in flute %}{{ valueformat.format(dataseries[key].get_value_string(i), statusdict[dataseries[key].get_status(i)]) }}{% endfor %}{{ endRowStr }}{% endfor %}
+        \hline
+        {% for i in range(dataseries['vdp_pstop_r']|length, dataseries['vdp_pstop_r']|length+5) %}{{ startRowStr }}{{ labelformat.format(dataseries['xlabels'][i]) }}{% for key in flute %}{{ valueformat.format(dataseries[key].get_value_string(i), statusdict[dataseries[key].get_status(i)]) }}{% endfor %}{{ endRowStr }}{% endfor %}
+
+        \hline
+    \end{tabular}
+\end{center}
+

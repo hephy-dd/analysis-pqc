@@ -1,0 +1,6 @@
+{% set flute=['i_surf', 's0', 'meander_poly', 't_line_n', 't_line_pstop4', 't_line_pstop2', 'v_bd'] %}
+{% set extraheader=' & \multicolumn{2}{ c|}{GCD} & Poly-R & \multicolumn{3}{ c|}{Line thickness} & breakdown\\\\' %}
+
+{% extends 'include/latex.tex' %}
+
+{# for some reason the relative path does not work, so we have to make do with the links #}

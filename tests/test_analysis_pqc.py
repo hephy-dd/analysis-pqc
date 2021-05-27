@@ -3,8 +3,8 @@ import numpy as np
 
 import analysis_pqc
 
-x = np.array([0., 1., 2., 3., 4., 5.])
-y = np.array([.1, .2, .3, .4, .5, .6])
+x = np.array([0., 1., 2., 3., 4., 5., 6., 7.])
+y = np.array([.1, .2, .3, .5, .6, .6, 6.,6.])
 
 class AnalysisPQCTest(unittest.TestCase):
 
@@ -14,7 +14,7 @@ class AnalysisPQCTest(unittest.TestCase):
         self.assertEqual(analysis_pqc.STATUS_FAILED, "failed")
 
     def test_line_regr_with_cuts(self):
-        r = analysis_pqc.line_regr_with_cuts(x, y, cut_param=-.5)
+        r = analysis_pqc.line_regr_with_cuts(x, y, cut_param=-.4)
         self.assertEqual(r.status, analysis_pqc.STATUS_PASSED)
 
     def test_analyse_iv(self):
@@ -22,7 +22,7 @@ class AnalysisPQCTest(unittest.TestCase):
         self.assertEqual(r.status, analysis_pqc.STATUS_PASSED)
 
     def test_analyse_cv(self):
-        r = analysis_pqc.analyse_cv(x, y)
+        r = analysis_pqc.analyse_cv(x, y, cut_param=-.005)
         self.assertEqual(r.status, analysis_pqc.STATUS_FAILED)
 
     def test_analyse_mos(self):
