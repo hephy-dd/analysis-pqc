@@ -40,6 +40,8 @@ def render_templates(pqc_resultset, templates=None):
         if "stdout" in filename:
             print(rendered_content)
         else:
+            if not os.path.exists(pqc_resultset.output_dir):
+                os.makedirs(pqc_resultset.output_dir)
             output_filename = os.path.join(pqc_resultset.output_dir, filename)
             with open(output_filename, "w") as fh:
                 print(f"rendering file {output_filename} ... ", end="", flush=True)
@@ -70,9 +72,9 @@ def plot_timeline(pqc_batches, path, printBatchNumbers=True):
     plt.title("p-stop VdP", fontsize=15)
 
     for res in pqc_batches:
-        spoly = res.vdp_poly_tot().getStats()
-        sn = res.vdp_n_tot().getStats()
-        spstop = res.vdp_pstop_tot().getStats()
+        spoly = res.vdp_poly_tot().get_stats()
+        sn = res.vdp_n_tot().get_stats()
+        spstop = res.vdp_pstop_tot().get_stats()
         lbl = res.batch
         if not printBatchNumbers:
             lbl = ''
@@ -93,6 +95,8 @@ def plot_timeline(pqc_batches, path, printBatchNumbers=True):
     fig.autofmt_xdate()
 
     fig.tight_layout(h_pad=1.0)
+    if not os.path.exists(path):
+        os.makedirs(path)
     fig.savefig(os.path.join(path, "Timeline.png"))
     plt.close()
 
@@ -112,13 +116,15 @@ def plot_boxplot(pqc_batches, path, values=['vdp_poly_f', 'vdp_n_f', 'vdp_pstop_
         plt.grid(axis='y', linestyle=':')
         ax.set_ylabel(pqc_batches[0].dataseries[values[i]].unit)
 
-        data = [ b.dataseries[values[i]].getStats().values for b in pqc_batches ]
+        data = [ b.dataseries[values[i]].get_stats().values for b in pqc_batches ]
 
         ax.boxplot(data, labels=labels)
         if (i < (len(values)-2)):
             ax.set_xticklabels([])
 
     fig.tight_layout(h_pad=1.0)
+    if not os.path.exists(path):
+        os.makedirs(path)
     fig.savefig(os.path.join(path, "Boxplot.png"))
     plt.close()
 
@@ -135,31 +141,33 @@ def plot_vdp_boxplot(pqc_batches, path):
     plt.grid(axis='y', linestyle=':')
     plt.title(pqc_batches[0].vdp_poly_tot().label, fontsize=15)
     ax.set_ylabel(pqc_batches[0].vdp_poly_tot().unit)
-    data = [ b.vdp_poly_tot().getStats().values for b in pqc_batches ]
+    data = [ b.vdp_poly_tot().get_stats().values for b in pqc_batches ]
     ax.boxplot(data, labels=labels)
 
     ax = plt.subplot(gs[1])
     plt.grid(axis='y', linestyle=':')
     plt.title(pqc_batches[0].vdp_n_tot().label, fontsize=15)
     ax.set_ylabel(pqc_batches[0].vdp_n_tot().unit)
-    data = [ b.vdp_n_tot().getStats().values for b in pqc_batches ]
+    data = [ b.vdp_n_tot().get_stats().values for b in pqc_batches ]
     ax.boxplot(data, labels=labels)
 
     ax = plt.subplot(gs[2])
     plt.grid(axis='y', linestyle=':')
     plt.title(pqc_batches[0].vdp_pstop_tot().label, fontsize=15)
     ax.set_ylabel(pqc_batches[0].vdp_pstop_tot().unit)
-    data = [ b.vdp_pstop_tot().getStats().values for b in pqc_batches ]
+    data = [ b.vdp_pstop_tot().get_stats().values for b in pqc_batches ]
     ax.boxplot(data, labels=labels)
 
     fig.tight_layout(h_pad=1.0)
+    if not os.path.exists(path):
+        os.makedirs(path)
     fig.savefig(os.path.join(path, "vdpBoxplot.png"))
     plt.close()
 
 def load_configuration(name):
     filename = os.path.join(os.path.dirname(__file__), 'config', f'{name}.yaml')
     if not os.path.isfile(filename):
-        raise ValueError("No such configuration: {name}")
+        raise ValueError(f"No such configuration: {name}")
     with open(filename) as fp:
         return yaml.safe_load(fp)
 
@@ -187,7 +195,7 @@ def apply_configuration(dataseries, config):
 def load_batch(path, outdir=None, lazy=False, create_plots=False,
                create_histograms=False, force_eval=False, config=None):
     batchname = os.path.basename(os.path.normpath(path))
-    print("Batch: "+batchname)
+    print(f"Batch: {batchname}")
     pqc_results = PQC_resultset(batchname)
 
     # Apply configuration
@@ -195,12 +203,12 @@ def load_batch(path, outdir=None, lazy=False, create_plots=False,
 
     if lazy and outdir is not None:
         try:
-            anatime = os.path.getmtime(pqc_results.analysis_dir(outdir))
-            meastime = os.path.getmtime(path)
+            analysis_time = os.path.getmtime(pqc_results.analysis_dir(outdir))
+            measure_time = os.path.getmtime(path)
 
-            if anatime > meastime:
+            if analysis_time > measure_time:
                 print("lazy mode: nothing to do")
-                exit(0)
+                exit(0) # TODO!
         except FileNotFoundError:
             print("lazy but first time")
 
@@ -243,7 +251,8 @@ def main():
     if args.multibatch:
         print("Multibatch mode - experimental!")
         dirs = glob.glob(os.path.join(args.path, "*"))
-        dirs = [t for t in dirs if "histograms" not in t and "VPX" in t ]
+        dirs = [t for t in dirs if "histograms" not in t and "VPX" in t ] # TODO!
+        dirs = [t for t in dirs if os.path.isdir(t)]
 
         pqc_batches = []
         pqc_slices = []

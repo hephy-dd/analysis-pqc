@@ -44,6 +44,7 @@ __all__ = [
 
 NOT_MEASURED = np.inf
 
+
 class AnalysisOptions:
 
     def __init__(self, plotImgBasedir=None, label=None):
@@ -763,6 +764,7 @@ def main():
         for f in filedir:
            analyse_file(f, test, show_plots=args.plot)
         plt.show()
+
 
 if __name__ =="__main__":
     main()

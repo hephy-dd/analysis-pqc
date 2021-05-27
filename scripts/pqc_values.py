@@ -69,14 +69,14 @@ class PQC_Values:
         self.values.append(val)
 
     def rearrange(self, indices):
-        self.values = [ self.values[indices[i]] for i in range(0, len(indices)) ]
+        self.values = [ self.values[indices[i]] for i in range(len(indices)) ]
 
-    def getValue(self, index):
+    def get_value(self, index):
         # with multiplier to suit the unit
         if index < len(self.values):
             return self.values[index]*self.show_multiplier
         else:
-            stats = self.getStats()
+            stats = self.get_stats()
             sel={0: stats.selMed,
                  1: stats.selAvg,
                  2: stats.selStd,
@@ -84,7 +84,7 @@ class PQC_Values:
                  4: len(stats.values)/stats.nTot, }
             return sel.get(index-len(self.values), "error")
 
-    def getValueString(self, index, niceText=True):
+    def get_value_string(self, index, niceText=True):
         if index < len(self.values):
             if np.isnan(self.values[index]) and niceText:
                 return "failed"
@@ -92,7 +92,7 @@ class PQC_Values:
                 return "---"
             return num2str(self.values[index]*self.show_multiplier, self.expected_value)
         else:
-            stats = self.getStats()
+            stats = self.get_stats()
             sel={0: num2str(stats.selMed, self.expected_value),
                  1: num2str(stats.selAvg, self.expected_value),
                  2: num2str(stats.selStd, self.expected_value),
@@ -100,7 +100,7 @@ class PQC_Values:
                  4: "{:3.2f}".format(len(stats.values)/stats.nTot), }
             return sel.get(index-len(self.values), "error")
 
-    def getStatus(self, index):
+    def get_status(self, index):
         if index >= len(self.values):
             return 0
         value = self.values[index]*self.show_multiplier
@@ -115,7 +115,7 @@ class PQC_Values:
         return 1  # OK
 
     @staticmethod
-    def getStatLabels():
+    def get_stats_labels():
         return ["Median", "Average", "Std dev.", "OK/Tot.", "OK (rel)"]
 
     def split(self, junk_size):
@@ -130,7 +130,7 @@ class PQC_Values:
         return [PQC_Values(values=i, **kwargs) for i in make_chunks(self.values, junk_size)]
 
     @params('values, nTot, nNan, nTooHigh, nTooLow, totAvg, totStd, totMed, selAvg, selStd, selMed')
-    def getStats(self, min_allowed=None, max_allowed=None):
+    def get_stats(self, min_allowed=None, max_allowed=None):
         if min_allowed is None:
             min_allowed = self.min_allowed
         if max_allowed is None:

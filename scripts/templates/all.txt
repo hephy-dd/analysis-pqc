@@ -6,7 +6,7 @@ sample {% for key in dataseries %}{% if not key.startswith('x'):%}{{ dataseries[
 
 {% for i in range(0, dataseries['vdp_pstop_r']|length ) %}
 {{ dataseries['xlabels'][i] }}   {% for key in dataseries %}
-{% if not key.startswith('x'):%}{{ dataseries[key].getValueString(i, False) }}       {% endif %}
+{% if not key.startswith('x'):%}{{ dataseries[key].get_value_string(i, False) }}       {% endif %}
 {% endfor %}
 
 {% endfor %}

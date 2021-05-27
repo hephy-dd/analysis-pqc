@@ -133,7 +133,8 @@ class PQC_resultset:
         return PQC_Values.merge([self.dataseries['vdp_pstop_f'], self.dataseries['vdp_pstop_f']], "vdp_pstop_tot", "P-stop VdP both")
 
     def sort_by_time(self):
-        order = np.argsort(self.timestamps)
+        # TODO remove placeholders
+        order = np.argsort([t for t in self.timestamps if t])
         #print(str(order))
 
         for key in self.dataseries:
@@ -399,9 +400,9 @@ class PQC_resultset:
             print("[{:2.0f}%] Analyzing: {:}".format(precent, sample_name))
             self.analyze_sample(sample_path, create_plots=create_plots, force_eval=force_eval)
 
-        self.dataseries['xlabels'].extend(PQC_Values.getStatLabels())
-        self.dataseries['xflutes'].extend([""]*len(PQC_Values.getStatLabels()))
-        self.dataseries['xtimestamps'].extend([""]*len(PQC_Values.getStatLabels()))
+        self.dataseries['xlabels'].extend(PQC_Values.get_stats_labels())
+        self.dataseries['xflutes'].extend([""]*len(PQC_Values.get_stats_labels()))
+        self.dataseries['xtimestamps'].extend([""]*len(PQC_Values.get_stats_labels()))
 
     def statusbar(self, pqc_value_statistics, axes, single=True, start=-0.5, stop=0.5, label=''):
         relOK = len(pqc_value_statistics.values)/pqc_value_statistics.nTot
@@ -448,9 +449,9 @@ class PQC_resultset:
     def histogram(self, pqc_values, path, stray=1.4, range_extension=None):
         # Plot stats
         if range_extension is not None:
-            stats = pqc_values.getStats(min_allowed=0, max_allowed=pqc_values.max_allowed * range_extension)
+            stats = pqc_values.get_stats(min_allowed=0, max_allowed=pqc_values.max_allowed * range_extension)
         else:
-            stats = pqc_values.getStats()
+            stats = pqc_values.get_stats()
 
         if len(stats.values) == 1 and stats.nNan == 1:
             print(f"warning: skipping plot due to no valid results: {pqc_values.name}")

@@ -24,7 +24,8 @@ __all__ = [
     'fit_curve'
 ]
 
-def find_all_files_from_path(path, test=None, whitelist=None, blacklist=None):
+
+def find_all_files_from_path(path, test=None, *, whitelist=None, blacklist=None, pattern='*.json'):
     """
     returns a list of measurements for a given test
     optionally filters also with whitelist and blacklist (all whitelists must match and no blacklist match)
@@ -32,27 +33,23 @@ def find_all_files_from_path(path, test=None, whitelist=None, blacklist=None):
       whitlelist=["PQCFlutesRight","polyslicon"] and
       blacklist=["reverse"]
     """
+    filedir = []
 
-    path_folder = path
-    filedir =[]
+    filenames = glob.glob(os.path.join(path, pattern))
+    filenames.sort()
 
-    files = glob.glob(os.path.join(path_folder, "*.json"))
-
-    files.sort()
-
-    for f in files:
-        #the replace is necessary for van_der_pauw/van-der-pauw
-        segments = [v.lower().replace("-", "_") for v in f.split('_')]
+    for filename in filenames:
+        # the replace is necessary for van_der_pauw/van-der-pauw
+        segments = [v.lower().replace("-", "_") for v in filename.split('_')]
         if (test is None or test in segments) and \
            (blacklist is None or not any(e.lower() in segments for e in blacklist)) and \
-           (whitelist is None or all(e .lower() in segments for e in whitelist)):
-            filedir.append(f)
+           (whitelist is None or all(e.lower() in segments for e in whitelist)):
+            filedir.append(filename)
 
     return np.sort(filedir)
 
 
-
-def find_most_recent_file(path, test=None, whitelist=None, blacklist=None):
+def find_most_recent_file(path, test=None, *, whitelist=None, blacklist=None):
     """This function takes the pathfile and the name of test as inputs and
     returns the most recent file which corresponds to the selected test. This is obtained via the name,
     not with the timestamp, so it gives a warning if the names don'z match for all candidats
@@ -67,9 +64,9 @@ def find_most_recent_file(path, test=None, whitelist=None, blacklist=None):
     basename_first = '_'.join(all_files[-1].split('_')[0:-1])
     for f in all_files:
         basename = '_'.join(f.split('_')[0:-1])
-        if(basename != basename_first):
-            print("Warning: heterogenous naming: "+os.path.basename(basename))
-            print("   Info: first one was:       "+os.path.basename(basename_first))
+        if basename != basename_first:
+            print("Warning: heterogenous naming: {}".format(os.path.basename(basename)))
+            print("   Info: first one was:       {}".format(os.path.basename(basename_first)))
             break  # we only want to show this once
 
     return all_files[-1]
@@ -102,17 +99,18 @@ def read_json_file(filename):
     >>> series.get('voltage')
     array([0.0, 0.1, 0.2, 0.3])
     """
-    data = json.loads('{ "series": {} }')
+    data = {"series": {}}
     try:
         with open(filename) as f:
             data = json.load(f)
         # convert to numpy arrays
-        series = data.get('series', json.loads("{}"))
+        series = data.get('series', {})
         for k, v in series.items():
             series[k] = np.array(v)
     except:
-        print("JSON error!")
+        raise RuntimeError(f"Failed to parse JSON file: {filename}")
     return data
+
 
 def get_timestamp(filename):
     ret = None
@@ -120,6 +118,7 @@ def get_timestamp(filename):
         data = json.load(json_file)
         ret = timestamp_parser.parse(data['meta']['start_timestamp'])
     return ret
+
 
 def units(data, unit):
     """This function converts the unit scale to the correct one."""
