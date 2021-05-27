@@ -1,57 +1,15 @@
-{% extends "include/hist.html" %}
+{% extends "include/histogram.html" %}
 
 {% block title %}PQC Batch {{ batch }}{% endblock %}
 
+{# shape options, values per table (here one flute each) #}
+{% set flute1=['v_th', 'v_fb2', 'c_acc_m', 't_ox', 'n_ox', 'vdp_poly_f', 'vdp_poly_r', 'vdp_n_f', 'vdp_n_r', 'vdp_pstop_f', 'vdp_pstop_r', 'cap_l', 'cap_r'] %}
+{% set flute2=['i_surf', 's0', 'meander_poly', 't_line_n', 't_line_pstop4', 't_line_pstop2', 'v_bd'] %}
+{% set flute3=['i600', 'v_fd', 'rho', 'conc', 'meander_metal', 'vdp_metclo_f', 'vdp_metclo_r', 'vdp_p_cross_bridge_f', 'vdp_p_cross_bridge_r', 't_line_p_cross_bridge', 'vdp_bulk_f', 'vdp_bulk_r', 'vdp_bulk_rho_old', 'vdp_bulk_rho'] %}
+{% set flute4=['i_surf05','s0_gcd05', 'r_contact_poly', 'r_contact_n', 'contact_p', 'contact_poly', 'contact_n'] %}
+{# the first element contains the columns, the second the name for the flute #}
+{% set tables=[(flute1, "Flute 1:"), (flute2, "Flute 2:"), (flute3, "Flute 3:"), (flute4, "Flute 4:")] %}
+
 {% block body %}
-    <h1>PQC Batch {{ batch }}: </h1>
-
-    {# formatting options (ie html, text, latex): #}
-    {% set labelformat='        <th><a href="plotpage.html?sample={0:s}" target="_blank">{0:s}</a></th>\n' %}
-    {% set labelformat_empty='        <th>{0:s}</th>\n' %}
-    {% set valueformat='        <td style="{1:s};">{0:s}</td>\n' %}
-    {% set colheaderformat='        <th>{0:s}</th>\n' %}
-    {% set tableheaderformat='<h2>{0:s}</h2>\n' %}
-    {% set afterheaderrows= '<tr style="border-bottom:1px solid black"><td colspan="100%"><hr/></td></tr>'%}
-    {% set startRowStr='    <tr>\n' %}
-    {% set endRowStr='    </tr>\n' %}
-    {% set afterresultrows= '<tr style="border-bottom:1px solid black"><td colspan="100%"><hr/></td></tr>'%}
-    {% set afterstatsrows= '<tr style="border-bottom:1px solid black"><td colspan="100%"><hr/></td></tr>'%}
-    {% set startTableStr='<table border="0">' %}
-    {% set endTableStr='</table>' %}
-
-    {#             0: statistics-value, 1: ok value, 2: too low     3: too high,                   4: nan (ie failed fit, compliance...), 5: not measured (inf)  #}
-    {% set statusdict={0: '', 1: '', 2: 'background-color:#edfc1b', 3: 'background-color:#fc8c0c', 4: 'background-color:#fc3f42', 5: 'background-color:#95f9f9'} %}
-
-
-    {# shape options, values per table (here one flute each) #}
-    {% set flute1=['v_th', 'v_fb2', 'c_acc_m', 't_ox', 'n_ox', 'vdp_poly_f', 'vdp_poly_r', 'vdp_n_f', 'vdp_n_r', 'vdp_pstop_f', 'vdp_pstop_r', 'cap_l', 'cap_r'] %}
-    {% set flute2=['i_surf', 's0', 'meander_poly', 't_line_n', 't_line_pstop4', 't_line_pstop2', 'v_bd'] %}
-    {% set flute3=['i600', 'v_fd', 'rho', 'conc', 'meander_metal', 'vdp_metclo_f', 'vdp_metclo_r', 'vdp_p_cross_bridge_f', 'vdp_p_cross_bridge_r', 't_line_p_cross_bridge', 'vdp_bulk_f', 'vdp_bulk_r', 'vdp_bulk_rho_old', 'vdp_bulk_rho'] %}
-    {% set flute4=['i_surf05','s0_gcd05', 'r_contact_poly', 'r_contact_n', 'contact_p', 'contact_poly', 'contact_n'] %}
-    {# the first element contains the columns, the second the name for the flute #}
-    {% set tables=[(flute1, "Flute 1:"), (flute2, "Flute 2:"), (flute3, "Flute 3:"), (flute4, "Flute 4:")] %}
-
-    {% for table in tables %}
-    {{ tableheaderformat.format(table[1]) }}
-    {{ startTableStr }}
-    {{ startRowStr }}{{ labelformat_empty.format('#') }}{% for key in table[0] %}{{ colheaderformat.format(dataseries[key].name) }}{% endfor %}
-    {{ endRowStr }}
-    {{ startRowStr }}{{ labelformat_empty.format('#') }}{% for key in table[0] %}{{ colheaderformat.format(dataseries[key].unit) }}{% endfor %}
-    {{ endRowStr }}
-    {{ afterheaderrows }}
-    {% for i in range(0, dataseries['vdp_pstop_r']|length ) %}
-    {{ startRowStr }}{{ labelformat.format(dataseries['xlabels'][i]) }}{% for key in table[0] %}{{ valueformat.format(dataseries[key].get_value_string(i), statusdict[dataseries[key].get_status(i)]) }}{% endfor %}
-    {{ endRowStr }}
-    {% endfor %}
-    {{ afterresultrows }}
-    {% for i in range(dataseries['vdp_pstop_r']|length, dataseries['vdp_pstop_r']|length+5) %}{{ startRowStr }}
-    {{ labelformat_empty.format(dataseries['xlabels'][i]) }}{% for key in table[0] %}{{ valueformat.format(dataseries[key].get_value_string(i), statusdict[dataseries[key].get_status(i)]) }}{% endfor %}
-    {{ endRowStr }}
-    {% endfor %}
-    {{ afterstatsrows }}
-    {{ endTableStr }}
-    {% endfor %}
-
 {{ super() }}
-
 {% endblock body %}

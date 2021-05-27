@@ -1,0 +1,57 @@
+{% extends "include/doc.html" %}
+
+{# formatting options (ie html, text, latex): #}
+{% set labelformat='        <th><a href="plotpage.html?sample={0:s}" target="_blank">{0:s}</a></th>\n' %}
+{% set labelformat_empty='        <th>{0:s}</th>\n' %}
+{% set valueformat='        <td style="{1:s};">{0:s}</td>\n' %}
+{% set colheaderformat='        <th>{0:s}</th>\n' %}
+{% set tableheaderformat='    <h2>{0:s}</h2>\n' %}
+{% set afterheaderrows= '      <tr style="border-bottom:1px solid black"><td colspan="100%"><hr/></td></tr>'%}
+{% set startRowStr='      <tr>\n' %}
+{% set endRowStr='      </tr>\n' %}
+{% set afterresultrows= '      <tr style="border-bottom:1px solid black"><td colspan="100%"><hr/></td></tr>'%}
+{% set afterstatsrows= '      <tr style="border-bottom:1px solid black"><td colspan="100%"><hr/></td></tr>'%}
+{% set startTableStr='    <table border="0">' %}
+{% set endTableStr='    </table>' %}
+
+{# 0: statistics-value #}
+{# 1: ok value #}
+{# 2: too low #}
+{# 3: too high #}
+{# 4: nan (ie failed fit, compliance...) #}
+{# 5: not measured (inf)  #}
+{% set statusdict={
+  0: '',
+  1: '',
+  2: 'background-color:#edfc1b',
+  3: 'background-color:#fc8c0c',
+  4: 'background-color:#fc3f42',
+  5: 'background-color:#95f9f9'
+} %}
+
+{% block body %}
+    <h1>{{ self.title() }}</h1>
+{{ super() }}
+
+{% for table in tables %}
+{{ tableheaderformat.format(table[1]) }}
+{{ startTableStr }}
+{{ startRowStr }}{{ labelformat_empty.format('#') }}{% for key in table[0] %}{{ colheaderformat.format(dataseries[key].name) }}{% endfor %}
+{{ endRowStr }}
+{{ startRowStr }}{{ labelformat_empty.format('#') }}{% for key in table[0] %}{{ colheaderformat.format(dataseries[key].unit) }}{% endfor %}
+{{ endRowStr }}
+{{ afterheaderrows }}
+{% for i in range(0, dataseries['vdp_pstop_r']|length ) %}
+{{ startRowStr }}{{ labelformat.format(dataseries['xlabels'][i]) }}{% for key in table[0] %}{{ valueformat.format(dataseries[key].get_value_string(i), statusdict[dataseries[key].get_status(i)]) }}{% endfor %}
+{{ endRowStr }}
+{% endfor %}
+{{ afterresultrows }}
+{% for i in range(dataseries['vdp_pstop_r']|length, dataseries['vdp_pstop_r']|length+5) %}{{ startRowStr }}
+{{ labelformat_empty.format(dataseries['xlabels'][i]) }}{% for key in table[0] %}{{ valueformat.format(dataseries[key].get_value_string(i), statusdict[dataseries[key].get_status(i)]) }}{% endfor %}
+{{ endRowStr }}
+{% endfor %}
+{{ afterstatsrows }}
+{{ endTableStr }}
+{% endfor %}
+
+{% endblock body %}
