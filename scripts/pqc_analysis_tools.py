@@ -10,8 +10,6 @@ import dateutil.parser as timestamp_parser
 import matplotlib.pyplot as plt
 import numpy as np
 
-from analysis_pqc import *
-
 __all__ = [
     'find_most_recent_file',
     'find_all_files_from_path',
@@ -80,7 +78,7 @@ def assign_label(path, test, vdp=False):
     # un-comment this in case you want to test a specific file. You have to
     # assign it as a path through the terminal
     # file = path
-    #print(path)
+    # print(path)
     lbl_list = [1, 2, 6, 8, 9]
     if vdp:
         lbl_list = [10, 11, 12, 13]
@@ -107,7 +105,7 @@ def read_json_file(filename):
         series = data.get('series', {})
         for k, v in series.items():
             series[k] = np.array(v)
-    except:
+    except Exception:
         raise RuntimeError(f"Failed to parse JSON file: {filename}")
     return data
 
@@ -123,17 +121,16 @@ def get_timestamp(filename):
 def units(data, unit):
     """This function converts the unit scale to the correct one."""
     x = max(abs(data))
-    numer = 0
     unit_scale = ['P', 'T', 'G', 'M', 'k', '', 'm', '$\mu$', 'n', 'p', 'f', 'a', 'z', 'y']
     i = -1
     lower_limit = 1e-24
 
     max_scale = 1e+18
-    while max_scale> lower_limit:
+    while max_scale > lower_limit:
         previous_max = max_scale
-        max_scale = max_scale/1000
-        i +=1
-        if x >= max_scale and x< previous_max:
+        max_scale = max_scale / 1000
+        i += 1
+        if x >= max_scale and x < previous_max:
             numerator = max_scale
             string = '{}{}'.format(unit_scale[i], unit)
 
@@ -155,7 +152,7 @@ def plot_curve(ax, x, y, title, xlabel, ylabel, legend=None, annotate=None, x_lo
     In that case we want to overlay the curve and the fit.
     """
 
-    #plt.figure()
+    # plt.figure()
     ax.plot(x, y, '-o', ms=3, label=legend)
     if annotate:
         plt.annotate(annotate, (x_loc, y_loc), xycoords='figure fraction', color='black', bbox=dict(facecolor='deepskyblue', alpha=0.75), horizontalalignment='right', verticalalignment='top')
@@ -166,7 +163,7 @@ def plot_curve(ax, x, y, title, xlabel, ylabel, legend=None, annotate=None, x_lo
         plt.legend(loc='upper left')
     plt.grid(alpha=0.5, linestyle='--', linewidth=1)
     plt.tight_layout()
-   # plt.show()
+    # plt.show()
 
 
 def fit_curve(ax, x, y1, y2=None, color='r'):

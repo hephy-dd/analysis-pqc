@@ -110,7 +110,7 @@ def plot_boxplot(pqc_batches, filename, keys=None):
     if not pqc_batches:
         return
 
-    if keys is None: # TODO
+    if keys is None:  # TODO
         keys = ['vdp_poly_f', 'vdp_n_f', 'vdp_pstop_f', 'vdp_poly_r', 'vdp_n_r', 'vdp_pstop_r']
 
     matplotlib.rcParams.update({'font.size': 12})
@@ -118,7 +118,7 @@ def plot_boxplot(pqc_batches, filename, keys=None):
     fig = plt.figure(figsize=(8, 6))
 
     gs = gridspec.GridSpec(int(len(keys) / 2), 2)
-    labels = [ b.short_batch(vpx=False) for b in pqc_batches ]
+    labels = [b.short_batch(vpx=False) for b in pqc_batches]
 
     for i, key in enumerate(keys):
         ax = plt.subplot(gs[i])
@@ -126,7 +126,7 @@ def plot_boxplot(pqc_batches, filename, keys=None):
         plt.grid(axis='y', linestyle=':')
         ax.set_ylabel(pqc_batches[0].dataseries[key].unit)
 
-        data = [ b.dataseries[key].get_stats().values for b in pqc_batches ]
+        data = [b.dataseries[key].get_stats().values for b in pqc_batches]
 
         ax.boxplot(data, labels=labels)
         if (i < (len(keys) - 2)):
@@ -145,27 +145,27 @@ def plot_vdp_boxplot(pqc_batches, filename):
     fig = plt.figure(figsize=(8, 6))
 
     gs = gridspec.GridSpec(3, 1)
-    labels = [ b.short_batch() for b in pqc_batches ]
+    labels = [b.short_batch() for b in pqc_batches]
 
     ax = plt.subplot(gs[0])
     plt.grid(axis='y', linestyle=':')
     plt.title(pqc_batches[0].vdp_poly_tot().label, fontsize=15)
     ax.set_ylabel(pqc_batches[0].vdp_poly_tot().unit)
-    data = [ b.vdp_poly_tot().get_stats().values for b in pqc_batches ]
+    data = [b.vdp_poly_tot().get_stats().values for b in pqc_batches]
     ax.boxplot(data, labels=labels)
 
     ax = plt.subplot(gs[1])
     plt.grid(axis='y', linestyle=':')
     plt.title(pqc_batches[0].vdp_n_tot().label, fontsize=15)
     ax.set_ylabel(pqc_batches[0].vdp_n_tot().unit)
-    data = [ b.vdp_n_tot().get_stats().values for b in pqc_batches ]
+    data = [b.vdp_n_tot().get_stats().values for b in pqc_batches]
     ax.boxplot(data, labels=labels)
 
     ax = plt.subplot(gs[2])
     plt.grid(axis='y', linestyle=':')
     plt.title(pqc_batches[0].vdp_pstop_tot().label, fontsize=15)
     ax.set_ylabel(pqc_batches[0].vdp_pstop_tot().unit)
-    data = [ b.vdp_pstop_tot().get_stats().values for b in pqc_batches ]
+    data = [b.vdp_pstop_tot().get_stats().values for b in pqc_batches]
     ax.boxplot(data, labels=labels)
 
     fig.tight_layout(h_pad=1.0)
@@ -231,7 +231,7 @@ def load_batch(path, outdir=None, lazy=False, create_plots=False,
 
             if analysis_time > measure_time:
                 print("lazy mode: nothing to do")
-                exit(0) # TODO!
+                exit(0)  # TODO!
         except FileNotFoundError:
             print("lazy but first time")
 
@@ -243,7 +243,7 @@ def load_batch(path, outdir=None, lazy=False, create_plots=False,
 
     # Render histograms (optional)
     if create_histograms:
-        print(f"rendering histograms... ", end="", flush=True)
+        print("rendering histograms... ", end="", flush=True)
         pqc_results.create_histograms()
         print("done.")
 
@@ -254,15 +254,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('path')
     parser.add_argument('-m', dest='multibatch', action='store_true', help='multibatch mode, e. g. for time analysis (experimental)')
-    parser.add_argument('-o', dest='outdir', metavar='DIR', default=None, help='override output directory location')
-    parser.add_argument('-l', dest='lazy', action='store_true', default=None, help='lazy evaluation: skip if the measurement folder is older than analysis folder')
-    parser.add_argument('-H', dest='histograms', action='store_true', default=None, help='create histograms')
-    parser.add_argument('-P', dest='plots', action='store_true', default=None, help='create plots (for each single measurement used)')
-    parser.add_argument('-f', dest='force', action='store_true', default=None, help='force evaluating all directories (normally, only directories with at least one VdP measurement are evaluated to prevent blank lines if the is a wrong file or so)')
+    parser.add_argument('-o', dest='outdir', metavar='DIR', help='override output directory location')
+    parser.add_argument('-l', dest='lazy', action='store_true', help='lazy evaluation: skip if the measurement folder is older than analysis folder')
+    parser.add_argument('-H', dest='histograms', action='store_true', help='create histograms')
+    parser.add_argument('-P', dest='plots', action='store_true', help='create plots (for each single measurement used)')
+    parser.add_argument('-f', dest='force', action='store_true', help='force evaluating all directories (normally, only directories with at least one VdP measurement are evaluated to prevent blank lines if the is a wrong file or so)')
     parser.add_argument('-t', dest='templates', metavar='EXPR', action='append', default=[], help='select templates to render (eg. -t*.tex -t*.html -tall.txt)')
     parser.add_argument('-c', '--config', metavar='NAME', default='default', help='select custom configuration')
-
-    #parser.add_argument('-d', action='store_true', default=None, help='create plots with debugging infos inside (e.g. correlation coefficients)')
     args = parser.parse_args()
 
     outdir = args.outdir or args.path
@@ -277,7 +275,7 @@ def main():
     if args.multibatch:
         print("Multibatch mode - experimental!")
         dirs = glob.glob(os.path.join(args.path, "*"))
-        dirs = [t for t in dirs if "histograms" not in t and "VPX" in t ] # TODO!
+        dirs = [t for t in dirs if "histograms" not in t and "VPX" in t]  # TODO!
         dirs = [t for t in dirs if os.path.isdir(t)]
 
         pqc_batches = []
@@ -300,20 +298,19 @@ def main():
         plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "boxplot_b.png"), keys=['vdp_p_cross_bridge_f', 'vdp_p_cross_bridge_r', 't_line_p_cross_bridge', 'v_bd', 'i600', 'v_fd'])
         plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "boxplot_c.png"), keys=['rho', 'conc', 't_ox', 'n_ox', 'c_acc_m', 'i_surf'])
     else:
-        pqc_results = load_batch(args.path, outdir,
+        pqc_results = load_batch(
+            args.path,
+            outdir,
             lazy=args.lazy,
             create_plots=args.plots,
             create_histograms=args.histograms,
             force_eval=args.force,
             config=config
         )
-
-        # Render templates
         render_templates(pqc_results, args.templates)
-
 
     plt.show()
 
 
-if __name__ =="__main__":
+if __name__ == "__main__":
     main()

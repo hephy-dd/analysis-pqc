@@ -161,13 +161,13 @@ def analyse_cv_data(path, options=None):
 
     lbl = assign_label(path, test)
     if "Flute_1" in path:
-    	area = 1.56e-6  # m^2, quarter
-    	return -1, -1, -1   # this does not work anyway and creates a lot of plots
+        area = 1.56e-6  # m^2, quarter
+        return -1, -1, -1   # this does not work anyway and creates a lot of plots
     elif "Flute_3" in path:
     	area = 6.25e-6  # m^2, half (but without rounded edges)
     else:
-    	area = 1
-    	print("WARNING: clould not determine flute number - area dependent values will be wrong!")
+        area = 1
+        print("WARNING: clould not determine flute number - area dependent values will be wrong!")
 
     v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status = analyse_cv(v, c, area=area, cut_param= 0.008, carrier='holes')
 
@@ -193,7 +193,7 @@ def analyse_cv_data(path, options=None):
         options.savePlot("diodecv??", fig)
 
     if options.print:
-    	#print(f"{lbl}: CV: v_fd: {}")
+        # print(f"{lbl}: CV: v_fd: {}")
         print('%s: \tCV: v_fd: %.2e V\trho: %.2e Ohm\tconc: %.2e cm^-3' % (lbl, v_dep2, rho, conc*1e-6))
 
     return v_dep2, rho, conc
