@@ -22,7 +22,7 @@ import glob
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.stats import linregress
+
 from analysis_pqc import *
 from pqc_analysis_tools import *
 
@@ -406,6 +406,8 @@ def analyse_van_der_pauw_data(path, options=None, min_correlation=0.99):
        #print('%s: \tvdp: r_sheet: %.2e Ohm/sq, raw: %.2e Ohm, correlation: %.2e  %s' % (lbl, r_sheet, a, r_value, lbl_vdp))  # lbl_vdp
         print('%s: \tvdp: r_sheet: %.2e Ohm/sq, raw: %.2e Ohm, correlation: %.2e  %s' % (lbl, r_sheet, a, r_value, lbl_vdp))  # lbl_vdp
 
+    return r_sheet
+
 
 def analyse_linewidth_data(path, r_sheet=np.nan, options=None, min_correlation=0.9):
     test = 'linewidth'
@@ -444,29 +446,11 @@ def analyse_linewidth_data(path, r_sheet=np.nan, options=None, min_correlation=0
         plot_curve(ax, i*1e6, v*1e3, options.plotTitle("VdP ???"), 'Current / uA', 'Voltage / mV', '', resstr, 0.9, 0.3)
         options.savePlot("vdp___", fig)
 
+
     if options.print:
         print('%s: \tLinewidth: %.2e um\t%s' % (lbl, t_line, lbl_vdp))
 
     return t_line
-
-
-def analyse_cross_data(options=None):
-    test = 'bulk_cross'
-
-    v = read_json_file(path, test, 'voltage_vsrc')
-    i = read_json_file(path, test, 'current')
-
-    i_norm, i_unit = normalise_parameter(i, 'A')
-    v_norm, v_unit = normalise_parameter(v, 'V')
-
-    lbl = assign_label(path, test)
-
-    r_sheet, a, b, x_fit, spl_dev, status = analyse_cross(i,v)
-
-    if options.print:
-        print('%s: Bulk cross: r_sheet: %.2e Ohm/sq' % (lbl, r_sheet))
-
-    return r_sheet, lbl
 
 
 def analyse_cbkr_data(path, r_sheet=np.nan, options=None, min_correlation=0.95):
@@ -594,6 +578,7 @@ def analyse_meander_data(path, options=None, min_correlation=0.99):
         else:
             resstr = f"R: {r:8.2f} Ohm\n"
         resstr += "correlation:"+" {:5.3f}".format(r_value)
+
 
         fig, ax = plt.subplots(1,1)
         #fit_curve(ax, x_fit*1e6, fit*1e3, 0)
@@ -747,7 +732,7 @@ def analyse_file(path, test, show_plots=False):
         r = FUNCTIONS.get(test)(path, options=options)
     else:
         raise ValueError(f"no such test: '{test}'")
-    
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -772,8 +757,6 @@ def main():
     else:
         tests = [args.test]
 
-    j=-1
-    colors = ['c', 'b','g','r','m', 'y', 'black', 'limegreen', 'slategrey', 'darkblue', 'gold', 'brown', 'aqua', 'indigo', 'thistle', 'pink']
     for test in tests:
         print(test)
         filedir = find_all_files_from_path(args.path, None)

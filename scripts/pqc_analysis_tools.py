@@ -17,7 +17,6 @@ __all__ = [
     'find_all_files_from_path',
     'get_timestamp',
     'assign_label',
-    'find_json_parameter',
     'read_json_file',
     'units',
     'normalise_parameter',
@@ -183,10 +182,3 @@ def fit_curve(ax, x, y1, y2=None, color='r'):
       ax.plot(x, y2, '--'+color)
 
     return ax
-
-
-def plot_histogram(data, xlabel):
-    plt.hist(data)
-    plt.title("Histogram")
-    plt.xlabel(xlabel)
-

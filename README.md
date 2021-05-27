@@ -41,25 +41,10 @@ not sure if this works...
 pip install git+https://github.com/hephy-dd/analysis-pqc.git@0.1.1
 ```
 
-## Local usage and development
-
-Set `PYTHONPATH` environment variable to use the local package (if not using an virtual environment).
-
-```bash
-export PYTHONPATH=$PYTHONPATH:$(pwd)
-```
-
-**Note:** the package requires additional dependencies to be installed.
-
-```bash
-pip install -r requirements.txt
-```
-
 Run command `deactivate` to exit the virtual environment and
 `. env/bin/activate` to actiate it.
 
-Run `pip install .` again to apply local changes in the
-`analysis_pqc` pacakge.
+Run `pip install .` again to apply local changes in the `analysis_pqc` package.
 
 Full line analysis (for whole batch)
 
@@ -93,4 +78,10 @@ python scripts/pqc_analysis_json.py <path> <analysis>
 ### Convert text to JSON
 ```bash
 python scripts/txt2json.py <input.txt> -o <output.json>
+```
+
+**Note:** the package requires additional dependencies to be installed.
+
+```bash
+pip install -r scripts/requirements.txt
 ```

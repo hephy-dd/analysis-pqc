@@ -517,7 +517,7 @@ class PQC_resultset:
 
         # Append histogram to resultset
         self.histograms.append(Histogram(
-            filename,
+            os.path.relpath(filename, self.output_dir), # relative path for urls
             title=title,
             description=descNum
         ))
