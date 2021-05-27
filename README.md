@@ -41,9 +41,14 @@ pip install --upgrade pip
 pip install git+https://github.com/hephy-dd/analysis-pqc.git@0.2.0
 ```
 
-## Run scripts
+Run command `deactivate` to exit the virtual environment and
+`. env/bin/activate` to actiate it.
+
+Run `pip install .` again to apply local changes in the
+`analysis_pqc` pacakge.
 
 Full line analysis (for whole batch)
+
 ```bash
 python scripts/full_line.py [-h] [-o DIR] [-l] [-H] [-P] [-t EXPR] [-c NAME] path
 ```
@@ -65,18 +70,13 @@ Templates that contain ```stdout``` will be sent to the stdout stream automatica
 
 ## Old scripts:
 
-Analyze JSON
+### Analyze JSON
+
 ```bash
 python scripts/pqc_analysis_json.py <path> <analysis>
 ```
 
-Convert text to JSON
+### Convert text to JSON
 ```bash
 python scripts/txt2json.py <input.txt> -o <output.json>
-```
-
-**Note:** the above scripts require additional dependencies to be installed.
-
-```bash
-pip install -r scripts/requirements.txt
 ```

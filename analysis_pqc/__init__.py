@@ -181,6 +181,7 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
     a_rise = b_rise = a_const = b_const = np.nan
     v_rise = []
     v_const = []
+
     status = STATUS_NONE
     
     if savgol_windowsize is None:
@@ -511,9 +512,26 @@ def analyse_van_der_pauw(i, v, cut_param=1e-5, debug=False):
     a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
     r_sheet = np.pi / np.log(2) * a
     return r_sheet, a, b, x_fit, spl_dev, status, r_value
+  
+@params('r_sheet, a, b, x_fit, spl_dev, status')
+def analyse_cross(i, v, cut_param=1e-5, debug=False):
+    """
+    Cross: Extract sheet resistance.
 
+    Parameters:
+    i ... current
+    v ... voltage
+    cut_param ... used to cut on 1st derivative to id voltage regions
 
+    Returns:
+    r_sheet ... resistance per square
+    """
 
+    a, b, x_fit, spl_dev, status, r_value = line_regr_with_cuts(i, v, cut_param, debug)
+    r_sheet = np.pi / np.log(2) * a
+
+    return r_sheet, a, b, x_fit, spl_dev, status
+  
 
 @params('t_line, a, b, x_fit, spl_dev, r_value, status')
 def analyse_linewidth(i, v, r_sheet=np.nan, cut_param=1e-5, min_correlation=0.99, debug=False):
@@ -538,7 +556,6 @@ def analyse_linewidth(i, v, r_sheet=np.nan, cut_param=1e-5, min_correlation=0.99
     t_line = r_sheet * 128.5 * 1./a
 
     return t_line, a, b, x_fit, spl_dev, r_value, status
-
 
 
 @params('r_contact, a, b, x_fit, spl_dev, r_value, status')
