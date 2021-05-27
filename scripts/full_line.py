@@ -14,6 +14,7 @@ import yaml
 
 from pqc_resultset import PQC_resultset
 
+
 def render_templates(pqc_resultset, templates=None):
     # Create the jinja2 environment.
     # Notice the use of trim_blocks, which greatly helps control whitespace.
@@ -49,12 +50,13 @@ def render_templates(pqc_resultset, templates=None):
                 print("done.")
 
 
-def plot_timeline(pqc_batches, path, printBatchNumbers=True):
-    print(path)
+def plot_timeline(pqc_batches, filename, show_batch_numbers=True):
+    """Render timeline figure for batches."""
+    print(f"rendering timeline {filename} ...")
+
     matplotlib.rcParams.update({'font.size': 14})
 
     fig = plt.figure(figsize=(8, 6))
-
 
     gs = gridspec.GridSpec(3, 1)
 
@@ -76,14 +78,18 @@ def plot_timeline(pqc_batches, path, printBatchNumbers=True):
         sn = res.vdp_n_tot().get_stats()
         spstop = res.vdp_pstop_tot().get_stats()
         lbl = res.batch
-        if not printBatchNumbers:
+        if not show_batch_numbers:
             lbl = ''
+
+        if not res.timestamps:
+            print(f"plot_timeline: skipping empty dataseries {lbl}")
+            continue
 
         start = min(res.timestamps)
         stop = max(res.timestamps)
         cent = start + (stop - start) / 2
 
-        if not printBatchNumbers:
+        if not show_batch_numbers:
             start = cent - timedelta(days=1)
             stop = cent + timedelta(days=1)
 
@@ -91,45 +97,49 @@ def plot_timeline(pqc_batches, path, printBatchNumbers=True):
         res.statusbar(sn, ax1, single=False, start=start, stop=stop, label=lbl)
         res.statusbar(spstop, ax2, single=False, start=start, stop=stop, label=lbl)
 
-
     fig.autofmt_xdate()
-
     fig.tight_layout(h_pad=1.0)
-    if not os.path.exists(path):
-        os.makedirs(path)
-    fig.savefig(os.path.join(path, "Timeline.png"))
+    plot_save(fig, filename)
     plt.close()
 
 
-def plot_boxplot(pqc_batches, path, values=['vdp_poly_f', 'vdp_n_f', 'vdp_pstop_f', 'vdp_poly_r', 'vdp_n_r', 'vdp_pstop_r']):
-    print(path)
+def plot_boxplot(pqc_batches, filename, keys=None):
+    """Render boxplot figure for selected keys of dataseries."""
+    print(f"rendering boxplot {filename} ...")
+
+    if not pqc_batches:
+        return
+
+    if keys is None: # TODO
+        keys = ['vdp_poly_f', 'vdp_n_f', 'vdp_pstop_f', 'vdp_poly_r', 'vdp_n_r', 'vdp_pstop_r']
+
     matplotlib.rcParams.update({'font.size': 12})
 
     fig = plt.figure(figsize=(8, 6))
 
-    gs = gridspec.GridSpec(int(len(values) / 2), 2)
+    gs = gridspec.GridSpec(int(len(keys) / 2), 2)
     labels = [ b.short_batch(vpx=False) for b in pqc_batches ]
 
-    for i in range(0, len(values)):
+    for i, key in enumerate(keys):
         ax = plt.subplot(gs[i])
-        plt.title(pqc_batches[0].dataseries[values[i]].label, fontsize=13)
+        plt.title(pqc_batches[0].dataseries[key].label, fontsize=13)
         plt.grid(axis='y', linestyle=':')
-        ax.set_ylabel(pqc_batches[0].dataseries[values[i]].unit)
+        ax.set_ylabel(pqc_batches[0].dataseries[key].unit)
 
-        data = [ b.dataseries[values[i]].get_stats().values for b in pqc_batches ]
+        data = [ b.dataseries[key].get_stats().values for b in pqc_batches ]
 
         ax.boxplot(data, labels=labels)
-        if (i < (len(values)-2)):
+        if (i < (len(keys) - 2)):
             ax.set_xticklabels([])
 
     fig.tight_layout(h_pad=1.0)
-    if not os.path.exists(path):
-        os.makedirs(path)
-    fig.savefig(os.path.join(path, "Boxplot.png"))
+    plot_save(fig, filename)
     plt.close()
 
-def plot_vdp_boxplot(pqc_batches, path):
-    print(path)
+
+def plot_vdp_boxplot(pqc_batches, filename):
+    """Render VdP boxplot figure for dataseries."""
+    print(f"rendering boxplot {filename} ...")
     matplotlib.rcParams.update({'font.size': 14})
 
     fig = plt.figure(figsize=(8, 6))
@@ -159,17 +169,27 @@ def plot_vdp_boxplot(pqc_batches, path):
     ax.boxplot(data, labels=labels)
 
     fig.tight_layout(h_pad=1.0)
-    if not os.path.exists(path):
-        os.makedirs(path)
-    fig.savefig(os.path.join(path, "vdpBoxplot.png"))
+    plot_save(fig, filename)
     plt.close()
 
+
+def plot_save(fig, filename):
+    """Save plot to file, creates path if not exist."""
+    path = os.path.dirname(filename)
+    # Create path if not exists
+    if not os.path.exists(path):
+        os.makedirs(path)
+    fig.savefig(filename)
+
+
 def load_configuration(name):
+    """Load dataseries configuration from YAML file in directory `config`."""
     filename = os.path.join(os.path.dirname(__file__), 'config', f'{name}.yaml')
     if not os.path.isfile(filename):
         raise ValueError(f"No such configuration: {name}")
     with open(filename) as fp:
         return yaml.safe_load(fp)
+
 
 def apply_configuration(dataseries, config):
     if config is None:
@@ -192,8 +212,11 @@ def apply_configuration(dataseries, config):
                     value = types.get(name)(value)
                     setattr(series, name, value)
 
+
 def load_batch(path, outdir=None, lazy=False, create_plots=False,
                create_histograms=False, force_eval=False, config=None):
+    create_plots = create_plots and outdir
+    create_histograms = create_histograms and outdir
     batchname = os.path.basename(os.path.normpath(path))
     print(f"Batch: {batchname}")
     pqc_results = PQC_resultset(batchname)
@@ -212,7 +235,10 @@ def load_batch(path, outdir=None, lazy=False, create_plots=False,
         except FileNotFoundError:
             print("lazy but first time")
 
-    pqc_results.prepare_analysis_dir(outdir)
+    # TODO
+    # Prevent to create ouput directory if not given
+    if outdir:
+        pqc_results.prepare_analysis_dir(outdir)
     pqc_results.analyze(path, create_plots=create_plots, force_eval=force_eval)
 
     # Render histograms (optional)
@@ -239,7 +265,7 @@ def main():
     #parser.add_argument('-d', action='store_true', default=None, help='create plots with debugging infos inside (e.g. correlation coefficients)')
     args = parser.parse_args()
 
-    outdir = args.outdir or  args.path
+    outdir = args.outdir or args.path
 
     # Load configuration
     config = load_configuration(args.config)
@@ -258,7 +284,7 @@ def main():
         pqc_slices = []
 
         for diri in dirs:
-            print("Current dir: "+str(diri))
+            print(f"Current dir: {diri}")
             res = load_batch(diri, config=config)
             res.sort_by_time()
             pqc_batches.append(res)
@@ -266,13 +292,13 @@ def main():
         #    #res.create_histograms(args.path)
 
         print(f"loaded {len(pqc_batches)} batches")
-        plot_timeline(pqc_batches, os.path.join(args.path, 'histograms', 'batch'))
-        plot_timeline(pqc_slices, os.path.join(args.path, "histograms", "fine"), printBatchNumbers=False)
+        plot_timeline(pqc_batches, os.path.join(args.path, "histograms", "timeline_batch.png"))
+        plot_timeline(pqc_slices, os.path.join(args.path, "histograms", "timeline_fine.png"), show_batch_numbers=False)
 
-        plot_vdp_boxplot(pqc_batches, os.path.join(args.path, "histograms"))
-        plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "a"), values=['t_line_n', 'r_contact_n', 't_line_pstop2', 't_line_pstop4', 'r_contact_poly', 'v_th'])
-        plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "b"), values=['vdp_p_cross_bridge_f', 'vdp_p_cross_bridge_r', 't_line_p_cross_bridge', 'v_bd', 'i600', 'v_fd'])
-        plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "c"), values=['rho', 'conc', 't_ox', 'n_ox', 'c_acc_m', 'i_surf'])
+        plot_vdp_boxplot(pqc_batches, os.path.join(args.path, "histograms", "boxplot_vdp.png"))
+        plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "boxplot_a.png"), keys=['t_line_n', 'r_contact_n', 't_line_pstop2', 't_line_pstop4', 'r_contact_poly', 'v_th'])
+        plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "boxplot_b.png"), keys=['vdp_p_cross_bridge_f', 'vdp_p_cross_bridge_r', 't_line_p_cross_bridge', 'v_bd', 'i600', 'v_fd'])
+        plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "boxplot_c.png"), keys=['rho', 'conc', 't_ox', 'n_ox', 'c_acc_m', 'i_surf'])
     else:
         pqc_results = load_batch(args.path, outdir,
             lazy=args.lazy,
