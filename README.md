@@ -24,7 +24,7 @@ python setup.py install
 Run full-line scripts
 
 ```bash
-python scripts/full_line.py /PQC/Tracker/Production/Data/VPX35953/ -HP -t*.html -o ../test-pqc
+python scripts/full_line.py /PQC/Tracker/Production/Data/VPX35953/ -P -t*.html -o ../test-pqc
 ```
 
 Use flag `-t` to select templates to render output files by specifying a `glob`
@@ -34,11 +34,25 @@ report, `-t*.tex -t*.html` for all LaTeX and HTML reports, or `-t*` for all.
 
 ## Install using pip
 
-Install using pip (>= 19.0) in a virtual environment.
+Install using pip in a virtual environment.
 
 ```bash
-pip install --upgrade pip
-pip install git+https://github.com/hephy-dd/analysis-pqc.git@0.2.0
+not sure if this works...
+pip install git+https://github.com/hephy-dd/analysis-pqc.git@0.1.1
+```
+
+## Local usage and development
+
+Set `PYTHONPATH` environment variable to use the local package (if not using an virtual environment).
+
+```bash
+export PYTHONPATH=$PYTHONPATH:$(pwd)
+```
+
+**Note:** the package requires additional dependencies to be installed.
+
+```bash
+pip install -r requirements.txt
 ```
 
 Run command `deactivate` to exit the virtual environment and
