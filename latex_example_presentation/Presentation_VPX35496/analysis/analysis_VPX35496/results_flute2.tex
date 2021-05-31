@@ -1,0 +1,77 @@
+
+
+
+
+
+
+
+    
+
+
+
+\def\nanval{\cellcolor[HTML]{aa0000}}
+\def\highval{\cellcolor[HTML]{ff9900}}
+\def\lowval{\cellcolor[HTML]{ffff00}}
+\def\okval{\cellcolor[HTML]{ffffff}}
+\def\notmeasval{\cellcolor[HTML]{d4fcfc}}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+\begin{center}
+    \fontsize{4pt}{5pt}\selectfont
+    \setlength{\tabcolsep}{0.35em} % for the horizontal padding
+    \begin{tabular}{ |l|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}| }
+        \hline
+         & GCD & Poly-R & \multicolumn{3}{ c|}{Line thickness} & breakdown\\
+        \hline
+        \detokenize{  } & \detokenize{ i_surf } & \detokenize{ meand_poly } & \detokenize{ lw_n } & \detokenize{ lw_pstp4 } & \detokenize{ lw_pstp2 } & \detokenize{ v_bd } \\
+
+        \hline
+        \detokenize{  } & \detokenize{ pA } & \detokenize{ MOhm } & \detokenize{ um } & \detokenize{ um } & \detokenize{ um } & \detokenize{ V } \\
+
+        \hline
+        
+        \detokenize{ HPK_VPX35496_001_PSP_HM_EL } & \okval 13.38 & \notmeasval --- & \okval 35.0 & \okval 60.8 & \okval 37.2 & \okval 160.0 \\
+\detokenize{ HPK_VPX35496_001_PSP_HM_ER } & \okval 11.52 & \notmeasval --- & \okval 34.3 & \okval 58.6 & \okval 36.8 & \okval 166.0 \\
+\detokenize{ HPK_VPX35496_001_PSP_HM_WL } & \okval 10.43 & \notmeasval --- & \okval 35.0 & \okval 57.5 & \okval 36.5 & \okval 162.0 \\
+\detokenize{ HPK_VPX35496_001_PSP_HM_WR } & \nanval failed & \notmeasval --- & \okval 35.1 & \okval 61.6 & \okval 37.5 & \okval 158.0 \\
+\detokenize{ HPK_VPX35496_002_PSP_HM_EL } & \okval 14.28 & \notmeasval --- & \nanval failed & \nanval failed & \nanval failed & \nanval failed \\
+\detokenize{ HPK_VPX35496_002_PSP_HM_ER } & \okval 12.46 & \notmeasval --- & \okval 34.8 & \okval 59.0 & \okval 36.9 & \okval 160.0 \\
+\detokenize{ HPK_VPX35496_002_PSP_HM_WL } & \okval 12.92 & \notmeasval --- & \okval 34.9 & \okval 57.9 & \okval 36.6 & \okval 160.0 \\
+\detokenize{ HPK_VPX35496_002_PSP_HM_WR } & \okval 13.75 & \notmeasval --- & \okval 35.1 & \okval 61.2 & \okval 37.2 & \okval 161.0 \\
+\detokenize{ HPK_VPX35496_010_PSP_HM_EL } & \okval 14.34 & \notmeasval --- & \okval 34.9 & \okval 61.0 & \okval 37.1 & \okval 164.0 \\
+\detokenize{ HPK_VPX35496_010_PSP_HM_ER } & \okval 13.11 & \notmeasval --- & \okval 34.6 & \okval 58.8 & \okval 36.8 & \okval 160.0 \\
+\detokenize{ HPK_VPX35496_010_PSP_HM_WL } & \okval 12.55 & \notmeasval --- & \okval 35.0 & \okval 57.4 & \okval 36.4 & \okval 172.0 \\
+\detokenize{ HPK_VPX35496_010_PSP_HM_WR } & \okval 14.21 & \notmeasval --- & \okval 35.0 & \okval 61.0 & \okval 37.3 & \okval 162.0 \\
+\detokenize{ HPK_VPX35496_017_PSP_HM_EL } & \okval 14.23 & \notmeasval --- & \okval 34.8 & \okval 60.6 & \okval 37.0 & \okval 160.0 \\
+\detokenize{ HPK_VPX35496_017_PSP_HM_ER } & \okval 13.33 & \notmeasval --- & \okval 34.7 & \okval 58.8 & \okval 37.0 & \okval 161.0 \\
+\detokenize{ HPK_VPX35496_017_PSP_HM_WL } & \okval 13.02 & \notmeasval --- & \okval 34.9 & \okval 58.3 & \okval 36.6 & \okval 162.0 \\
+\detokenize{ HPK_VPX35496_017_PSP_HM_WR } & \okval 14.27 & \notmeasval --- & \okval 35.0 & \okval 61.1 & \okval 37.3 & \okval 164.0 \\
+\detokenize{ HPK_VPX35496_026_PSP_HM_EL } & \okval 14.41 & \notmeasval --- & \okval 35.0 & \okval 60.3 & \okval 36.9 & \okval 160.0 \\
+\detokenize{ HPK_VPX35496_026_PSP_HM_ER } & \okval 11.20 & \notmeasval --- & \okval 34.6 & \okval 58.0 & \okval 36.7 & \nanval failed \\
+\detokenize{ HPK_VPX35496_026_PSP_HM_WL } & \okval 11.23 & \notmeasval --- & \okval 34.8 & \okval 57.2 & \okval 36.8 & \okval 150.0 \\
+\detokenize{ HPK_VPX35496_026_PSP_HM_WR } & \okval 13.73 & \notmeasval --- & \okval 35.0 & \okval 60.2 & \okval 37.0 & \okval 159.0 \\
+\detokenize{ HPK_VPX35496_032_PSP_HM_EL } & \okval 14.30 & \notmeasval --- & \okval 34.7 & \okval 60.2 & \okval 36.9 & \okval 160.0 \\
+\detokenize{ HPK_VPX35496_032_PSP_HM_ER } & \okval 11.33 & \notmeasval --- & \okval 34.5 & \okval 57.7 & \okval 36.3 & \okval 150.0 \\
+\detokenize{ HPK_VPX35496_032_PSP_HM_WL } & \okval 11.60 & \notmeasval --- & \okval 34.7 & \okval 57.0 & \okval 36.0 & \okval 150.0 \\
+\detokenize{ HPK_VPX35496_032_PSP_HM_WR } & \okval 14.54 & \notmeasval --- & \okval 34.9 & \okval 60.6 & \okval 37.1 & \okval 160.0 \\
+\detokenize{ HPK_VPX35496_040_PSP_HM_EL } & \okval 15.62 & \notmeasval --- & \okval 34.8 & \okval 60.0 & \okval 37.0 & \okval 170.0 \\
+\detokenize{ HPK_VPX35496_040_PSP_HM_ER } & \okval 12.82 & \notmeasval --- & \okval 34.5 & \okval 58.3 & \okval 36.4 & \okval 170.0 \\
+\detokenize{ HPK_VPX35496_040_PSP_HM_WL } & \okval 12.49 & \notmeasval --- & \okval 35.0 & \okval 57.1 & \okval 36.5 & \okval 165.0 \\
+\detokenize{ HPK_VPX35496_040_PSP_HM_WR } & \okval 15.03 & \notmeasval --- & \okval 34.9 & \okval 62.2 & \okval 38.4 & \okval 155.0 \\
+\detokenize{ HPK_VPX35496_044_PSP_HM_EL } & \okval 15.65 & \notmeasval --- & \okval 34.7 & \okval 61.0 & \okval 37.1 & \okval 165.0 \\
+\detokenize{ HPK_VPX35496_044_PSP_HM_ER } & \okval 12.99 & \notmeasval --- & \okval 34.6 & \okval 58.7 & \okval 36.5 & \okval 165.0 \\
+\detokenize{ HPK_VPX35496_044_PSP_HM_WL } & \okval 12.83 & \notmeasval --- & \okval 34.8 & \okval 58.0 & \okval 36.7 & \okval 160.0 \\
+\detokenize{ HPK_VPX35496_044_PSP_HM_WR } & \okval 14.95 & \notmeasval --- & \okval 34.9 & \okval 60.9 & \okval 36.8 & \okval 155.0 \\
+        \hline
+        \detokenize{ Median } & \okval 13.33 & \okval 0.00 & \okval 34.9 & \okval 59.0 & \okval 36.9 & \okval 160.0 \\
+\detokenize{ Average } & \okval 13.31 & \okval 0.00 & \okval 34.8 & \okval 59.4 & \okval 36.9 & \okval 160.9 \\
+\detokenize{ Std dev. } & \okval 1.33 & \okval 0.00 & \okval  0.2 & \okval  1.5 & \okval  0.4 & \okval  5.3 \\
+\detokenize{ OK/Tot. } & \okval 31/32 & \okval 1/1 & \okval 31/32 & \okval 31/32 & \okval 31/32 & \okval 30/32 \\
+\detokenize{ OK (rel) } & \okval 0.97 & \okval 1.00 & \okval 0.97 & \okval 0.97 & \okval 0.97 & \okval 0.94 \\
+
+        \hline
+    \end{tabular}
+\end{center}

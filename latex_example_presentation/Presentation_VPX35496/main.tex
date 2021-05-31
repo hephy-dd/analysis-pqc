@@ -1,0 +1,250 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{relsize}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{etoolbox}
+\usepackage{amssymb}
+\usepackage{siunitx}
+\usepackage{verbatim} 
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{boldline} 
+
+\usepackage{colortbl}
+\usepackage{xcolor}
+
+\usepackage{tabularx}
+
+
+\newcommand{\todo}[1]{\textcolor{red}{TODO: #1}\PackageWarning{TODO:}{#1!}}
+
+
+\newcommand{\gc}{\cellcolor[HTML]{cccccc}}
+
+
+\usetheme{Madrid}
+
+%Information to be included in the title page:
+\title{PQC Status Vienna}
+\author{Maximilian Babeluk}
+\institute{}
+\date{April 20$^{th}$ 2021}
+
+\graphicspath{{plots/}{imgs/}}
+
+\makeatletter
+\newcommand\appendtographicspath[1]{%
+	\g@addto@macro\Ginput@path{#1}%
+}
+\makeatother
+
+
+
+\usepackage{tikz}
+\usetikzlibrary{fadings,shapes.arrows,shadows}
+\usepackage{varwidth}
+
+\usepackage{xparse}
+
+
+
+\usepackage{graphicx}
+\usetikzlibrary{calc}
+
+\definecolor{dgreen}{RGB}{0, 124, 0}
+\definecolor{dorange}{RGB}{200, 150, 0}
+
+\newcommand\myheading[1]{%
+	\par\bigskip
+	{\Large\bfseries#1}\par\smallskip}
+
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\begin{document}
+	
+	\frame{\titlepage}
+	
+	\setbeamertemplate{frametitle}[default][center]
+	
+	\addtobeamertemplate{frametitle}{}{%
+		\begin{tikzpicture}[remember picture,overlay]
+		\node[anchor=north east,yshift=4pt] at (current page.north east) {\includegraphics[height=0.9cm]{imgs/oeaw.jpg}};
+		
+		\node[anchor=north west,yshift=4pt] at (current page.north west) {\includegraphics[height=0.9cm]{imgs/cms.png}};
+		\node[anchor=north west,yshift=4pt, xshift=1cm] at (current page.north west) {\includegraphics[height=0.9cm]{imgs/hephyalt.png}};
+		
+	\end{tikzpicture}}
+
+	
+	
+	
+	\begin{frame}
+		\frametitle{PQC Status}
+		
+		\begin{itemize}
+			\item{New contacting procedure:}
+			\begin{itemize}
+				\item{Align XY position with camera}
+				\item{Use LCR-meter for touchdown}
+				\item{Rp in Cp/Rp equivalent circuit as contact-quality measure}
+				\item{Across all needles (all VdP on flute1 parallel)}
+			\end{itemize}
+			\item{Automatic re-measurement for suspicious results}
+
+		\end{itemize}
+	
+	
+		\begin{center}
+			\fontsize{7pt}{9pt}\selectfont
+			\begin{tabular}{ |l|l|l|l|L{2.5cm}|l|L{1.5cm}| }
+				\hline
+				 Batch & Type & Wafers & Tested & Status & Date & Link \\
+				 \hline
+				 VPX35953 & 2-S & 40 pcs & 6+3 & \ \color{dgreen} OK \color{dorange} (BD pending, p-stop inhom.) & April 13$^{th}$ 2021 & \fontsize{5pt}{6pt}\selectfont \href{https://indico.cern.ch/event/1028589/}{https://indico.cern.ch/event/1028589/} \\
+\hline
+				VPX35496 & PS-P & 44 pcs & 8+0 & \ \color{dgreen} OK \color{dorange} (low Bulk resistivity) & today & \fontsize{5pt}{6pt}\selectfont \href{https://indico.cern.ch/event/1028816/}{https://indico.cern.ch/event/1028816/} \\
+\hline
+				VPX35499 & PS-P & 47 pcs & & pending & & \\
+				 \hline
+			\end{tabular}
+		\end{center}
+	
+	\end{frame}
+	
+	
+	\def\batch{VPX35496}
+	
+	\begin{frame}
+		\frametitle{\batch: Flute 1}
+		\input{analysis/analysis_\batch/results_flute1.tex}
+	\end{frame}
+
+
+	\begin{frame}
+		\frametitle{\batch: Flute 1}
+		\input{analysis/analysis_\batch/results_flute1.tex}
+
+		\begin{tikzpicture}[remember picture,overlay]
+		
+			\draw[draw=gray, fill=white, anchor=south west,inner sep=0pt] ($(current page.south west)+(0.8cm,3cm)$) rectangle ++(6.5cm,2.75cm);
+			
+			\node[anchor=south west,inner sep=0pt] at ($(current page.south west)+(0.8cm,3.25cm)$) {
+				{\begin{varwidth}{\linewidth}		\begin{itemize}
+					\fontsize{8pt}{10pt}\selectfont
+					\item{Flatband voltage higher than 2-S/PS-S}
+					\item{FET $V_{th}$ lower than in 2-S/PS-S}
+					\item{Very good p-stop and FET $V_{th}$ homogenity}
+					\item{No polysilicon layer on PS-P}
+					\item{High capacitance on capacitor structure}
+					\end{itemize}\end{varwidth}}
+			};
+		
+		\end{tikzpicture}
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{\batch: Flute 2}
+		\input{analysis/analysis_\batch/results_flute2.tex}
+		
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{\batch: Flute 2}
+		\input{analysis/analysis_\batch/results_flute2.tex}
+		
+		\begin{tikzpicture}[remember picture,overlay]
+			\draw[draw=gray, fill=white, anchor=south west,inner sep=0pt] ($(current page.south west)+(0.2cm,3cm)$) rectangle ++(8cm,1.2cm);
+			
+			\node[anchor=south west,inner sep=0pt] at ($(current page.south west)+(0.2cm,3.2cm)$) {
+				{\begin{varwidth}{\linewidth}		\begin{itemize}
+					\fontsize{8pt}{10pt}\selectfont
+					\item Early dielectric breakdown, often the minimal 150V
+					\item Fits to high capacitance on flute 1: thin oxide is thinner 
+					\end{itemize}\end{varwidth}}
+			};
+		\end{tikzpicture}
+		
+	\end{frame}
+
+
+	
+	\begin{frame}
+		\frametitle{\batch: Flute 3}
+		\input{analysis/analysis_\batch/results_flute3.tex}
+		
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{\batch: Flute 3}
+		\input{analysis/analysis_\batch/results_flute3.tex}
+	
+		\begin{tikzpicture}[remember picture,overlay]
+			\draw[draw=gray, fill=white, anchor=south west,inner sep=0pt] ($(current page.south west)+(0.2cm,5.05cm)$) rectangle ++(6.2cm,3.5cm);
+			
+			\node[anchor=south west,inner sep=0pt] at ($(current page.south west)+(0.1cm,5.15cm)$) {
+				{\begin{varwidth}{\linewidth}		\begin{itemize}
+					\fontsize{8pt}{10pt}\selectfont
+					\item Bulk resistivity lower than 3.5 kOhm*cm
+					\item DiodeHalf does not work on PS-P, \newline stopped measuring it as agreed
+					\item Metal clover leaf investigations running:
+					\begin{itemize}
+						\fontsize{8pt}{10pt}\selectfont
+						\item 30 mA close to what \newline is possible for K2410
+						\item different maximum for current ramp
+						\item result depends on maximum current
+					\end{itemize}
+				\end{itemize}\end{varwidth}}};
+			
+			
+			\draw[draw=magenta, fill=magenta, anchor=south west,inner sep=0pt] ($(current page.south west)+(8.3cm,3.5cm)$) rectangle ++(0.5cm,3.5cm);
+
+			\draw[draw=cyan, fill=cyan, anchor=south west,inner sep=0pt] ($(current page.south west)+(8.3cm,2.75cm)$) rectangle ++(0.5cm,0.75cm);
+
+			\draw[draw=green, fill=green, anchor=south west,inner sep=0pt] ($(current page.south west)+(8.3cm,1.35cm)$) rectangle ++(0.5cm,1.4cm);
+			
+			
+			\node[align=center,font=\scriptsize,rotate=90] at ($(current page.south west)+(8.55cm,5.25cm)$) {30mA range (met. VdP)};
+			
+			\node[align=center,font=\scriptsize,rotate=70] at ($(current page.south west)+(8.55cm,3.125cm)$) {100mA};
+			
+			\node[align=center,font=\scriptsize,rotate=90] at ($(current page.south west)+(8.55cm,2.05cm)$) {200mA};
+			
+			\node[anchor=south west,inner sep=0pt] at ($(current page.south west)+(0.5cm,0.35cm)$) {
+				\includegraphics[width=6cm]{analysis/vdp_metal_fwd_HPK_VPX35496_032_PSP_HM_WR.png}
+			};
+			
+			
+			
+		\end{tikzpicture}
+	
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{\batch: Flute 4}
+		\input{analysis/analysis_\batch/results_flute4.tex}
+	\end{frame}
+
+
+	
+	\begin{frame}
+		\frametitle{\batch: Summary}
+		
+		\begin{itemize}
+			\item{ \color{dorange} Bulk resistivity low \color{dgreen}}
+			\item{Breakdown structure: early breakdown, but DC process anyway}
+			\item{\color{dgreen} p-stop/FET $V_{th}$ very homogeneous}
+			
+			\item{ \color{dgreen} Batch \batch \ can be accepted?}
+		
+		\end{itemize}
+	\end{frame}
+	
+	
+	
+	
+	
+\end{document}

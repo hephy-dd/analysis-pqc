@@ -1,0 +1,76 @@
+
+
+
+
+
+
+    
+
+
+
+\def\nanval{\cellcolor[HTML]{aa0000}}
+\def\highval{\cellcolor[HTML]{ff9900}}
+\def\lowval{\cellcolor[HTML]{ffff00}}
+\def\okval{\cellcolor[HTML]{ffffff}}
+\def\notmeasval{\cellcolor[HTML]{d4fcfc}}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+\begin{center}
+    \fontsize{4pt}{5pt}\selectfont
+    \setlength{\tabcolsep}{0.35em} % for the horizontal padding
+    \begin{tabular}{ |l|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}| }
+        \hline
+         & FET & \multicolumn{4}{ c|}{MOS Quarter} & \multicolumn{2}{ c|}{Polysilicon VdP} & \multicolumn{2}{ c|}{n+ VdP} & \multicolumn{2}{ c|}{p-stop VdP} & \multicolumn{2}{ c|}{Capacitor} \\
+        \hline
+        \detokenize{  } & \detokenize{ fet } & \detokenize{ v_fb } & \detokenize{ c_acc } & \detokenize{ t_ox } & \detokenize{ n_ox } & \detokenize{ vdpPoly } & \detokenize{ vdpPoly_r } & \detokenize{ vdpN } & \detokenize{ vdpN_r } & \detokenize{ vdpPstp } & \detokenize{ vdpPstp_r } & \detokenize{ cap_l } & \detokenize{ cap_r } \\
+
+        \hline
+        \detokenize{  } & \detokenize{ V } & \detokenize{ V } & \detokenize{ pF } & \detokenize{ nm } & \detokenize{ 1E10cm^-3 } & \detokenize{ kOhm/sq } & \detokenize{ kOhm/sq } & \detokenize{ Ohm/sq } & \detokenize{ Ohm/sq } & \detokenize{ kOhm/sq } & \detokenize{ kOhm/sq } & \detokenize{ pF } & \detokenize{ pF } \\
+
+        \hline
+        
+        \detokenize{ HPK_VPX35496_001_PSP_HM_EL } & \lowval 2.23 & \highval 5.21 & \okval 87.9 & \okval 653.3 & \highval 19.5 & \notmeasval --- & \notmeasval --- & \okval 35.3 & \okval 35.1 & \okval 18.6 & \okval 18.6 & \okval 3.46 & \okval 3.31 \\
+\detokenize{ HPK_VPX35496_001_PSP_HM_ER } & \lowval 2.57 & \highval 4.72 & \okval 86.6 & \okval 662.9 & \highval 17.6 & \notmeasval --- & \notmeasval --- & \okval 35.1 & \okval 35.3 & \okval 18.5 & \okval 18.5 & \okval 3.36 & \okval 3.22 \\
+\detokenize{ HPK_VPX35496_001_PSP_HM_WL } & \lowval 2.59 & \highval 4.71 & \okval 86.7 & \okval 662.2 & \highval 17.6 & \notmeasval --- & \notmeasval --- & \okval 35.5 & \okval 35.3 & \okval 18.5 & \okval 18.5 & \okval 3.39 & \okval 3.24 \\
+\detokenize{ HPK_VPX35496_001_PSP_HM_WR } & \lowval 2.19 & \highval 5.38 & \okval 87.4 & \okval 657.1 & \highval 19.9 & \notmeasval --- & \notmeasval --- & \okval 35.3 & \okval 35.4 & \okval 18.7 & \okval 18.7 & \okval 3.43 & \okval 3.29 \\
+\detokenize{ HPK_VPX35496_002_PSP_HM_EL } & \nanval failed & \highval 5.28 & \okval 87.7 & \okval 654.6 & \highval 19.7 & \notmeasval --- & \notmeasval --- & \nanval failed & \nanval failed & \nanval failed & \nanval failed & \okval 3.39 & \okval 3.27 \\
+\detokenize{ HPK_VPX35496_002_PSP_HM_ER } & \lowval 2.50 & \highval 4.80 & \okval 86.9 & \okval 660.6 & \highval 17.9 & \notmeasval --- & \notmeasval --- & \okval 35.2 & \okval 35.3 & \okval 18.6 & \okval 18.6 & \okval 3.33 & \okval 3.21 \\
+\detokenize{ HPK_VPX35496_002_PSP_HM_WL } & \lowval 2.64 & \highval 4.63 & \okval 86.7 & \okval 662.1 & \highval 17.3 & \notmeasval --- & \notmeasval --- & \okval 35.6 & \okval 35.3 & \okval 18.5 & \okval 18.5 & \okval 3.37 & \okval 3.25 \\
+\detokenize{ HPK_VPX35496_002_PSP_HM_WR } & \lowval 2.23 & \highval 5.28 & \okval 87.7 & \okval 655.0 & \highval 19.6 & \notmeasval --- & \notmeasval --- & \okval 35.3 & \okval 35.4 & \okval 18.7 & \okval 18.7 & \okval 3.42 & \okval 3.29 \\
+\detokenize{ HPK_VPX35496_010_PSP_HM_EL } & \lowval 2.25 & \highval 5.20 & \okval 88.1 & \okval 651.7 & \highval 19.5 & \notmeasval --- & \notmeasval --- & \okval 35.4 & \okval 35.3 & \okval 18.6 & \okval 18.6 & \okval 3.48 & \okval 3.34 \\
+\detokenize{ HPK_VPX35496_010_PSP_HM_ER } & \lowval 2.47 & \highval 4.88 & \okval 87.0 & \okval 660.6 & \highval 18.2 & \notmeasval --- & \notmeasval --- & \okval 35.3 & \okval 35.3 & \okval 18.7 & \okval 18.7 & \okval 3.38 & \okval 3.25 \\
+\detokenize{ HPK_VPX35496_010_PSP_HM_WL } & \lowval 2.60 & \highval 4.73 & \okval 86.7 & \okval 662.8 & \highval 17.6 & \notmeasval --- & \notmeasval --- & \okval 35.7 & \okval 35.4 & \okval 18.6 & \okval 18.6 & \okval 3.36 & \okval 3.22 \\
+\detokenize{ HPK_VPX35496_010_PSP_HM_WR } & \lowval 2.26 & \highval 5.30 & \okval 87.0 & \okval 660.1 & \highval 19.5 & \notmeasval --- & \notmeasval --- & \okval 35.4 & \okval 35.4 & \okval 18.7 & \okval 18.7 & \okval 3.41 & \okval 3.27 \\
+\detokenize{ HPK_VPX35496_017_PSP_HM_EL } & \lowval 2.28 & \highval 5.12 & \okval 87.8 & \okval 654.0 & \highval 19.2 & \notmeasval --- & \notmeasval --- & \okval 35.2 & \okval 35.3 & \okval 18.6 & \okval 18.6 & \okval 3.38 & \okval 3.26 \\
+\detokenize{ HPK_VPX35496_017_PSP_HM_ER } & \lowval 2.49 & \highval 4.86 & \okval 87.1 & \okval 659.1 & \highval 18.1 & \notmeasval --- & \notmeasval --- & \okval 35.2 & \okval 35.4 & \okval 18.7 & \okval 18.6 & \okval 3.32 & \okval 3.21 \\
+\detokenize{ HPK_VPX35496_017_PSP_HM_WL } & \lowval 2.41 & \highval 4.79 & \okval 86.6 & \okval 662.9 & \highval 17.8 & \notmeasval --- & \notmeasval --- & \okval 35.7 & \okval 35.4 & \okval 18.6 & \okval 18.7 & \okval 3.35 & \okval 3.23 \\
+\detokenize{ HPK_VPX35496_017_PSP_HM_WR } & \lowval 2.26 & \highval 5.25 & \okval 87.6 & \okval 655.9 & \highval 19.5 & \notmeasval --- & \notmeasval --- & \okval 35.4 & \okval 35.4 & \okval 18.8 & \okval 18.7 & \okval 3.40 & \okval 3.28 \\
+\detokenize{ HPK_VPX35496_026_PSP_HM_EL } & \lowval 2.38 & \highval 5.00 & \okval 88.2 & \okval 651.4 & \highval 18.8 & \notmeasval --- & \notmeasval --- & \okval 35.3 & \okval 35.1 & \okval 18.4 & \okval 18.5 & \okval 3.45 & \okval 3.30 \\
+\detokenize{ HPK_VPX35496_026_PSP_HM_ER } & \lowval 2.70 & \highval 4.37 & \okval 87.4 & \okval 657.1 & \highval 16.6 & \notmeasval --- & \notmeasval --- & \okval 35.0 & \okval 35.3 & \okval 18.5 & \okval 18.5 & \okval 3.37 & \okval 3.23 \\
+\detokenize{ HPK_VPX35496_026_PSP_HM_WL } & \lowval 2.78 & \highval 4.30 & \okval 87.1 & \okval 659.3 & \highval 16.3 & \notmeasval --- & \notmeasval --- & \okval 35.4 & \okval 35.2 & \okval 18.5 & \okval 18.5 & \okval 3.38 & \okval 3.24 \\
+\detokenize{ HPK_VPX35496_026_PSP_HM_WR } & \lowval 2.35 & \highval 5.11 & \okval 87.6 & \okval 655.4 & \highval 19.1 & \notmeasval --- & \notmeasval --- & \okval 35.3 & \okval 35.5 & \okval 18.5 & \okval 18.5 & \okval 3.42 & \okval 3.28 \\
+\detokenize{ HPK_VPX35496_032_PSP_HM_EL } & \lowval 2.38 & \highval 4.99 & \okval 88.0 & \okval 652.7 & \highval 18.7 & \notmeasval --- & \notmeasval --- & \okval 35.2 & \okval 35.2 & \okval 18.6 & \okval 18.7 & \okval 3.36 & \okval 3.24 \\
+\detokenize{ HPK_VPX35496_032_PSP_HM_ER } & \lowval 2.70 & \highval 4.34 & \okval 87.7 & \okval 655.0 & \highval 16.5 & \notmeasval --- & \notmeasval --- & \okval 35.1 & \okval 35.2 & \okval 18.6 & \okval 18.6 & \okval 3.33 & \okval 3.21 \\
+\detokenize{ HPK_VPX35496_032_PSP_HM_WL } & \lowval 2.75 & \highval 4.25 & \okval 88.0 & \okval 652.5 & \highval 16.3 & \notmeasval --- & \notmeasval --- & \okval 35.6 & \okval 35.2 & \okval 18.6 & \okval 18.6 & \okval 3.39 & \okval 3.26 \\
+\detokenize{ HPK_VPX35496_032_PSP_HM_WR } & \lowval 2.37 & \highval 5.02 & \okval 88.0 & \okval 652.7 & \highval 18.9 & \notmeasval --- & \notmeasval --- & \okval 35.3 & \okval 35.3 & \okval 18.7 & \okval 18.7 & \okval 3.41 & \okval 3.28 \\
+\detokenize{ HPK_VPX35496_040_PSP_HM_EL } & \lowval 2.31 & \highval 5.00 & \okval 88.4 & \okval 649.5 & \highval 18.9 & \notmeasval --- & \notmeasval --- & \okval 35.3 & \okval 35.2 & \okval 18.7 & \okval 18.8 & \okval 3.24 & \okval 3.11 \\
+\detokenize{ HPK_VPX35496_040_PSP_HM_ER } & \lowval 2.63 & \highval 4.47 & \okval 88.0 & \okval 653.0 & \highval 17.0 & \notmeasval --- & \notmeasval --- & \okval 35.1 & \okval 35.4 & \okval 18.7 & \okval 18.7 & \okval 3.16 & \okval 3.04 \\
+\detokenize{ HPK_VPX35496_040_PSP_HM_WL } & \lowval 2.68 & \highval 4.33 & \okval 88.1 & \okval 652.0 & \highval 16.6 & \notmeasval --- & \notmeasval --- & \okval 35.6 & \okval 35.2 & \okval 18.7 & \okval 18.7 & \okval 3.18 & \okval 3.06 \\
+\detokenize{ HPK_VPX35496_040_PSP_HM_WR } & \lowval 2.26 & \highval 5.09 & \okval 88.3 & \okval 650.8 & \highval 19.1 & \notmeasval --- & \notmeasval --- & \okval 35.4 & \okval 35.4 & \okval 18.8 & \okval 18.8 & \okval 3.22 & \okval 3.10 \\
+\detokenize{ HPK_VPX35496_044_PSP_HM_EL } & \lowval 2.27 & \highval 5.12 & \okval 87.8 & \okval 654.3 & \highval 19.1 & \notmeasval --- & \notmeasval --- & \okval 35.1 & \okval 35.2 & \okval 18.9 & \okval 18.8 & \okval 3.14 & \okval 3.03 \\
+\detokenize{ HPK_VPX35496_044_PSP_HM_ER } & \lowval 2.53 & \highval 4.60 & \okval 87.9 & \okval 653.4 & \highval 17.4 & \notmeasval --- & \notmeasval --- & \okval 35.1 & \okval 35.3 & \okval 18.9 & \okval 18.9 & \okval 3.12 & \okval 3.02 \\
+\detokenize{ HPK_VPX35496_044_PSP_HM_WL } & \lowval 2.63 & \highval 4.47 & \okval 88.5 & \okval 648.9 & \highval 17.1 & \notmeasval --- & \notmeasval --- & \okval 35.7 & \okval 35.4 & \okval 18.9 & \okval 18.9 & \okval 3.19 & \okval 3.09 \\
+\detokenize{ HPK_VPX35496_044_PSP_HM_WR } & \lowval 2.20 & \highval 5.16 & \okval 88.8 & \okval 646.8 & \highval 19.5 & \notmeasval --- & \notmeasval --- & \okval 35.5 & \okval 35.5 & \okval 18.9 & \okval 18.9 & \okval 3.23 & \okval 3.12 \\
+        \hline
+        \detokenize{ Median } & \okval  nan & \okval  nan & \okval 87.7 & \okval 654.8 & \okval  nan & \okval 0.00 & \okval 0.00 & \okval 35.3 & \okval 35.3 & \okval 18.6 & \okval 18.7 & \okval 3.37 & \okval 3.24 \\
+\detokenize{ Average } & \okval  nan & \okval  nan & \okval 87.6 & \okval 655.6 & \okval  nan & \okval 0.00 & \okval 0.00 & \okval 35.4 & \okval 35.3 & \okval 18.7 & \okval 18.7 & \okval 3.34 & \okval 3.21 \\
+\detokenize{ Std dev. } & \okval  nan & \okval  nan & \okval  0.6 & \okval  4.4 & \okval  nan & \okval 0.00 & \okval 0.00 & \okval  0.2 & \okval  0.1 & \okval  0.1 & \okval  0.1 & \okval 0.10 & \okval 0.09 \\
+\detokenize{ OK/Tot. } & \okval 0/32 & \okval 0/32 & \okval 32/32 & \okval 32/32 & \okval 0/32 & \okval 1/1 & \okval 1/1 & \okval 31/32 & \okval 31/32 & \okval 31/32 & \okval 31/32 & \okval 32/32 & \okval 32/32 \\
+\detokenize{ OK (rel) } & \okval 0.00 & \okval 0.00 & \okval 1.00 & \okval 1.00 & \okval 0.00 & \okval 1.00 & \okval 1.00 & \okval 0.97 & \okval 0.97 & \okval 0.97 & \okval 0.97 & \okval 1.00 & \okval 1.00 \\
+
+        \hline
+    \end{tabular}
+\end{center}

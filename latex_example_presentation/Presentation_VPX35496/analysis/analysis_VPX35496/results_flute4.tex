@@ -1,0 +1,75 @@
+
+
+
+
+
+    
+
+
+
+\def\nanval{\cellcolor[HTML]{aa0000}}
+\def\highval{\cellcolor[HTML]{ff9900}}
+\def\lowval{\cellcolor[HTML]{ffff00}}
+\def\okval{\cellcolor[HTML]{ffffff}}
+\def\notmeasval{\cellcolor[HTML]{d4fcfc}}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+\begin{center}
+    \fontsize{4pt}{5pt}\selectfont
+    \setlength{\tabcolsep}{0.35em} % for the horizontal padding
+    \begin{tabular}{ |l|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}|R{0.6cm}| }
+        \hline
+         & GCD05 & \multicolumn{2}{ c|}{CBKR} & \multicolumn{3}{ c|}{Contact chain}\\
+        \hline
+        \detokenize{  } & \detokenize{ i_surf05 } & \detokenize{ r_cont_poly } & \detokenize{ r_cont_n } & \detokenize{ cont_p } & \detokenize{ cont_poly } & \detokenize{ cont_n } \\
+
+        \hline
+        \detokenize{  } & \detokenize{ pA } & \detokenize{ kOhm } & \detokenize{ Ohm } & \detokenize{ kOhm } & \detokenize{ MOhm } & \detokenize{ kOhm } \\
+
+        \hline
+        
+        \detokenize{ HPK_VPX35496_001_PSP_HM_EL } & \okval 19.3 & \notmeasval --- & \okval 27.8 & \okval 71.5 & \notmeasval --- & \okval 96.8 \\
+\detokenize{ HPK_VPX35496_001_PSP_HM_ER } & \okval 16.0 & \notmeasval --- & \okval 28.2 & \okval 71.5 & \notmeasval --- & \okval 94.1 \\
+\detokenize{ HPK_VPX35496_001_PSP_HM_WL } & \okval 17.7 & \notmeasval --- & \okval 27.9 & \okval 69.3 & \notmeasval --- & \okval 90.7 \\
+\detokenize{ HPK_VPX35496_001_PSP_HM_WR } & \okval 19.4 & \notmeasval --- & \okval 28.0 & \okval 70.6 & \notmeasval --- & \okval 94.5 \\
+\detokenize{ HPK_VPX35496_002_PSP_HM_EL } & \okval 19.4 & \notmeasval --- & \nanval failed & \okval 71.5 & \notmeasval --- & \okval 92.2 \\
+\detokenize{ HPK_VPX35496_002_PSP_HM_ER } & \okval 16.6 & \notmeasval --- & \okval 28.1 & \okval 72.2 & \notmeasval --- & \okval 96.7 \\
+\detokenize{ HPK_VPX35496_002_PSP_HM_WL } & \okval 18.2 & \notmeasval --- & \okval 28.0 & \okval 70.1 & \notmeasval --- & \okval 89.3 \\
+\detokenize{ HPK_VPX35496_002_PSP_HM_WR } & \okval 20.7 & \notmeasval --- & \okval 28.1 & \okval 71.5 & \notmeasval --- & \okval 93.4 \\
+\detokenize{ HPK_VPX35496_010_PSP_HM_EL } & \okval 20.4 & \notmeasval --- & \okval 27.9 & \okval 71.3 & \notmeasval --- & \okval 90.8 \\
+\detokenize{ HPK_VPX35496_010_PSP_HM_ER } & \okval 18.0 & \notmeasval --- & \okval 28.2 & \okval 71.3 & \notmeasval --- & \okval 93.7 \\
+\detokenize{ HPK_VPX35496_010_PSP_HM_WL } & \okval 18.1 & \notmeasval --- & \okval 27.9 & \okval 69.6 & \notmeasval --- & \okval 87.6 \\
+\detokenize{ HPK_VPX35496_010_PSP_HM_WR } & \okval 20.3 & \notmeasval --- & \okval 28.6 & \okval 71.0 & \notmeasval --- & \okval 89.2 \\
+\detokenize{ HPK_VPX35496_017_PSP_HM_EL } & \okval 20.2 & \notmeasval --- & \okval 27.7 & \okval 71.9 & \notmeasval --- & \okval 88.6 \\
+\detokenize{ HPK_VPX35496_017_PSP_HM_ER } & \okval 18.4 & \notmeasval --- & \okval 28.0 & \okval 71.9 & \notmeasval --- & \okval 95.6 \\
+\detokenize{ HPK_VPX35496_017_PSP_HM_WL } & \okval 19.1 & \notmeasval --- & \okval 28.0 & \okval 70.1 & \notmeasval --- & \okval 88.1 \\
+\detokenize{ HPK_VPX35496_017_PSP_HM_WR } & \okval 20.5 & \notmeasval --- & \okval 28.4 & \okval 71.2 & \notmeasval --- & \okval 90.9 \\
+\detokenize{ HPK_VPX35496_026_PSP_HM_EL } & \okval 20.3 & \notmeasval --- & \okval 27.7 & \okval 73.4 & \notmeasval --- & \okval 83.0 \\
+\detokenize{ HPK_VPX35496_026_PSP_HM_ER } & \okval 15.8 & \notmeasval --- & \okval 27.8 & \okval 73.8 & \notmeasval --- & \okval 86.0 \\
+\detokenize{ HPK_VPX35496_026_PSP_HM_WL } & \okval 16.6 & \notmeasval --- & \okval 28.0 & \okval 71.3 & \notmeasval --- & \okval 80.1 \\
+\detokenize{ HPK_VPX35496_026_PSP_HM_WR } & \okval 20.7 & \notmeasval --- & \okval 28.2 & \okval 72.6 & \notmeasval --- & \okval 82.1 \\
+\detokenize{ HPK_VPX35496_032_PSP_HM_EL } & \okval 20.1 & \notmeasval --- & \okval 27.9 & \okval 72.5 & \notmeasval --- & \okval 89.7 \\
+\detokenize{ HPK_VPX35496_032_PSP_HM_ER } & \okval 15.7 & \notmeasval --- & \okval 27.8 & \okval 73.2 & \notmeasval --- & \okval 89.5 \\
+\detokenize{ HPK_VPX35496_032_PSP_HM_WL } & \okval 17.3 & \notmeasval --- & \okval 27.9 & \okval 71.4 & \notmeasval --- & \okval 85.8 \\
+\detokenize{ HPK_VPX35496_032_PSP_HM_WR } & \okval 21.0 & \notmeasval --- & \okval 28.5 & \okval 72.8 & \notmeasval --- & \okval 88.8 \\
+\detokenize{ HPK_VPX35496_040_PSP_HM_EL } & \okval 22.1 & \notmeasval --- & \okval 28.0 & \okval 72.5 & \notmeasval --- & \okval 90.4 \\
+\detokenize{ HPK_VPX35496_040_PSP_HM_ER } & \okval 17.7 & \notmeasval --- & \okval 28.4 & \okval 73.4 & \notmeasval --- & \okval 92.2 \\
+\detokenize{ HPK_VPX35496_040_PSP_HM_WL } & \okval 18.7 & \notmeasval --- & \okval 27.8 & \okval 71.5 & \notmeasval --- & \okval 86.4 \\
+\detokenize{ HPK_VPX35496_040_PSP_HM_WR } & \okval 22.2 & \notmeasval --- & \okval 28.3 & \okval 72.3 & \notmeasval --- & \okval 92.0 \\
+\detokenize{ HPK_VPX35496_044_PSP_HM_EL } & \okval 21.9 & \notmeasval --- & \okval 28.1 & \okval 73.0 & \notmeasval --- & \okval 84.6 \\
+\detokenize{ HPK_VPX35496_044_PSP_HM_ER } & \okval 17.9 & \notmeasval --- & \okval 28.4 & \okval 72.2 & \notmeasval --- & \okval 90.3 \\
+\detokenize{ HPK_VPX35496_044_PSP_HM_WL } & \okval 19.4 & \notmeasval --- & \okval 27.7 & \okval 70.9 & \notmeasval --- & \okval 82.2 \\
+\detokenize{ HPK_VPX35496_044_PSP_HM_WR } & \okval 22.4 & \notmeasval --- & \okval 28.2 & \okval 72.7 & \notmeasval --- & \okval 88.5 \\
+        \hline
+        \detokenize{ Median } & \okval 19.4 & \okval  0.0 & \okval 28.0 & \okval 71.5 & \okval  0.0 & \okval 89.6 \\
+\detokenize{ Average } & \okval 19.1 & \okval  0.0 & \okval 28.1 & \okval 71.7 & \okval  0.0 & \okval 89.5 \\
+\detokenize{ Std dev. } & \okval  1.9 & \okval  0.0 & \okval  0.2 & \okval  1.1 & \okval  0.0 & \okval  4.2 \\
+\detokenize{ OK/Tot. } & \okval 32/32 & \okval 1/1 & \okval 31/32 & \okval 32/32 & \okval 1/1 & \okval 32/32 \\
+\detokenize{ OK (rel) } & \okval 1.00 & \okval 1.00 & \okval 0.97 & \okval 1.00 & \okval 1.00 & \okval 1.00 \\
+
+        \hline
+    \end{tabular}
+\end{center}
