@@ -290,13 +290,13 @@ def main():
         #    #res.create_histograms(args.path)
 
         print(f"loaded {len(pqc_batches)} batches")
-        plot_timeline(pqc_batches, os.path.join(args.path, "histograms", "timeline_batch.png"))
-        plot_timeline(pqc_slices, os.path.join(args.path, "histograms", "timeline_fine.png"), show_batch_numbers=False)
+        plot_timeline(pqc_batches, os.path.join(outdir, "histograms", "timeline_batch.png"))
+        plot_timeline(pqc_slices, os.path.join(outdir, "histograms", "timeline_fine.png"), show_batch_numbers=False)
 
-        plot_vdp_boxplot(pqc_batches, os.path.join(args.path, "histograms", "boxplot_vdp.png"))
-        plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "boxplot_a.png"), keys=['t_line_n', 'r_contact_n', 't_line_pstop2', 't_line_pstop4', 'r_contact_poly', 'v_th'])
-        plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "boxplot_b.png"), keys=['vdp_p_cross_bridge_f', 'vdp_p_cross_bridge_r', 't_line_p_cross_bridge', 'v_bd', 'i600', 'v_fd'])
-        plot_boxplot(pqc_batches, os.path.join(args.path, "histograms", "boxplot_c.png"), keys=['rho', 'conc', 't_ox', 'n_ox', 'c_acc_m', 'i_surf'])
+        plot_vdp_boxplot(pqc_batches, os.path.join(outdir, "histograms", "boxplot_vdp.png"))
+        plot_boxplot(pqc_batches, os.path.join(outdir, "histograms", "boxplot_a.png"), keys=['t_line_n', 'r_contact_n', 't_line_pstop2', 't_line_pstop4', 'r_contact_poly', 'v_th'])
+        plot_boxplot(pqc_batches, os.path.join(outdir, "histograms", "boxplot_b.png"), keys=['vdp_p_cross_bridge_f', 'vdp_p_cross_bridge_r', 't_line_p_cross_bridge', 'v_bd', 'i600', 'v_fd'])
+        plot_boxplot(pqc_batches, os.path.join(outdir, "histograms", "boxplot_c.png"), keys=['rho', 'conc', 't_ox', 'n_ox', 'c_acc_m', 'i_surf'])
     else:
         pqc_results = load_batch(
             args.path,
