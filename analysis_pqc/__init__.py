@@ -14,7 +14,7 @@ import scipy.signal
 from collections import namedtuple
 import traceback
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 __all__ = [
     'STATUS_NONE',
