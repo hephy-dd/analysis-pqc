@@ -127,10 +127,10 @@ class PQC_resultset:
         return PQC_Values.merge([self.dataseries['vdp_poly_f'], self.dataseries['vdp_poly_r']], "vdp_poly_tot", "PolySi VdP both")
 
     def vdp_n_tot(self):
-        return PQC_Values.merge([self.dataseries['vdp_n_f'], self.dataseries['vdp_n_f']], "vdp_N_tot", "N+ VdP both")
+        return PQC_Values.merge([self.dataseries['vdp_n_f'], self.dataseries['vdp_n_r']], "vdp_N_tot", "N+ VdP both")
 
     def vdp_pstop_tot(self):
-        return PQC_Values.merge([self.dataseries['vdp_pstop_f'], self.dataseries['vdp_pstop_f']], "vdp_pstop_tot", "P-stop VdP both")
+        return PQC_Values.merge([self.dataseries['vdp_pstop_f'], self.dataseries['vdp_pstop_r']], "vdp_pstop_tot", "P-stop VdP both")
 
     def sort_by_time(self):
         # TODO remove placeholders
