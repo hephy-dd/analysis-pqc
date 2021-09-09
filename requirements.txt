@@ -1,2 +1,2 @@
-numpy==1.18.*
-scipy
+numpy==1.21.*
+scipy==1.7.*
