@@ -43,7 +43,7 @@ class PQC_resultset:
         self.plot_dir = None # TODO
         self.histogram_dir = None # TODO
         self.histograms = []
-        self.rawdata={}
+        self.rawdata=[]
 
         if dataseries is None:
             self.dataseries = {
@@ -201,10 +201,12 @@ class PQC_resultset:
 
         # =================================================== Flute 1 ===================================================
 
-        self.dataseries['v_th'].append(pqc.analyse_fet_data(
+        v_th, fet_rawdata=pqc.analyse_fet_data(
             pqc.find_most_recent_file(path, "fet", whitelist=[]),
             options=options
-        ))
+        )
+        self.dataseries['v_th'].append(v_th)
+        if fet_rawdata is not None: self.rawdata.append(fet_rawdata)
 
         _, v_fb2, t_ox, n_ox, c_acc_m = pqc.analyse_mos_data(
             pqc.find_most_recent_file(path, "mos", whitelist=[]),
@@ -293,7 +295,7 @@ class PQC_resultset:
             options=options.pushPrefix("IV_DiodeHalf")
         )
         self.dataseries['i600'].append(i600)
-        self.rawdata['iv'] = iv_rawdata
+        if iv_rawdata is not None: self.rawdata.append(iv_rawdata)
         
         v_fd, rho, conc = pqc.analyse_cv_data(
             pqc.find_most_recent_file(path, "cv", whitelist=["3"]),

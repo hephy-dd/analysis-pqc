@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from analysis_pqc import *
+from pqc_rawdata import PQC_RawData
 from pqc_analysis_tools import *
 
 __all__ = [
@@ -94,7 +95,7 @@ class AnalysisOptions:
 def analyse_iv_data(path, options=None):
     test = 'iv'
     if path is None:
-        return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED,
+        return NOT_MEASURED, NOT_MEASURED, None
 
     if options is None:
         options = AnalysisOptions()
@@ -107,11 +108,11 @@ def analyse_iv_data(path, options=None):
     humidity = series.get('humidity_box', np.array([]))
 
     meta = read_json_file(path).get('meta')
-    samplename=meta.get('sample_name')
+    sample_name=meta.get('sample_name')
     iv_rawdata=PQC_RawData(test,sample_name)
     
     if(len(v) == 0):
-        return np.nan, np.nan, np.nan
+        return np.nan, np.nan, np.nan, None
 
     x_loc = 0.5
     y_loc = 0.65
@@ -310,7 +311,7 @@ def analyse_fet_data(path, options=None):
     test = 'fet'
 
     if path is None:
-        return NOT_MEASURED
+        return NOT_MEASURED, NOT_MEASURED
 
     if options is None:
         options = AnalysisOptions()
@@ -321,10 +322,12 @@ def analyse_fet_data(path, options=None):
     i_src = series.get('current_vsrc', np.array([]))
     i_hvsrc = series.get('current_hvsrc', np.array([]))
 
-
+    meta = read_json_file(path).get('meta')
+    sample_name=meta.get('sample_name')
+    fet_rawdata=PQC_RawData(test,sample_name)
 
     if(len(v) < 3) or (len(i_em) < 3):
-        return np.nan
+        return np.nan, np.nan
 
     iz_em = i_em - i_em[0]
 
@@ -362,7 +365,7 @@ def analyse_fet_data(path, options=None):
     if options.print:
        print('%s: \tnFet: v_th: %.2e V' % (lbl, v_th))
 
-    return v_th
+    return v_th, fet_rawdata
 
 
 def analyse_van_der_pauw_data(path, options=None, min_correlation=0.99):
