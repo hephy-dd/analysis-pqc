@@ -3,6 +3,7 @@
 import glob
 import os
 import re
+import pdb
 
 import numpy as np
 
@@ -42,6 +43,7 @@ class PQC_resultset:
         self.plot_dir = None # TODO
         self.histogram_dir = None # TODO
         self.histograms = []
+        self.rawdata={}
 
         if dataseries is None:
             self.dataseries = {
@@ -286,12 +288,13 @@ class PQC_resultset:
         # =================================================== Flute 3 ===================================================
 
         # we want this for FLute_3 and not Flute_1
-        i600, _ = pqc.analyse_iv_data(
+        i600, _, iv_rawdata = pqc.analyse_iv_data(
             pqc.find_most_recent_file(path, "iv", whitelist=["3"]),
             options=options.pushPrefix("IV_DiodeHalf")
         )
         self.dataseries['i600'].append(i600)
-
+        self.rawdata['iv'] = iv_rawdata
+        
         v_fd, rho, conc = pqc.analyse_cv_data(
             pqc.find_most_recent_file(path, "cv", whitelist=["3"]),
             options=options.pushPrefix("CV_DiodeHalf")

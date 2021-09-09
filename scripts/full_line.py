@@ -13,11 +13,12 @@ from jinja2 import Environment, FileSystemLoader
 import yaml
 
 from pqc_resultset import PQC_resultset
-
+import pdb
 
 def render_templates(pqc_resultset, templates=None):
     # Create the jinja2 environment.
     # Notice the use of trim_blocks, which greatly helps control whitespace.
+    pdb.set_trace()
     template_dir = os.path.join(os.path.dirname(__file__), "templates")
 
     j2_env = Environment(loader=FileSystemLoader(template_dir), trim_blocks=True)
@@ -308,7 +309,7 @@ def main():
             config=config
         )
         render_templates(pqc_results, args.templates)
-
+    #pdb.set_trace()
     plt.show()
 
 

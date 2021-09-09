@@ -19,6 +19,7 @@ terminal.
 import argparse
 import os
 import glob
+import pdb
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -93,7 +94,7 @@ class AnalysisOptions:
 def analyse_iv_data(path, options=None):
     test = 'iv'
     if path is None:
-        return NOT_MEASURED, NOT_MEASURED
+        return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED,
 
     if options is None:
         options = AnalysisOptions()
@@ -105,8 +106,12 @@ def analyse_iv_data(path, options=None):
     temp = series.get('temperature_chuck', np.array([]))
     humidity = series.get('humidity_box', np.array([]))
 
+    meta = read_json_file(path).get('meta')
+    samplename=meta.get('sample_name')
+    iv_rawdata=PQC_RawData(test,sample_name)
+    
     if(len(v) == 0):
-        return np.nan, np.nan
+        return np.nan, np.nan, np.nan
 
     x_loc = 0.5
     y_loc = 0.65
@@ -130,7 +135,7 @@ def analyse_iv_data(path, options=None):
     if options.print:
         print('%s:  IV:\ti_600: %.3f uA\ti_800: %.3f uA' % (lbl, i_600*1e6, i_800*1e6))
 
-    return i_600, i_800
+    return i_600, i_800, iv_rawdata
 
 
 def analyse_cv_data(path, options=None):
