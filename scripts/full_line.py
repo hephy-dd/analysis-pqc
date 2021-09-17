@@ -18,7 +18,7 @@ import pdb
 def render_templates(pqc_resultset, templates=None):
     # Create the jinja2 environment.
     # Notice the use of trim_blocks, which greatly helps control whitespace.
-    pdb.set_trace()
+    
     template_dir = os.path.join(os.path.dirname(__file__), "templates")
 
     j2_env = Environment(loader=FileSystemLoader(template_dir), trim_blocks=True)
@@ -29,15 +29,16 @@ def render_templates(pqc_resultset, templates=None):
             # Ignore sub directories
             if os.path.isfile(filename):
                 filenames.add(filename)
-
+              
     for filename in filenames:
         filename = os.path.basename(filename)
         rendered_content = j2_env.get_template(filename).render(
             batch=pqc_resultset.batch,
             dataseries=pqc_resultset.dataseries,
-            histograms=pqc_resultset.histograms
+            histograms=pqc_resultset.histograms,
+            rawdata=pqc_resultset.rawdata
         )
-
+        
         # Handle special stdout templates
         if "stdout" in filename:
             print(rendered_content)

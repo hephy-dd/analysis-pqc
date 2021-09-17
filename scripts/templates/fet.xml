@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf8'?>
+<ROOT>
+	<HEADER>
+		<TEST>{{ rawdata.fet.test }}</TEST>
+		<SAMPLENAME>{{ rawdata.fet.sample_name }}</SAMPLENAME>
+	</HEADER>
+{#	{% for id in range(len) %}
+	<DATA>
+		<CURRENT>{{ i[id] }}</CURRENT>
+		<VOLTAGE>{{ v[id] }}</VOLTAGE>
+	</DATA>
+	{% endfor %}
+#}
+</ROOT>
