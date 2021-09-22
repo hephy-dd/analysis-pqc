@@ -29,9 +29,13 @@ def render_templates(pqc_resultset, templates=None):
             # Ignore sub directories
             if os.path.isfile(filename):
                 filenames.add(filename)
-              
+
     for filename in filenames:
         filename = os.path.basename(filename)
+        if True not in [(key in filename) for key in pqc_resultset.rawdata.keys()] and filename[-3:] == 'xml':
+            print('Skipping',filename)
+            continue #skip xml templates of tests which were not carried out
+    
         rendered_content = j2_env.get_template(filename).render(
             batch=pqc_resultset.batch,
             dataseries=pqc_resultset.dataseries,
@@ -50,7 +54,6 @@ def render_templates(pqc_resultset, templates=None):
                 print(f"rendering file {output_filename} ... ", end="", flush=True)
                 fh.write(rendered_content)
                 print("done.")
-
 
 def plot_timeline(pqc_batches, filename, show_batch_numbers=True):
     """Render timeline figure for batches."""
