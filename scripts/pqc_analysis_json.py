@@ -99,20 +99,16 @@ def analyse_iv_data(path, options=None):
 
     if options is None:
         options = AnalysisOptions()
-
+    
     series = read_json_file(path).get('series')
     v = abs(series.get('voltage', np.array([])))
     i_elm = -series.get('current_elm', np.array([]))
     i = abs(series.get('current_hvsrc', np.array([])))
     temp = series.get('temperature_chuck', np.array([]))
     humidity = series.get('humidity_box', np.array([]))
-
-    meta = read_json_file(path).get('meta')
-    sample_name=meta.get('sample_name')
-    iv_rawdata=PQC_RawData(test,sample_name)
     
     if(len(v) == 0):
-        return np.nan, np.nan, np.nan, None
+        return np.nan, np.nan, None
 
     x_loc = 0.5
     y_loc = 0.65
@@ -136,14 +132,24 @@ def analyse_iv_data(path, options=None):
     if options.print:
         print('%s:  IV:\ti_600: %.3f uA\ti_800: %.3f uA' % (lbl, i_600*1e6, i_800*1e6))
 
-    return i_600, i_800, iv_rawdata
+    meta = read_json_file(path).get('meta')
+    rawdata=PQC_RawData(path,test,meta,series)
+    rawdata.set_data({'len':len(v),
+                         'v':v,
+                         'i_elm':i_elm,
+                         'i':i,
+                         'temp':temp,
+                         'humidity':humidity,
+                         'i_600':i_600,
+                         'i_800':i_800})    
+    return i_600, i_800, rawdata
 
 
 def analyse_cv_data(path, options=None):
     test = 'cv'
 
     if path is None:
-        return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED
+        return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, None
 
     if options is None:
         options = AnalysisOptions()
@@ -158,7 +164,7 @@ def analyse_cv_data(path, options=None):
     humidity = series.get('humidity_box', np.array([]))
 
     if(len(v) == 0) or (len(c) == 0):
-        return np.nan, np.nan, np.nan
+        return np.nan, np.nan, np.nan, None
 
     x_loc = 0.3
     y_loc = 0.65
@@ -201,15 +207,16 @@ def analyse_cv_data(path, options=None):
     if options.print:
         # print(f"{lbl}: CV: v_fd: {}")
         print('%s: \tCV: v_fd: %.2e V\trho: %.2e Ohm\tconc: %.2e cm^-3' % (lbl, v_dep2, rho, conc*1e-6))
-
-    return v_dep2, rho, conc
+    meta = read_json_file(path).get('meta')
+    rawdata=PQC_RawData(path,test,meta,series)
+    return v_dep2, rho, conc, rawdata
 
 
 def analyse_mos_data(path, options=None):
     test = 'mos'
 
     if path is None:
-        return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, NOT_MEASURED
+        return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, None
 
     if options is None:
         options = AnalysisOptions()
@@ -224,7 +231,7 @@ def analyse_mos_data(path, options=None):
     humidity = series.get('humidity_box', np.array([]))
 
     if(len(v) == 0):
-        return np.nan, np.nan, np.nan, np.nan, np.nan
+        return np.nan, np.nan, np.nan, np.nan, np.nan, None
 
     #v_norm, v_unit = normalise_parameter(v, 'V')
     #c_norm, c_unit = normalise_parameter(c, 'F')
@@ -234,7 +241,7 @@ def analyse_mos_data(path, options=None):
         c_acc_m = np.mean(c_acc)
 
     except:
-        return np.nan, np.nan, np.nan, np.nan, np.nan
+        return np.nan, np.nan, np.nan, np.nan, np.nan, None
     annotate = 'V$_{{fb}}$: {} V (via intersection)\nV$_{{fb}}$: {} V (via inflection)\n\nt$_{{ox}}$: {} m\nn$_{{ox}}$: {} cm$^{{-2}}$'.format(round(v_fb2,2), round(v_fb1,2), round(t_ox, 2), round(n_ox, 2))
 
     x_loc = 0.15
@@ -256,15 +263,17 @@ def analyse_mos_data(path, options=None):
 
     if options.print:
         print('%s: \tMOS: v_fb2: %.2e V\tc_acc: %.2e F\tt_ox: %.3e um\tn_ox: %.2e cm^-2' % (lbl, v_fb2, c_acc_m, t_ox, n_ox))
-
-    return v_fb1, v_fb2, t_ox, n_ox, c_acc_m
+        
+    meta = read_json_file(path).get('meta')
+    rawdata=PQC_RawData(path,test,meta,series)
+    return v_fb1, v_fb2, t_ox, n_ox, c_acc_m, rawdata
 
 
 def analyse_gcd_data(path, options=None):
     test = 'gcd'
 
     if path is None:
-        return NOT_MEASURED, NOT_MEASURED
+        return NOT_MEASURED, NOT_MEASURED, None
 
     if options is None:
         options = AnalysisOptions()
@@ -276,7 +285,7 @@ def analyse_gcd_data(path, options=None):
     i_hvsrc = series.get('current_hvsrc', np.array([]))
 
     if(len(v) < 3) or (len(i_em) < 3):
-        return np.nan, np.nan
+        return np.nan, np.nan, None
 
 
     lbl = assign_label(path, test)
@@ -304,14 +313,16 @@ def analyse_gcd_data(path, options=None):
     if options.print:
         print('%s: \tGCD: i_surf: %.2e A\t i_bulk: %.2e A' % (lbl, gcd_result.i_surf, gcd_result.i_bulk))
 
-    return gcd_result.i_surf, gcd_result.i_bulk
+    meta = read_json_file(path).get('meta')
+    rawdata=PQC_RawData(path,test,meta,series)
+    return gcd_result.i_surf, gcd_result.i_bulk, rawdata
 
 
 def analyse_fet_data(path, options=None):
     test = 'fet'
 
     if path is None:
-        return NOT_MEASURED, NOT_MEASURED
+        return NOT_MEASURED, None
 
     if options is None:
         options = AnalysisOptions()
@@ -322,12 +333,8 @@ def analyse_fet_data(path, options=None):
     i_src = series.get('current_vsrc', np.array([]))
     i_hvsrc = series.get('current_hvsrc', np.array([]))
 
-    meta = read_json_file(path).get('meta')
-    sample_name=meta.get('sample_name')
-    fet_rawdata=PQC_RawData(test,sample_name)
-
     if(len(v) < 3) or (len(i_em) < 3):
-        return np.nan, np.nan
+        return np.nan, None
 
     iz_em = i_em - i_em[0]
 
@@ -365,7 +372,9 @@ def analyse_fet_data(path, options=None):
     if options.print:
        print('%s: \tnFet: v_th: %.2e V' % (lbl, v_th))
 
-    return v_th, fet_rawdata
+    meta = read_json_file(path).get('meta')
+    rawdata=PQC_RawData(path,test,meta,series)
+    return v_th, rawdata
 
 
 def analyse_van_der_pauw_data(path, options=None, min_correlation=0.99):
@@ -373,7 +382,7 @@ def analyse_van_der_pauw_data(path, options=None, min_correlation=0.99):
 
     if path is None:
         options.popPrefix("-")
-        return NOT_MEASURED
+        return NOT_MEASURED, None
 
     if options is None:
         options = AnalysisOptions()
@@ -384,7 +393,7 @@ def analyse_van_der_pauw_data(path, options=None, min_correlation=0.99):
 
     if len(v) <= 3 or len(i) <= 3:
         options.popPrefix("-")
-        return np.nan
+        return np.nan, None
 
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
@@ -414,7 +423,9 @@ def analyse_van_der_pauw_data(path, options=None, min_correlation=0.99):
        #print('%s: \tvdp: r_sheet: %.2e Ohm/sq, raw: %.2e Ohm, correlation: %.2e  %s' % (lbl, r_sheet, a, r_value, lbl_vdp))  # lbl_vdp
         print('%s: \tvdp: r_sheet: %.2e Ohm/sq, raw: %.2e Ohm, correlation: %.2e  %s' % (lbl, r_sheet, a, r_value, lbl_vdp))  # lbl_vdp
 
-    return r_sheet
+    meta = read_json_file(path).get('meta')
+    rawdata=PQC_RawData(path,test,meta,series)
+    return r_sheet, rawdata
 
 
 def analyse_linewidth_data(path, r_sheet=np.nan, options=None, min_correlation=0.9):
@@ -422,7 +433,7 @@ def analyse_linewidth_data(path, r_sheet=np.nan, options=None, min_correlation=0
 
     if path is None:
         options.popPrefix("-")
-        return NOT_MEASURED
+        return NOT_MEASURED, None
 
     if options is None:
         options = AnalysisOptions()
@@ -433,7 +444,7 @@ def analyse_linewidth_data(path, r_sheet=np.nan, options=None, min_correlation=0
 
     if len(v) <= 3 or len(i) <= 3:
         options.popPrefix("-")
-        return np.nan
+        return np.nan, None
 
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
@@ -458,7 +469,9 @@ def analyse_linewidth_data(path, r_sheet=np.nan, options=None, min_correlation=0
     if options.print:
         print('%s: \tLinewidth: %.2e um\t%s' % (lbl, t_line, lbl_vdp))
 
-    return t_line
+    meta = read_json_file(path).get('meta')
+    rawdata=PQC_RawData(path,test,meta,series)
+    return t_line, rawdata
 
 
 def analyse_cbkr_data(path, r_sheet=np.nan, options=None, min_correlation=0.95):
@@ -466,7 +479,7 @@ def analyse_cbkr_data(path, r_sheet=np.nan, options=None, min_correlation=0.95):
 
     if path is None:
         options.popPrefix("-")
-        return NOT_MEASURED
+        return NOT_MEASURED, None
 
     if options is None:
         options = AnalysisOptions()
@@ -476,7 +489,7 @@ def analyse_cbkr_data(path, r_sheet=np.nan, options=None, min_correlation=0.95):
     i = series.get('current', np.array([]))
 
     if len(v) <= 3 or len(i) <= 3:
-        return np.nan
+        return np.nan, None
 
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
@@ -501,8 +514,9 @@ def analyse_cbkr_data(path, r_sheet=np.nan, options=None, min_correlation=0.95):
     if options.print:
        print('%s: \tcbkr: r_contact: %.2e Ohm\t%s' % (lbl, r_contact, lbl_vdp))
 
-
-    return r_contact
+    meta = read_json_file(path).get('meta')
+    rawdata=PQC_RawData(path,test,meta,series)
+    return r_contact, rawdata
 
 
 def analyse_contact_data(path, options=None, min_correlation=0.95):
@@ -510,7 +524,7 @@ def analyse_contact_data(path, options=None, min_correlation=0.95):
 
     if path is None:
         options.popPrefix("-")
-        return NOT_MEASURED
+        return NOT_MEASURED, None
 
     if options is None:
         options = AnalysisOptions()
@@ -521,7 +535,7 @@ def analyse_contact_data(path, options=None, min_correlation=0.95):
 
     if len(v) <= 3 or len(i) <= 3:
         options.popPrefix("-")
-        return np.nan
+        return np.nan, None
 
     lbl = assign_label(path, test)
     r_contact, a, b, x_fit, spl_dev, status, r_value = analyse_contact(i, v, cut_param=0.01, debug=0)
@@ -547,7 +561,9 @@ def analyse_contact_data(path, options=None, min_correlation=0.95):
     if options.print:
        print('%s: \tcontact: r_contact: %.2e Ohm, r_value: %.2f' % (lbl, r_contact, r_value))
 
-    return r_contact
+    meta = read_json_file(path).get('meta')
+    rawdata=PQC_RawData(path,test,meta,series)
+    return r_contact, rawdata
 
 
 def analyse_meander_data(path, options=None, min_correlation=0.99):
@@ -555,7 +571,7 @@ def analyse_meander_data(path, options=None, min_correlation=0.99):
 
     if path is None:
         options.popPrefix("-")
-        return NOT_MEASURED
+        return NOT_MEASURED, None
 
     if options is None:
         options = AnalysisOptions()
@@ -570,7 +586,7 @@ def analyse_meander_data(path, options=None, min_correlation=0.99):
 
     if len(v) <= 3 or len(i) <= 3:
         options.popPrefix("-")
-        return np.nan
+        return np.nan, None
 
     lbl = assign_label(path, test)
 
@@ -596,14 +612,16 @@ def analyse_meander_data(path, options=None, min_correlation=0.99):
     if options.print:
         print(f"{lbl}: \tMeander: r: {r:.2e} r_value: {r_value:.2f}")
 
-    return r
+    meta = read_json_file(path).get('meta')
+    rawdata=PQC_RawData(path,test,meta,series)
+    return r, rawdata
 
 
 def analyse_breakdown_data(path, options=None):
     test = 'breakdown'
 
     if path is None:
-        return NOT_MEASURED
+        return NOT_MEASURED, None
 
     if options is None:
         options = AnalysisOptions()
@@ -622,7 +640,7 @@ def analyse_breakdown_data(path, options=None):
     y_loc = 0.5
 
     if len(v) == 0:
-        return np.nan
+        return np.nan, None
 
     v_bd, status = analyse_breakdown(v, i, debug=0)
 
@@ -635,14 +653,16 @@ def analyse_breakdown_data(path, options=None):
     if options.print:
        print('%s: \tBreakdown: v_bd: %.2e V' % (lbl, v_bd))
 
-    return v_bd
+    meta = read_json_file(path).get('meta')
+    rawdata=PQC_RawData(path,test,meta,series)
+    return v_bd, rawdata
 
 
 def analyse_capacitor_data(path, options=None):
     test = 'capacitor'
 
     if path is None:
-        return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED
+        return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, None
 
     if options is None:
         options = AnalysisOptions()
@@ -657,7 +677,7 @@ def analyse_capacitor_data(path, options=None):
     y_loc = 0.5
 
     if len(v) <= 3 or len(c) <= 3:
-        return np.nan, np.nan, np.nan
+        return np.nan, np.nan, np.nan, None
 
     c_mean, c_median, d, status = analyse_capacitor(v, c, debug=0)
 
@@ -667,7 +687,9 @@ def analyse_capacitor_data(path, options=None):
     if options.print:
        print('%s: \tCapacitance: %.2e F, ' % (lbl, c_median))
 
-    return c_mean, c_median, d
+    meta = read_json_file(path).get('meta')
+    rawdata=PQC_RawData(path,test,meta,series)
+    return c_mean, c_median, d, rawdata
 
 
 def get_vdp_value(pathlist, printResults=False, plotResults=False):
