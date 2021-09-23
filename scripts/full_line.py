@@ -32,7 +32,8 @@ def render_templates(pqc_resultset, templates=None):
     pdb.set_trace()
     for filename in filenames:
         filename = os.path.basename(filename)
-        if True not in [(key in filename) for key in pqc_resultset.rawdata.keys()] and filename[-3:] == 'xml':
+        _, extension = os.path.splitext(filename)
+        if True not in [(key in filename) for key in pqc_resultset.rawdata.keys()] and extension  == '.xml':
             print('Skipping',filename)
             continue #skip xml templates of tests which were not carried out
     
