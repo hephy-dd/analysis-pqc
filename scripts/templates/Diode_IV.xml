@@ -1,0 +1,103 @@
+<?xml version='1.0'  encoding='UTF-8' standalone='yes'?>
+
+<ROOT>
+ <HEADER>
+  <TYPE>
+   <EXTENSION_TABLE_NAME>HALFMOON_METADATA</EXTENSION_TABLE_NAME>
+   <NAME>Tracker Halfmoon Metadata</NAME>
+  </TYPE>
+  <RUN mode="SEQUENCE_NUMBER" sequence="TRK_OT_RUN_SEQ">
+
+    <RUN_TYPE>PQC</RUN_TYPE>
+    <LOCATION>{{ rawdata.Diode_IV.location }}</LOCATION>
+    <INITIATED_BY_USER>{{ rawdata.Diode_IV.operator }}</INITIATED_BY_USER>
+    <RUN_BEGIN_TIMESTAMP>{{ rawdata.Diode_IV.RUN_BEGIN_TIMESTAMP }}</RUN_BEGIN_TIMESTAMP>
+
+    <COMMENT_DESCRIPTION></COMMENT_DESCRIPTION>
+
+  </RUN>
+ </HEADER>
+ <DATA_SET>
+
+  <COMMENT_DESCRIPTION>Metadata with flute and structure</COMMENT_DESCRIPTION>
+  <VERSION>v2</VERSION>
+  <PART>
+    <NAME_LABEL>{{ rawdata.Diode_IV.NAME_LABEL }}</NAME_LABEL>
+    <KIND_OF_PART>{{ rawdata.Diode_IV.KIND_OF_PART }}</KIND_OF_PART>
+  </PART>
+
+  <DATA>  
+
+    <KIND_OF_HM_SET_ID>{{ rawdata.Diode_IV.KIND_OF_HM_SET_ID }}</KIND_OF_HM_SET_ID>
+    <KIND_OF_HM_FLUTE_ID>{{ rawdata.Diode_IV.KIND_OF_HM_FLUTE_ID }}</KIND_OF_HM_FLUTE_ID>
+    <KIND_OF_HM_STRUCT_ID>{{ rawdata.Diode_IV.KIND_OF_HM_STRUCT_ID }}</KIND_OF_HM_STRUCT_ID>
+    <KIND_OF_HM_CONFIG_ID>{{ rawdata.Diode_IV.KIND_OF_HM_CONFIG_ID }}</KIND_OF_HM_CONFIG_ID>
+    
+
+    <PROCEDURE_TYPE>DiodeIV_GR</PROCEDURE_TYPE>
+    <FILE_NAME>Test_HPK_VPX36706_012_2-S_HM_EE_East_South_PQC3_DiodeIV_GR_DiodeHalf_IV_Run01_09_13_2021_04_48_35_PM.txt</FILE_NAME>
+    <EQUIPMENT>PQC_HM_POSITION 1</EQUIPMENT>
+    <WAITING_TIME_S>0.200</WAITING_TIME_S>
+    <TEMP_SET_DEGC>20.</TEMP_SET_DEGC>
+    <AV_TEMP_DEGC>20.019</AV_TEMP_DEGC>
+
+  </DATA>
+
+  <CHILD_DATA_SET>
+   <HEADER>
+    <TYPE>
+     <EXTENSION_TABLE_NAME>TEST_SENSOR_IV</EXTENSION_TABLE_NAME>
+     <NAME>Tracker Halfmoon IV Test</NAME>
+    </TYPE>
+   </HEADER>
+   <DATA_SET>
+    <COMMENT_DESCRIPTION></COMMENT_DESCRIPTION>
+    <VERSION>IV_measurement-004</VERSION>
+    <PART>
+      <NAME_LABEL>{{ rawdata.Diode_IV.NAME_LABEL }}</NAME_LABEL>
+      <KIND_OF_PART>{{ rawdata.Diode_IV.KIND_OF_PART }}</KIND_OF_PART>
+    </PART>
+{% for id in range(rawdata.Diode_IV.data.len) %}
+    <DATA>
+     <TIME>2021-09-13 16:39:55.025</TIME>
+     <VOLTS>-0.000</VOLTS>
+     <BIASCURRNT_NAMPR>-7.870</BIASCURRNT_NAMPR>
+     <CURRNT_NAMP>-1.246</CURRNT_NAMP>
+     <TEMP_DEGC>20.019</TEMP_DEGC>
+     <AIR_TEMP_DEGC>25.440</AIR_TEMP_DEGC>
+     <RH_PRCNT>18.990</RH_PRCNT>
+    </DATA>
+{% endfor %}
+    
+    <CHILD_DATA_SET>
+     <HEADER>
+      <TYPE>
+       <EXTENSION_TABLE_NAME>HALFMOON_IV_PAR</EXTENSION_TABLE_NAME>
+       <NAME>Tracker Halfmoon IV Parameters</NAME>
+      </TYPE>
+     </HEADER>
+     <DATA_SET>
+      <COMMENT_DESCRIPTION>Test</COMMENT_DESCRIPTION>
+      <VERSION>IV_measurement-004</VERSION>
+      <PART>
+        <NAME_LABEL>36706_012_2-S_HM_EE</NAME_LABEL>
+        <KIND_OF_PART>2S Halfmoon E</KIND_OF_PART>
+      </PART>
+      <DATA>  
+
+          <VBD_V>1000.000</VBD_V>
+          <I600_PAMPR>236.677</I600_PAMPR>
+          <VI600_NAMPRMM3>0.131</VI600_NAMPRMM3>
+
+      </DATA>
+     </DATA_SET>
+    </CHILD_DATA_SET>
+   </DATA_SET>
+
+  </CHILD_DATA_SET>
+
+
+
+ </DATA_SET>
+
+</ROOT>
