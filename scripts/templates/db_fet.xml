@@ -2,7 +2,6 @@
 
 {% block structure_data %}
 
-  <DATA>  
    <KIND_OF_HM_SET_ID>Right</KIND_OF_HM_SET_ID>
    <KIND_OF_HM_FLUTE_ID>PQC1</KIND_OF_HM_FLUTE_ID>
    <KIND_OF_HM_STRUCT_ID>FET_PSS</KIND_OF_HM_STRUCT_ID>
@@ -10,32 +9,25 @@
    <PROCEDURE_TYPE>FET1</PROCEDURE_TYPE>
    <FILE_NAME>{{ filename }}</FILE_NAME>
    <EQUIPMENT>PQC_HM_POSITION 2</EQUIPMENT>
-   <WAITING_TIME_S>0.010</WAITING_TIME_S>
+   <WAITING_TIME_S>{{ waiting_time }}</WAITING_TIME_S>
    <TEMP_SET_DEGC>20.</TEMP_SET_DEGC>
    <AV_TEMP_DEGC>20.006</AV_TEMP_DEGC>
-  </DATA>
 
 {% endblock %}
 
 {% block measurement_data %}
-{% for data in measurement_data %}
 
-    <DATA>
      <TIME>{{ data.timestamp }}</TIME>
      <VOLTS>{{ data.voltage }}</VOLTS>
      <CURRNT_NAMP>{{ data.current }}</CURRNT_NAMP>
      <TEMP_DEGC>{{ data.chuck_temperature }}</TEMP_DEGC>
      <AIR_TEMP_DEGC>{{ data.box_temperature }}</AIR_TEMP_DEGC>
      <RH_PRCNT>{{ data.box_humidity }}</RH_PRCNT>
-    </DATA>
 
-{% endfor %}
 {% endblock %}
 
 {% block parameters_data %}
 
-      <DATA>  
-       <VTH_V>{{ parameters.vth_v }}</VTH_V>
-      </DATA>
+       <VTH_V>{{ vth_v }}</VTH_V>
 
 {% endblock %}

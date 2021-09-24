@@ -20,7 +20,9 @@
     <NAME_LABEL>{{ structure_name }}</NAME_LABEL>
     <KIND_OF_PART>{{ structure_part }}</KIND_OF_PART>
   </PART>
+  <DATA>
 {% block structure_data %}{% endblock %}
+  </DATA>
   <CHILD_DATA_SET>
    <HEADER>
     <TYPE>
@@ -35,7 +37,11 @@
       <NAME_LABEL>{{ structure_name }}</NAME_LABEL>
       <KIND_OF_PART>{{ structure_part }}</KIND_OF_PART>
     </PART>
+{% for data in measurement_data %}
+    <DATA>
 {% block measurement_data %}{% endblock %}
+    </DATA>
+{% endfor %}
     <CHILD_DATA_SET>
      <HEADER>
       <TYPE>
@@ -50,7 +56,9 @@
         <NAME_LABEL>{{ structure_name }}</NAME_LABEL>
         <KIND_OF_PART>{{ structure_part }}</KIND_OF_PART>
       </PART>
+      <DATA>
 {% block parameters_data %}{% endblock %}
+      </DATA>
      </DATA_SET>
     </CHILD_DATA_SET>
    </DATA_SET>
