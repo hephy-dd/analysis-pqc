@@ -29,7 +29,7 @@
      <RH_PRCNT>{{ data.box_humidity }}</RH_PRCNT>
     </DATA>
 
-{& endfor %}
+{% endfor %}
 {% endblock %}
 
 {% block parameters_data %}
