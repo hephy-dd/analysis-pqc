@@ -45,6 +45,7 @@ def render_templates(pqc_resultset: PQC_resultset, templates: Iterable) -> None:
     pdb.set_trace() # DEBUG
 
     for filename in filenames:
+
         basename = os.path.basename(filename)
         _, extension = os.path.splitext(basename)
 
