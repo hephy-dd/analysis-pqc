@@ -1,0 +1,33 @@
+{% extends 'include/db.xml' %}
+
+{% block structure_data %}
+
+   <KIND_OF_HM_SET_ID>Right</KIND_OF_HM_SET_ID>
+   <KIND_OF_HM_FLUTE_ID>PQC1</KIND_OF_HM_FLUTE_ID>
+   <KIND_OF_HM_STRUCT_ID>FET_PSS</KIND_OF_HM_STRUCT_ID>
+   <KIND_OF_HM_CONFIG_ID>Not Used</KIND_OF_HM_CONFIG_ID>
+   <PROCEDURE_TYPE>FET1</PROCEDURE_TYPE>
+   <FILE_NAME>{{ filename }}</FILE_NAME>
+   <EQUIPMENT>PQC_HM_POSITION 2</EQUIPMENT>
+   <WAITING_TIME_S>{{ waiting_time }}</WAITING_TIME_S>
+   <TEMP_SET_DEGC>20.</TEMP_SET_DEGC>
+   <AV_TEMP_DEGC>20.006</AV_TEMP_DEGC>
+
+{% endblock %}
+
+{% block measurement_data %}
+
+     <TIME>{{ data.timestamp }}</TIME>
+     <VOLTS>{{ data.voltage }}</VOLTS>
+     <CURRNT_NAMP>{{ data.current }}</CURRNT_NAMP>
+     <TEMP_DEGC>{{ data.chuck_temperature }}</TEMP_DEGC>
+     <AIR_TEMP_DEGC>{{ data.box_temperature }}</AIR_TEMP_DEGC>
+     <RH_PRCNT>{{ data.box_humidity }}</RH_PRCNT>
+
+{% endblock %}
+
+{% block parameters_data %}
+
+       <VTH_V>{{ vth_v }}</VTH_V>
+
+{% endblock %}

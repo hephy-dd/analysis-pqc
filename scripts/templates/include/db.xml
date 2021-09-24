@@ -1,0 +1,67 @@
+<?xml version='1.0'  encoding='UTF-8' standalone='yes'?>
+<ROOT>
+ <HEADER>
+  <TYPE>
+   <EXTENSION_TABLE_NAME>HALFMOON_METADATA</EXTENSION_TABLE_NAME>
+   <NAME>Tracker Halfmoon Metadata</NAME>
+  </TYPE>
+  <RUN mode="SEQUENCE_NUMBER" sequence="TRK_OT_RUN_SEQ">
+    <RUN_TYPE>PQC</RUN_TYPE>
+    <LOCATION>{{ location }}</LOCATION>
+    <INITIATED_BY_USER>{{ user }}</INITIATED_BY_USER>
+    <RUN_BEGIN_TIMESTAMP>{{ begin_timestamp }}</RUN_BEGIN_TIMESTAMP>
+    <COMMENT_DESCRIPTION>{{ comment }}</COMMENT_DESCRIPTION>
+  </RUN>
+ </HEADER>
+ <DATA_SET>
+  <COMMENT_DESCRIPTION>Metadata with flute and structure</COMMENT_DESCRIPTION>
+  <VERSION>v2</VERSION>
+  <PART>
+    <NAME_LABEL>{{ structure_name }}</NAME_LABEL>
+    <KIND_OF_PART>{{ structure_part }}</KIND_OF_PART>
+  </PART>
+  <DATA>
+{% block structure_data %}{% endblock %}
+  </DATA>
+  <CHILD_DATA_SET>
+   <HEADER>
+    <TYPE>
+     <EXTENSION_TABLE_NAME>TEST_SENSOR_{{ measurement_type }}</EXTENSION_TABLE_NAME>
+     <NAME>Tracker Halfmoon {{ measurement_type }} Test</NAME>
+    </TYPE>
+   </HEADER>
+   <DATA_SET>
+    <COMMENT_DESCRIPTION>Test</COMMENT_DESCRIPTION>
+    <VERSION>{{ measurement_type }}_measurement-004</VERSION>
+    <PART>
+      <NAME_LABEL>{{ structure_name }}</NAME_LABEL>
+      <KIND_OF_PART>{{ structure_part }}</KIND_OF_PART>
+    </PART>
+{% for data in measurement_data %}
+    <DATA>
+{% block measurement_data %}{% endblock %}
+    </DATA>
+{% endfor %}
+    <CHILD_DATA_SET>
+     <HEADER>
+      <TYPE>
+       <EXTENSION_TABLE_NAME>HALFMOON_{{ measurement_type }}_PAR</EXTENSION_TABLE_NAME>
+       <NAME>Tracker Halfmoon IV Parameters</NAME>
+      </TYPE>
+     </HEADER>
+     <DATA_SET>
+      <COMMENT_DESCRIPTION>Test</COMMENT_DESCRIPTION>
+      <VERSION>{{ measurement_type }}_measurement-004</VERSION>
+      <PART>
+        <NAME_LABEL>{{ structure_name }}</NAME_LABEL>
+        <KIND_OF_PART>{{ structure_part }}</KIND_OF_PART>
+      </PART>
+      <DATA>
+{% block parameters_data %}{% endblock %}
+      </DATA>
+     </DATA_SET>
+    </CHILD_DATA_SET>
+   </DATA_SET>
+  </CHILD_DATA_SET>
+ </DATA_SET>
+</ROOT>
