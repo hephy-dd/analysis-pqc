@@ -27,6 +27,7 @@ import numpy as np
 from analysis_pqc import *
 from pqc_rawdata import PQC_RawData
 from pqc_analysis_tools import *
+from itertools import repeat
 
 __all__ = [
     'AnalysisOptions',
@@ -101,10 +102,12 @@ def analyse_iv_data(path, options=None):
         options = AnalysisOptions()
     
     series = read_json_file(path).get('series')
+    timestamp = series.get('timestamp', np.array([]))
     v = abs(series.get('voltage', np.array([])))
     i_elm = -series.get('current_elm', np.array([]))
     i = abs(series.get('current_hvsrc', np.array([])))
     temp = series.get('temperature_chuck', np.array([]))
+    temp_box = series.get('temperature_box', np.array([]))
     humidity = series.get('humidity_box', np.array([]))
     
     if(len(v) == 0):
@@ -133,15 +136,21 @@ def analyse_iv_data(path, options=None):
         print('%s:  IV:\ti_600: %.3f uA\ti_800: %.3f uA' % (lbl, i_600*1e6, i_800*1e6))
 
     meta = read_json_file(path).get('meta')
+    start_timestamp=meta.get('start_timestamp').replace('T',' ')
     rawdata=PQC_RawData(path,test,meta,series)
-    rawdata.set_data({'len':len(v),
-                         'v':v,
-                         'i_elm':i_elm,
-                         'i':i,
-                         'temp':temp,
-                         'humidity':humidity,
-                         'i_600':i_600,
-                         'i_800':i_800})    
+    #convert relative timestamp to absolute timestamp
+    timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
+    rawdata.add_data({'len':len(v),
+                      'timestamp':timestamp,
+                      'timestamp_abs':timestamp_abs,
+                      'v':v,#Volt
+                      'i_elm':i_elm*1e9,#A to nA
+                      'i':i*1e9,#A to nA
+                      'temp':temp,#degC
+                      'temp_box':temp_box,#degC
+                      'humidity':humidity,#percent
+                      'i_600':i_600*1e12,#A to pA
+                      'i_800':i_800*1e12}) #A to pA
     return i_600, i_800, rawdata
 
 
@@ -702,7 +711,6 @@ def get_vdp_value(pathlist, printResults=False, plotResults=False):
         rs = analyse_van_der_pauw_data(f, min_correlation=.7)
 
     return rs
-
 
 def analyse_full_line_data(path):
     """

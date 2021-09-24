@@ -34,12 +34,10 @@
     <KIND_OF_HM_CONFIG_ID>{{ rawdata.Diode_IV.KIND_OF_HM_CONFIG_ID }}</KIND_OF_HM_CONFIG_ID>
     
 
-    <PROCEDURE_TYPE>DiodeIV_GR</PROCEDURE_TYPE>
-    <FILE_NAME>Test_HPK_VPX36706_012_2-S_HM_EE_East_South_PQC3_DiodeIV_GR_DiodeHalf_IV_Run01_09_13_2021_04_48_35_PM.txt</FILE_NAME>
-    <EQUIPMENT>PQC_HM_POSITION 1</EQUIPMENT>
-    <WAITING_TIME_S>0.200</WAITING_TIME_S>
-    <TEMP_SET_DEGC>20.</TEMP_SET_DEGC>
-    <AV_TEMP_DEGC>20.019</AV_TEMP_DEGC>
+    <PROCEDURE_TYPE>{{ rawdata.Diode_IV.measurement_name }}</PROCEDURE_TYPE>
+    <FILE_NAME>{{ rawdata.Diode_IV.FILE_NAME }}</FILE_NAME>
+    <EQUIPMENT>{{ rawdata.Diode_IV.contact_name }} {{ rawdata.Diode_IV.sample_position }}</EQUIPMENT>
+    <WAITING_TIME_S>{{ rawdata.Diode_IV.WAITING_TIME_S }}</WAITING_TIME_S>
 
   </DATA>
 
@@ -51,22 +49,24 @@
     </TYPE>
    </HEADER>
    <DATA_SET>
-    <COMMENT_DESCRIPTION></COMMENT_DESCRIPTION>
+    <COMMENT_DESCRIPTION>{{ rawdata.Diode_IV.sample_comment }}</COMMENT_DESCRIPTION>
     <VERSION>IV_measurement-004</VERSION>
     <PART>
       <NAME_LABEL>{{ rawdata.Diode_IV.NAME_LABEL }}</NAME_LABEL>
       <KIND_OF_PART>{{ rawdata.Diode_IV.KIND_OF_PART }}</KIND_OF_PART>
     </PART>
 {% for id in range(rawdata.Diode_IV.data.len) %}
+
     <DATA>
-     <TIME>2021-09-13 16:39:55.025</TIME>
-     <VOLTS>-0.000</VOLTS>
-     <BIASCURRNT_NAMPR>-7.870</BIASCURRNT_NAMPR>
-     <CURRNT_NAMP>-1.246</CURRNT_NAMP>
-     <TEMP_DEGC>20.019</TEMP_DEGC>
-     <AIR_TEMP_DEGC>25.440</AIR_TEMP_DEGC>
-     <RH_PRCNT>18.990</RH_PRCNT>
+     <TIME>{{ rawdata.Diode_IV.data.timestamp_abs[id] }}</TIME>
+     <VOLTS>{{ rawdata.Diode_IV.data.v[id] }}</VOLTS>
+     <BIASCURRNT_NAMPR>{{ rawdata.Diode_IV.data.i_elm[id] }}</BIASCURRNT_NAMPR>
+     <CURRNT_NAMP>{{ rawdata.Diode_IV.data.i[id] }}</CURRNT_NAMP>
+     <TEMP_DEGC>{{ rawdata.Diode_IV.data.temp[id] }}</TEMP_DEGC>
+     <AIR_TEMP_DEGC>{{ rawdata.Diode_IV.data.temp_box[id] }}</AIR_TEMP_DEGC>
+     <RH_PRCNT>{{ rawdata.Diode_IV.data.humidity[id] }}</RH_PRCNT>
     </DATA>
+    
 {% endfor %}
     
     <CHILD_DATA_SET>
@@ -80,14 +80,14 @@
       <COMMENT_DESCRIPTION>Test</COMMENT_DESCRIPTION>
       <VERSION>IV_measurement-004</VERSION>
       <PART>
-        <NAME_LABEL>36706_012_2-S_HM_EE</NAME_LABEL>
-        <KIND_OF_PART>2S Halfmoon E</KIND_OF_PART>
+        <NAME_LABEL>{{ rawdata.Diode_IV.NAME_LABEL }}</NAME_LABEL>
+        <KIND_OF_PART>{{ rawdata.Diode_IV.KIND_OF_PART }}</KIND_OF_PART>
       </PART>
       <DATA>  
 
-          <VBD_V>1000.000</VBD_V>
-          <I600_PAMPR>236.677</I600_PAMPR>
-          <VI600_NAMPRMM3>0.131</VI600_NAMPRMM3>
+          {# <VBD_V>1000.000</VBD_V> #}
+          <I600_PAMPR>{{ rawdata.Diode_IV.data.i_600 }}</I600_PAMPR>
+          {# <VI600_NAMPRMM3>0.131</VI600_NAMPRMM3> #}
 
       </DATA>
      </DATA_SET>

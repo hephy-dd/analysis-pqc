@@ -1,17 +1,28 @@
+import os
+
 class PQC_RawData:
     '''
     '''
 
     def __init__(self,path,test,meta,series):
+        self.data={}
+        
         self.path=path
         self.test=test
+
+        self.location='Hephy'
         
         self.sample_name=meta.get('sample_name')
-        self.location='Hephy'
-        self.operator=meta.get('operator')
-        self.start_timestamp=meta.get('start_timestamp')
+        self.sample_position=meta.get('sample_position')
+        self.sample_comment=meta.get('sample_comment')
         self.contact_name=meta.get('contact_name')
         self.measurement_name=meta.get('measurement_name')
+        self.start_timestamp=meta.get('start_timestamp')
+        self.operator=meta.get('operator')
+        self.waiting_time=meta.get('waiting_time')
+        
+        self.FILE_NAME=os.path.basename(self.path)
+        self.WAITING_TIME_S=self.waiting_time.split(' ')[0]
         self.RUN_BEGIN_TIMESTAMP=self.start_timestamp.replace('T',' ')
         man,batch,wafer,sensortype,hm,location=self.sample_name.split('_')
         self.NAME_LABEL=self.sample_name[7:]#removing 'HPK_VPX'
@@ -20,8 +31,8 @@ class PQC_RawData:
         
         self.KIND_OF_HM_FLUTE_ID,self.KIND_OF_HM_STRUCT_ID,self.KIND_OF_HM_CONFIG_ID=self.get_structure(self.contact_name,self.measurement_name)
         
-    def set_data(self,data_dict):
-        self.data=data_dict
+    def add_data(self,data_dict):
+        self.data={**self.data,**data_dict}
 
     def get_structure(self,contact_name,measurement_name):
         lookup={

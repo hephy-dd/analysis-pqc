@@ -10,10 +10,13 @@ import dateutil.parser as timestamp_parser
 import matplotlib.pyplot as plt
 import numpy as np
 
+from datetime import datetime,timedelta
+
 __all__ = [
     'find_most_recent_file',
     'find_all_files_from_path',
     'get_timestamp',
+    'rel_to_abs_timestamp',
     'assign_label',
     'read_json_file',
     'units',
@@ -116,6 +119,11 @@ def get_timestamp(filename):
         data = json.load(json_file)
         ret = timestamp_parser.parse(data['meta']['start_timestamp'])
     return ret
+
+def rel_to_abs_timestamp(start_time,incr_time):
+    dt_start_time=datetime.strptime(start_time,'%Y-%m-%d %H:%M:%S')
+    dt_new_time=dt_start_time+timedelta(seconds=incr_time)
+    return dt_new_time.strftime('%Y-%m-%d %H:%M:%S.%f')
 
 
 def units(data, unit):
