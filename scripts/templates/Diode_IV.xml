@@ -9,9 +9,9 @@
   <RUN mode="SEQUENCE_NUMBER" sequence="TRK_OT_RUN_SEQ">
 
     <RUN_TYPE>PQC</RUN_TYPE>
-    <LOCATION>{{ rawdata.Diode_IV.location }}</LOCATION>
-    <INITIATED_BY_USER>{{ rawdata.Diode_IV.operator }}</INITIATED_BY_USER>
-    <RUN_BEGIN_TIMESTAMP>{{ rawdata.Diode_IV.RUN_BEGIN_TIMESTAMP }}</RUN_BEGIN_TIMESTAMP>
+    <LOCATION>{{ rawdata.location }}</LOCATION>
+    <INITIATED_BY_USER>{{ rawdata.operator }}</INITIATED_BY_USER>
+    <RUN_BEGIN_TIMESTAMP>{{ rawdata.RUN_BEGIN_TIMESTAMP }}</RUN_BEGIN_TIMESTAMP>
 
     <COMMENT_DESCRIPTION></COMMENT_DESCRIPTION>
 
@@ -22,22 +22,22 @@
   <COMMENT_DESCRIPTION>Metadata with flute and structure</COMMENT_DESCRIPTION>
   <VERSION>v2</VERSION>
   <PART>
-    <NAME_LABEL>{{ rawdata.Diode_IV.NAME_LABEL }}</NAME_LABEL>
-    <KIND_OF_PART>{{ rawdata.Diode_IV.KIND_OF_PART }}</KIND_OF_PART>
+    <NAME_LABEL>{{ rawdata.NAME_LABEL }}</NAME_LABEL>
+    <KIND_OF_PART>{{ rawdata.KIND_OF_PART }}</KIND_OF_PART>
   </PART>
 
   <DATA>  
 
-    <KIND_OF_HM_SET_ID>{{ rawdata.Diode_IV.KIND_OF_HM_SET_ID }}</KIND_OF_HM_SET_ID>
-    <KIND_OF_HM_FLUTE_ID>{{ rawdata.Diode_IV.KIND_OF_HM_FLUTE_ID }}</KIND_OF_HM_FLUTE_ID>
-    <KIND_OF_HM_STRUCT_ID>{{ rawdata.Diode_IV.KIND_OF_HM_STRUCT_ID }}</KIND_OF_HM_STRUCT_ID>
-    <KIND_OF_HM_CONFIG_ID>{{ rawdata.Diode_IV.KIND_OF_HM_CONFIG_ID }}</KIND_OF_HM_CONFIG_ID>
+    <KIND_OF_HM_SET_ID>{{ rawdata.KIND_OF_HM_SET_ID }}</KIND_OF_HM_SET_ID>
+    <KIND_OF_HM_FLUTE_ID>{{ rawdata.KIND_OF_HM_FLUTE_ID }}</KIND_OF_HM_FLUTE_ID>
+    <KIND_OF_HM_STRUCT_ID>{{ rawdata.KIND_OF_HM_STRUCT_ID }}</KIND_OF_HM_STRUCT_ID>
+    <KIND_OF_HM_CONFIG_ID>{{ rawdata.KIND_OF_HM_CONFIG_ID }}</KIND_OF_HM_CONFIG_ID>
     
 
-    <PROCEDURE_TYPE>{{ rawdata.Diode_IV.measurement_name }}</PROCEDURE_TYPE>
-    <FILE_NAME>{{ rawdata.Diode_IV.FILE_NAME }}</FILE_NAME>
-    <EQUIPMENT>{{ rawdata.Diode_IV.contact_name }} {{ rawdata.Diode_IV.sample_position }}</EQUIPMENT>
-    <WAITING_TIME_S>{{ rawdata.Diode_IV.WAITING_TIME_S }}</WAITING_TIME_S>
+    <PROCEDURE_TYPE>{{ rawdata.measurement_name }}</PROCEDURE_TYPE>
+    <FILE_NAME>{{ rawdata.FILE_NAME }}</FILE_NAME>
+    <EQUIPMENT>{{ rawdata.contact_name }} {{ rawdata.sample_position }}</EQUIPMENT>
+    <WAITING_TIME_S>{{ rawdata.WAITING_TIME_S }}</WAITING_TIME_S>
 
   </DATA>
 
@@ -49,22 +49,22 @@
     </TYPE>
    </HEADER>
    <DATA_SET>
-    <COMMENT_DESCRIPTION>{{ rawdata.Diode_IV.sample_comment }}</COMMENT_DESCRIPTION>
+    <COMMENT_DESCRIPTION>{{ rawdata.sample_comment }}</COMMENT_DESCRIPTION>
     <VERSION>IV_measurement-004</VERSION>
     <PART>
-      <NAME_LABEL>{{ rawdata.Diode_IV.NAME_LABEL }}</NAME_LABEL>
-      <KIND_OF_PART>{{ rawdata.Diode_IV.KIND_OF_PART }}</KIND_OF_PART>
+      <NAME_LABEL>{{ rawdata.NAME_LABEL }}</NAME_LABEL>
+      <KIND_OF_PART>{{ rawdata.KIND_OF_PART }}</KIND_OF_PART>
     </PART>
-{% for id in range(rawdata.Diode_IV.data.len) %}
+{% for id in range(rawdata.data.len) %}
 
     <DATA>
-     <TIME>{{ rawdata.Diode_IV.data.timestamp_abs[id] }}</TIME>
-     <VOLTS>{{ rawdata.Diode_IV.data.v[id] }}</VOLTS>
-     <BIASCURRNT_NAMPR>{{ rawdata.Diode_IV.data.i_elm[id] }}</BIASCURRNT_NAMPR>
-     <CURRNT_NAMP>{{ rawdata.Diode_IV.data.i[id] }}</CURRNT_NAMP>
-     <TEMP_DEGC>{{ rawdata.Diode_IV.data.temp[id] }}</TEMP_DEGC>
-     <AIR_TEMP_DEGC>{{ rawdata.Diode_IV.data.temp_box[id] }}</AIR_TEMP_DEGC>
-     <RH_PRCNT>{{ rawdata.Diode_IV.data.humidity[id] }}</RH_PRCNT>
+     <TIME>{{ rawdata.data.timestamp_abs[id] }}</TIME>
+     <VOLTS>{{ rawdata.data.v[id] }}</VOLTS>
+     <BIASCURRNT_NAMPR>{{ rawdata.data.i_elm[id] }}</BIASCURRNT_NAMPR>
+     <CURRNT_NAMP>{{ rawdata.data.i[id] }}</CURRNT_NAMP>
+     <TEMP_DEGC>{{ rawdata.data.temp[id] }}</TEMP_DEGC>
+     <AIR_TEMP_DEGC>{{ rawdata.data.temp_box[id] }}</AIR_TEMP_DEGC>
+     <RH_PRCNT>{{ rawdata.data.humidity[id] }}</RH_PRCNT>
     </DATA>
     
 {% endfor %}
@@ -80,13 +80,13 @@
       <COMMENT_DESCRIPTION>Test</COMMENT_DESCRIPTION>
       <VERSION>IV_measurement-004</VERSION>
       <PART>
-        <NAME_LABEL>{{ rawdata.Diode_IV.NAME_LABEL }}</NAME_LABEL>
-        <KIND_OF_PART>{{ rawdata.Diode_IV.KIND_OF_PART }}</KIND_OF_PART>
+        <NAME_LABEL>{{ rawdata.NAME_LABEL }}</NAME_LABEL>
+        <KIND_OF_PART>{{ rawdata.KIND_OF_PART }}</KIND_OF_PART>
       </PART>
       <DATA>  
 
           {# <VBD_V>1000.000</VBD_V> #}
-          <I600_PAMPR>{{ rawdata.Diode_IV.data.i_600 }}</I600_PAMPR>
+          <I600_PAMPR>{{ rawdata.data.i_600 }}</I600_PAMPR>
           {# <VI600_NAMPRMM3>0.131</VI600_NAMPRMM3> #}
 
       </DATA>
