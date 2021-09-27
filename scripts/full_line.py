@@ -68,7 +68,9 @@ def render_templates(pqc_resultset: PQC_resultset, templates: Iterable) -> None:
             print(rendered_content)
         else:
             create_dir(pqc_resultset.output_dir)
-            output_filename = os.path.join(pqc_resultset.output_dir, basename)
+            if is_xml_template: output_filename = os.path.join(pqc_resultset.output_dir, pqc_resultset.rawdata[template_id].out_file_name)
+            else: output_filename = os.path.join(pqc_resultset.output_dir, basename)
+            
             with open(output_filename, "w") as fh:
                 print(f"rendering file {output_filename} ... ", end="", flush=True)
                 fh.write(rendered_content)
