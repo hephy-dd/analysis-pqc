@@ -47,7 +47,7 @@ def render_templates(pqc_resultset: PQC_resultset, templates: Iterable) -> None:
     for filename in filenames:
 
         basename = os.path.basename(filename)
-        _, extension = os.path.splitext(basename)
+        template_id, extension = os.path.splitext(basename)
 
         # Skip xml templates of tests which were not carried out
         is_xml_template = extension == '.xml'
@@ -55,12 +55,12 @@ def render_templates(pqc_resultset: PQC_resultset, templates: Iterable) -> None:
         if is_xml_template and not is_valid_template:
             print(f"skipping XML template: {filename}")
             continue
-
+        pdb.set_trace()
         rendered_content = j2_env.get_template(basename).render(
             batch=pqc_resultset.batch,
             dataseries=pqc_resultset.dataseries,
             histograms=pqc_resultset.histograms,
-            rawdata=pqc_resultset.rawdata
+            rawdata=pqc_resultset.rawdata[template_id]
         )
 
         # Handle special stdout templates
