@@ -22,6 +22,8 @@ class PQC_RawData:
         self.waiting_time=meta.get('waiting_time')
         
         self.FILE_NAME=os.path.basename(self.path)
+        self.out_file_name= os.path.splitext(self.FILE_NAME)[0]+'.xml'
+        
         self.WAITING_TIME_S=self.waiting_time.split(' ')[0]
         self.RUN_BEGIN_TIMESTAMP=self.start_timestamp.replace('T',' ')
         man,batch,wafer,sensortype,hm,location=self.sample_name.split('_')
