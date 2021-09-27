@@ -2,32 +2,29 @@
 
 {% block structure_data %}
 
-   <KIND_OF_HM_SET_ID>Right</KIND_OF_HM_SET_ID>
-   <KIND_OF_HM_FLUTE_ID>PQC1</KIND_OF_HM_FLUTE_ID>
-   <KIND_OF_HM_STRUCT_ID>FET_PSS</KIND_OF_HM_STRUCT_ID>
-   <KIND_OF_HM_CONFIG_ID>Not Used</KIND_OF_HM_CONFIG_ID>
-   <PROCEDURE_TYPE>FET1</PROCEDURE_TYPE>
-   <FILE_NAME>{{ rawdata.FILE_NAME }}</FILE_NAME>
-   <EQUIPMENT>PQC_HM_POSITION 2</EQUIPMENT>
-   <WAITING_TIME_S>{{ waiting_time }}</WAITING_TIME_S>
-   <TEMP_SET_DEGC>20.</TEMP_SET_DEGC>
-   <AV_TEMP_DEGC>20.006</AV_TEMP_DEGC>
+   <EQUIPMENT>{{ rawdata.contact_name }} {{ rawdata.sample_position }}</EQUIPMENT>
+   <WAITING_TIME_S>{{ rawdata.WAITING_TIME_S }}</WAITING_TIME_S>
+{# <TEMP_SET_DEGC>20.</TEMP_SET_DEGC>#}
+{# <AV_TEMP_DEGC>20.006</AV_TEMP_DEGC>#}
 
 {% endblock %}
 
 {% block measurement_data %}
-
-     <TIME>{{ data.timestamp }}</TIME>
-     <VOLTS>{{ data.voltage }}</VOLTS>
-     <CURRNT_NAMP>{{ data.current }}</CURRNT_NAMP>
-     <TEMP_DEGC>{{ data.chuck_temperature }}</TEMP_DEGC>
-     <AIR_TEMP_DEGC>{{ data.box_temperature }}</AIR_TEMP_DEGC>
-     <RH_PRCNT>{{ data.box_humidity }}</RH_PRCNT>
-
+{% for id in range(rawdata.data.len) %}
+    <DATA>
+     <TIME>{{ rawdata.data.timestamp_abs[id] }}</TIME>
+     <VOLTS>{{ rawdata.data.v[id] }}</VOLTS>
+     <CURRNT_NAMP>{{ rawdata.data.i_elm[id] }}</CURRNT_NAMP>
+     <TEMP_DEGC>{{ rawdata.data.temp[id] }}</TEMP_DEGC>
+     <AIR_TEMP_DEGC>{{ rawdata.data.temp_box[id] }}</AIR_TEMP_DEGC>
+     <RH_PRCNT>{{ rawdata.data.humidity[id] }}</RH_PRCNT>
+    </DATA>
+    
+{% endfor %}
 {% endblock %}
 
 {% block parameters_data %}
 
-       <VTH_V>{{ vth_v }}</VTH_V>
+       <VTH_V>{{ rawdata.data.v_th }}</VTH_V>
 
 {% endblock %}

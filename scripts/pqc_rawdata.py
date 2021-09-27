@@ -6,32 +6,37 @@ class PQC_RawData:
 
     def __init__(self,path,test,meta,series):
         self.data={}
-        
         self.path=path
-        self.test=test
-
-        self.location='Hephy'
-        
+        self.test=test        
         self.sample_name=meta.get('sample_name')
+        man,batch,wafer,sensortype,hm,location=self.sample_name.split('_')
         self.sample_position=meta.get('sample_position')
         self.sample_comment=meta.get('sample_comment')
         self.contact_name=meta.get('contact_name')
         self.measurement_name=meta.get('measurement_name')
+        self.measurement_type=meta.get('measurement_type')
+        is_IV='iv' in self.measurement_type
+        is_CV='cv' in self.measurement_type
+        self.IVCV='IV' if is_IV else 'CV' if is_CV else ''
         self.start_timestamp=meta.get('start_timestamp')
         self.operator=meta.get('operator')
         self.waiting_time=meta.get('waiting_time')
-        
-        self.FILE_NAME=os.path.basename(self.path)
-        self.out_file_name= os.path.splitext(self.FILE_NAME)[0]+'.xml'
-        
-        self.WAITING_TIME_S=self.waiting_time.split(' ')[0]
+        filename=os.path.basename(self.path)
+        self.out_file_name= os.path.splitext(filename)[0]+'.xml'
+
+        #self.LOCATION='Hephy'
+        self.INITIATED_BY_USER=self.operator
         self.RUN_BEGIN_TIMESTAMP=self.start_timestamp.replace('T',' ')
-        man,batch,wafer,sensortype,hm,location=self.sample_name.split('_')
+        self.COMMENT_DESCRIPTION=''
+        self.VERSION=''
+        self.FILE_NAME=filename
+        self.WAITING_TIME_S=self.waiting_time.split(' ')[0]
+        
         self.NAME_LABEL=self.sample_name[7:]#removing 'HPK_VPX'
         self.KIND_OF_PART='{} Halfmoon {}'.format(sensortype.replace('-',''),location[0])
         self.KIND_OF_HM_SET_ID={'L':'Left','R':'Right'}[location[1]]
-        
         self.KIND_OF_HM_FLUTE_ID,self.KIND_OF_HM_STRUCT_ID,self.KIND_OF_HM_CONFIG_ID=self.get_structure(self.contact_name,self.measurement_name)
+        self.PROCEDURE_TYPE=self.measurement_name
         
     def add_data(self,data_dict):
         self.data={**self.data,**data_dict}

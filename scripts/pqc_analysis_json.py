@@ -337,10 +337,14 @@ def analyse_fet_data(path, options=None):
         options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
+    timestamp = series.get('timestamp', np.array([]))
     v = series.get('voltage', np.array([]))
     i_em = series.get('current_elm', np.array([]))
     i_src = series.get('current_vsrc', np.array([]))
     i_hvsrc = series.get('current_hvsrc', np.array([]))
+    temp = series.get('temperature_chuck', np.array([]))
+    temp_box = series.get('temperature_box', np.array([]))
+    humidity = series.get('humidity_box', np.array([]))
 
     if(len(v) < 3) or (len(i_em) < 3):
         return np.nan, None
@@ -382,7 +386,19 @@ def analyse_fet_data(path, options=None):
        print('%s: \tnFet: v_th: %.2e V' % (lbl, v_th))
 
     meta = read_json_file(path).get('meta')
+    start_timestamp=meta.get('start_timestamp').replace('T',' ')
     rawdata=PQC_RawData(path,test,meta,series)
+    timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
+    rawdata.add_data({'len':len(v),
+                      'timestamp':timestamp,
+                      'timestamp_abs':timestamp_abs,
+                      'v':v,#Volt
+                      'i_elm':i_em*1e9,#A to nA
+                      'temp':temp,#degC
+                      'temp_box':temp_box,#degC
+                      'humidity':humidity,#percent
+                      'v_th':v_th#Volt
+                      })
     return v_th, rawdata
 
 

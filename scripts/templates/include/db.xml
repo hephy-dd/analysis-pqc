@@ -7,54 +7,59 @@
   </TYPE>
   <RUN mode="SEQUENCE_NUMBER" sequence="TRK_OT_RUN_SEQ">
     <RUN_TYPE>PQC</RUN_TYPE>
-    <LOCATION>{{ location }}</LOCATION>
-    <INITIATED_BY_USER>{{ user }}</INITIATED_BY_USER>
-    <RUN_BEGIN_TIMESTAMP>{{ begin_timestamp }}</RUN_BEGIN_TIMESTAMP>
-    <COMMENT_DESCRIPTION>{{ comment }}</COMMENT_DESCRIPTION>
+    <LOCATION>Hephy</LOCATION>
+{# or {{ rawdata.LOCATION }} #}
+    <INITIATED_BY_USER>{{ rawdata.INITIATED_BY_USER }}</INITIATED_BY_USER>
+    <RUN_BEGIN_TIMESTAMP>{{ rawdata.RUN_BEGIN_TIMESTAMP }}</RUN_BEGIN_TIMESTAMP>
+{#  <COMMENT_DESCRIPTION>{{ rawdata.COMMENT_DESCRIPTION }}</COMMENT_DESCRIPTION> #}
   </RUN>
  </HEADER>
  <DATA_SET>
   <COMMENT_DESCRIPTION>Metadata with flute and structure</COMMENT_DESCRIPTION>
-  <VERSION>v2</VERSION>
+{# <VERSION>v2</VERSION> #}
   <PART>
-    <NAME_LABEL>{{ structure_name }}</NAME_LABEL>
-    <KIND_OF_PART>{{ structure_part }}</KIND_OF_PART>
+    <NAME_LABEL>{{ rawdata.NAME_LABEL }}</NAME_LABEL>
+    <KIND_OF_PART>{{ rawdata.KIND_OF_PART }}</KIND_OF_PART>
   </PART>
   <DATA>
+   <KIND_OF_HM_SET_ID>{{ rawdata.KIND_OF_HM_SET_ID }}</KIND_OF_HM_SET_ID>
+   <KIND_OF_HM_FLUTE_ID>{{ rawdata.KIND_OF_HM_FLUTE_ID }}</KIND_OF_HM_FLUTE_ID>
+   <KIND_OF_HM_STRUCT_ID>{{ rawdata.KIND_OF_HM_STRUCT_ID }}</KIND_OF_HM_STRUCT_ID>
+   <KIND_OF_HM_CONFIG_ID>{{ rawdata.KIND_OF_HM_CONFIG_ID }}</KIND_OF_HM_CONFIG_ID>
+
+   <PROCEDURE_TYPE>{{ rawdata.PROCEDURE_TYPE }}</PROCEDURE_TYPE>
+   <FILE_NAME>{{ rawdata.FILE_NAME }}</FILE_NAME>
 {% block structure_data %}{% endblock %}
   </DATA>
   <CHILD_DATA_SET>
    <HEADER>
     <TYPE>
-     <EXTENSION_TABLE_NAME>TEST_SENSOR_{{ measurement_type }}</EXTENSION_TABLE_NAME>
-     <NAME>Tracker Halfmoon {{ measurement_type }} Test</NAME>
+     <EXTENSION_TABLE_NAME>TEST_SENSOR_{{ rawdata.IVCV }}</EXTENSION_TABLE_NAME>
+     <NAME>Tracker Halfmoon {{ rawdata.IVCV }} Test</NAME>
     </TYPE>
    </HEADER>
    <DATA_SET>
-    <COMMENT_DESCRIPTION>Test</COMMENT_DESCRIPTION>
-    <VERSION>{{ measurement_type }}_measurement-004</VERSION>
+    <COMMENT_DESCRIPTION>{{ rawdata.COMMENT_DESCRIPTION }}</COMMENT_DESCRIPTION>
+    <VERSION>{{ rawdata.VERSION }}</VERSION>
     <PART>
-      <NAME_LABEL>{{ structure_name }}</NAME_LABEL>
-      <KIND_OF_PART>{{ structure_part }}</KIND_OF_PART>
+      <NAME_LABEL>{{ rawdata.NAME_LABEL }}</NAME_LABEL>
+      <KIND_OF_PART>{{ rawdata.KIND_OF_PART }}</KIND_OF_PART>
     </PART>
-{% for data in measurement_data %}
-    <DATA>
+
 {% block measurement_data %}{% endblock %}
-    </DATA>
-{% endfor %}
     <CHILD_DATA_SET>
      <HEADER>
       <TYPE>
-       <EXTENSION_TABLE_NAME>HALFMOON_{{ measurement_type }}_PAR</EXTENSION_TABLE_NAME>
-       <NAME>Tracker Halfmoon IV Parameters</NAME>
+       <EXTENSION_TABLE_NAME>HALFMOON_{{ rawdata.IVCV }}_PAR</EXTENSION_TABLE_NAME>
+       <NAME>Tracker Halfmoon {{ rawdata.IVCV }} Parameters</NAME>
       </TYPE>
      </HEADER>
      <DATA_SET>
-      <COMMENT_DESCRIPTION>Test</COMMENT_DESCRIPTION>
-      <VERSION>{{ measurement_type }}_measurement-004</VERSION>
+      <COMMENT_DESCRIPTION>{{ rawdata.COMMENT_DESCRIPTION }}</COMMENT_DESCRIPTION>
+      <VERSION>{{ rawdata.VERSION }}</VERSION>
       <PART>
-        <NAME_LABEL>{{ structure_name }}</NAME_LABEL>
-        <KIND_OF_PART>{{ structure_part }}</KIND_OF_PART>
+        <NAME_LABEL>{{ rawdata.NAME_LABEL }}</NAME_LABEL>
+        <KIND_OF_PART>{{ rawdata.KIND_OF_PART }}</KIND_OF_PART>
       </PART>
       <DATA>
 {% block parameters_data %}{% endblock %}
