@@ -277,10 +277,14 @@ class PQC_resultset:
             pqc.find_most_recent_file(path, "gcd", whitelist=[]),
             options=options.pushPrefix("GCD")
         )  # only i_surf valid
-        if rawdata is not None: self.rawdata['']=rawdata
         self.dataseries['i_surf'].append(i_surf)
         # s0 = i_surf / q / ni[cm^-3] / Agate[cm^2]
-        self.dataseries['s0'].append(-i_surf / 1.602e-19 / 7.01e9 / 0.505e-2)
+        s0=-i_surf / 1.602e-19 / 7.01e9 / 0.505e-2
+        self.dataseries['s0'].append(s0)
+        if rawdata is not None:
+            rawdata.add_data({'s0':s0})
+            self.rawdata['GCD']=rawdata
+
 
         t_line_n, rawdata=pqc.analyse_linewidth_data(
             pqc.find_most_recent_file(path, "linewidth", whitelist=["n"]), r_sheet=self.dataseries['vdp_n_f'].values[-1],
