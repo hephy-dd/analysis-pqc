@@ -208,7 +208,7 @@ class PQC_resultset:
         self.dataseries['v_th'].append(v_th)
         if rawdata is not None: self.rawdata['FET']=rawdata
 
-        _, v_fb2, t_ox, n_ox, c_acc_m, mos_rawdata = pqc.analyse_mos_data(
+        _, v_fb2, t_ox, n_ox, c_acc_m, rawdata = pqc.analyse_mos_data(
             pqc.find_most_recent_file(path, "mos", whitelist=[]),
             options=options
         )

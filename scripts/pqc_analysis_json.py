@@ -164,12 +164,14 @@ def analyse_cv_data(path, options=None):
         options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
+    timestamp = series.get('timestamp', np.array([]))
     v = abs(series.get('voltage_hvsrc', np.array([])))
     i = series.get('current_hvsrc', np.array([]))
     c = series.get('capacitance', np.array([]))
     c2 = series.get('capacitance2', np.array([]))
     r = series.get('resistance', np.array([]))
     temp = series.get('temperature_chuck', np.array([]))
+    temp_box = series.get('temperature_box', np.array([]))
     humidity = series.get('humidity_box', np.array([]))
 
     if(len(v) == 0) or (len(c) == 0):
@@ -217,7 +219,23 @@ def analyse_cv_data(path, options=None):
         # print(f"{lbl}: CV: v_fd: {}")
         print('%s: \tCV: v_fd: %.2e V\trho: %.2e Ohm\tconc: %.2e cm^-3' % (lbl, v_dep2, rho, conc*1e-6))
     meta = read_json_file(path).get('meta')
+    start_timestamp=meta.get('start_timestamp').replace('T',' ')
     rawdata=PQC_RawData(path,test,meta,series)
+    #convert relative timestamp to absolute timestamp
+    timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
+    '''    
+    rawdata.add_data({'len':len(v),
+                      'timestamp':timestamp,
+                      'timestamp_abs':timestamp_abs,
+                      'v':v,#Volt
+                      'i_elm':i_elm*1e9,#A to nA
+                      'i':i*1e9,#A to nA
+                      'temp':temp,#degC
+                      'temp_box':temp_box,#degC
+                      'humidity':humidity,#percent
+                      'i_600':i_600*1e12,#A to pA
+                      'i_800':i_800*1e12}) #A to pA
+    '''
     return v_dep2, rho, conc, rawdata
 
 
@@ -231,12 +249,14 @@ def analyse_mos_data(path, options=None):
         options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
+    timestamp = series.get('timestamp', np.array([]))
     v = series.get('voltage_hvsrc', np.array([]))
     i = series.get('current_hvsrc', np.array([]))
     c = series.get('capacitance', np.array([]))
     c2 = series.get('capacitance2', np.array([]))
     r = series.get('resistance', np.array([]))
     temp = series.get('temperature_chuck', np.array([]))
+    temp_box = series.get('temperature_box', np.array([]))
     humidity = series.get('humidity_box', np.array([]))
 
     if(len(v) == 0):
@@ -274,7 +294,27 @@ def analyse_mos_data(path, options=None):
         print('%s: \tMOS: v_fb2: %.2e V\tc_acc: %.2e F\tt_ox: %.3e um\tn_ox: %.2e cm^-2' % (lbl, v_fb2, c_acc_m, t_ox, n_ox))
         
     meta = read_json_file(path).get('meta')
+    start_timestamp=meta.get('start_timestamp').replace('T',' ')
     rawdata=PQC_RawData(path,test,meta,series)
+    #convert relative timestamp to absolute timestamp
+    timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
+    rawdata.add_data({'len':len(v),
+                      'timestamp':timestamp,
+                      'timestamp_abs':timestamp_abs,
+                      'v':v,#Volt
+                      'i':i*1e9,#A to nA
+                      'c':c*1e12,#F to pF
+                      'r':r*1e-6,#Ohm to Mohm
+                      'temp':temp,#degC
+                      'temp_box':temp_box,#degC
+                      'humidity':humidity,#percent
+                      '_':v_fb1,
+                      'v_fb2':v_fb2,#V
+                      't_ox':t_ox*1e3,#um to nm
+                      'n_ox':n_ox*1e-10,#1e10cm^-2
+                      'c_acc_m':c_acc_m*1e12#F to pF
+                      })
+    
     return v_fb1, v_fb2, t_ox, n_ox, c_acc_m, rawdata
 
 
@@ -288,10 +328,14 @@ def analyse_gcd_data(path, options=None):
         options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
+    timestamp = series.get('timestamp', np.array([]))
     v = series.get('voltage', np.array([]))
     i_em = series.get('current_elm', np.array([]))
     i_src = series.get('current_vsrc', np.array([]))
     i_hvsrc = series.get('current_hvsrc', np.array([]))
+    temp = series.get('temperature_chuck', np.array([]))
+    temp_box = series.get('temperature_box', np.array([]))
+    humidity = series.get('humidity_box', np.array([]))
 
     if(len(v) < 3) or (len(i_em) < 3):
         return np.nan, np.nan, None
@@ -323,7 +367,23 @@ def analyse_gcd_data(path, options=None):
         print('%s: \tGCD: i_surf: %.2e A\t i_bulk: %.2e A' % (lbl, gcd_result.i_surf, gcd_result.i_bulk))
 
     meta = read_json_file(path).get('meta')
+    start_timestamp=meta.get('start_timestamp').replace('T',' ')
     rawdata=PQC_RawData(path,test,meta,series)
+    #convert relative timestamp to absolute timestamp
+    timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
+    '''    
+    rawdata.add_data({'len':len(v),
+                      'timestamp':timestamp,
+                      'timestamp_abs':timestamp_abs,
+                      'v':v,#Volt
+                      'i_elm':i_elm*1e9,#A to nA
+                      'i':i*1e9,#A to nA
+                      'temp':temp,#degC
+                      'temp_box':temp_box,#degC
+                      'humidity':humidity,#percent
+                      'i_600':i_600*1e12,#A to pA
+                      'i_800':i_800*1e12}) #A to pA
+    '''
     return gcd_result.i_surf, gcd_result.i_bulk, rawdata
 
 
@@ -413,8 +473,12 @@ def analyse_van_der_pauw_data(path, options=None, min_correlation=0.99):
         options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
+    timestamp = series.get('timestamp', np.array([]))
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
+    temp = series.get('temperature_chuck', np.array([]))
+    temp_box = series.get('temperature_box', np.array([]))
+    humidity = series.get('humidity_box', np.array([]))
 
     if len(v) <= 3 or len(i) <= 3:
         options.popPrefix("-")
@@ -449,7 +513,24 @@ def analyse_van_der_pauw_data(path, options=None, min_correlation=0.99):
         print('%s: \tvdp: r_sheet: %.2e Ohm/sq, raw: %.2e Ohm, correlation: %.2e  %s' % (lbl, r_sheet, a, r_value, lbl_vdp))  # lbl_vdp
 
     meta = read_json_file(path).get('meta')
+    start_timestamp=meta.get('start_timestamp').replace('T',' ')
     rawdata=PQC_RawData(path,test,meta,series)
+    #convert relative timestamp to absolute timestamp
+    timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
+    '''    
+    rawdata.add_data({'len':len(v),
+                      'timestamp':timestamp,
+                      'timestamp_abs':timestamp_abs,
+                      'v':v,#Volt
+                      'i_elm':i_elm*1e9,#A to nA
+                      'i':i*1e9,#A to nA
+                      'temp':temp,#degC
+                      'temp_box':temp_box,#degC
+                      'humidity':humidity,#percent
+                      'i_600':i_600*1e12,#A to pA
+                      'i_800':i_800*1e12}) #A to pA
+    '''
+
     return r_sheet, rawdata
 
 
@@ -464,8 +545,12 @@ def analyse_linewidth_data(path, r_sheet=np.nan, options=None, min_correlation=0
         options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
+    timestamp = series.get('timestamp', np.array([]))
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
+    temp = series.get('temperature_chuck', np.array([]))
+    temp_box = series.get('temperature_box', np.array([]))
+    humidity = series.get('humidity_box', np.array([]))
 
     if len(v) <= 3 or len(i) <= 3:
         options.popPrefix("-")
@@ -495,7 +580,24 @@ def analyse_linewidth_data(path, r_sheet=np.nan, options=None, min_correlation=0
         print('%s: \tLinewidth: %.2e um\t%s' % (lbl, t_line, lbl_vdp))
 
     meta = read_json_file(path).get('meta')
+    start_timestamp=meta.get('start_timestamp').replace('T',' ')
     rawdata=PQC_RawData(path,test,meta,series)
+    #convert relative timestamp to absolute timestamp
+    timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
+    '''    
+    rawdata.add_data({'len':len(v),
+                      'timestamp':timestamp,
+                      'timestamp_abs':timestamp_abs,
+                      'v':v,#Volt
+                      'i_elm':i_elm*1e9,#A to nA
+                      'i':i*1e9,#A to nA
+                      'temp':temp,#degC
+                      'temp_box':temp_box,#degC
+                      'humidity':humidity,#percent
+                      'i_600':i_600*1e12,#A to pA
+                      'i_800':i_800*1e12}) #A to pA
+    '''
+    
     return t_line, rawdata
 
 
@@ -510,8 +612,12 @@ def analyse_cbkr_data(path, r_sheet=np.nan, options=None, min_correlation=0.95):
         options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
+    timestamp = series.get('timestamp', np.array([]))
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
+    temp = series.get('temperature_chuck', np.array([]))
+    temp_box = series.get('temperature_box', np.array([]))
+    humidity = series.get('humidity_box', np.array([]))
 
     if len(v) <= 3 or len(i) <= 3:
         return np.nan, None
@@ -540,7 +646,24 @@ def analyse_cbkr_data(path, r_sheet=np.nan, options=None, min_correlation=0.95):
        print('%s: \tcbkr: r_contact: %.2e Ohm\t%s' % (lbl, r_contact, lbl_vdp))
 
     meta = read_json_file(path).get('meta')
+    start_timestamp=meta.get('start_timestamp').replace('T',' ')
     rawdata=PQC_RawData(path,test,meta,series)
+    #convert relative timestamp to absolute timestamp
+    timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
+    '''    
+    rawdata.add_data({'len':len(v),
+                      'timestamp':timestamp,
+                      'timestamp_abs':timestamp_abs,
+                      'v':v,#Volt
+                      'i_elm':i_elm*1e9,#A to nA
+                      'i':i*1e9,#A to nA
+                      'temp':temp,#degC
+                      'temp_box':temp_box,#degC
+                      'humidity':humidity,#percent
+                      'i_600':i_600*1e12,#A to pA
+                      'i_800':i_800*1e12}) #A to pA
+    '''
+
     return r_contact, rawdata
 
 
@@ -555,8 +678,12 @@ def analyse_contact_data(path, options=None, min_correlation=0.95):
         options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
+    timestamp = series.get('timestamp', np.array([]))
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
+    temp = series.get('temperature_chuck', np.array([]))
+    temp_box = series.get('temperature_box', np.array([]))
+    humidity = series.get('humidity_box', np.array([]))
 
     if len(v) <= 3 or len(i) <= 3:
         options.popPrefix("-")
@@ -587,7 +714,24 @@ def analyse_contact_data(path, options=None, min_correlation=0.95):
        print('%s: \tcontact: r_contact: %.2e Ohm, r_value: %.2f' % (lbl, r_contact, r_value))
 
     meta = read_json_file(path).get('meta')
+    start_timestamp=meta.get('start_timestamp').replace('T',' ')
     rawdata=PQC_RawData(path,test,meta,series)
+    #convert relative timestamp to absolute timestamp
+    timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
+    '''    
+    rawdata.add_data({'len':len(v),
+                      'timestamp':timestamp,
+                      'timestamp_abs':timestamp_abs,
+                      'v':v,#Volt
+                      'i_elm':i_elm*1e9,#A to nA
+                      'i':i*1e9,#A to nA
+                      'temp':temp,#degC
+                      'temp_box':temp_box,#degC
+                      'humidity':humidity,#percent
+                      'i_600':i_600*1e12,#A to pA
+                      'i_800':i_800*1e12}) #A to pA
+    '''
+
     return r_contact, rawdata
 
 
@@ -602,12 +746,15 @@ def analyse_meander_data(path, options=None, min_correlation=0.99):
         options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
-
+    timestamp = series.get('timestamp', np.array([]))
     v = series.get('voltage_vsrc', np.array([]))
     i = series.get('current', np.array([]))
     if (len(v) == 0):  # the polisilicon resistor uses a v-source and not a current source
         v = series.get('voltage', np.array([]))
         i = series.get('current_elm', np.array([]))
+    temp = series.get('temperature_chuck', np.array([]))
+    temp_box = series.get('temperature_box', np.array([]))
+    humidity = series.get('humidity_box', np.array([]))
 
     if len(v) <= 3 or len(i) <= 3:
         options.popPrefix("-")
@@ -638,7 +785,24 @@ def analyse_meander_data(path, options=None, min_correlation=0.99):
         print(f"{lbl}: \tMeander: r: {r:.2e} r_value: {r_value:.2f}")
 
     meta = read_json_file(path).get('meta')
+    start_timestamp=meta.get('start_timestamp').replace('T',' ')
     rawdata=PQC_RawData(path,test,meta,series)
+    #convert relative timestamp to absolute timestamp
+    timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
+    '''    
+    rawdata.add_data({'len':len(v),
+                      'timestamp':timestamp,
+                      'timestamp_abs':timestamp_abs,
+                      'v':v,#Volt
+                      'i_elm':i_elm*1e9,#A to nA
+                      'i':i*1e9,#A to nA
+                      'temp':temp,#degC
+                      'temp_box':temp_box,#degC
+                      'humidity':humidity,#percent
+                      'i_600':i_600*1e12,#A to pA
+                      'i_800':i_800*1e12}) #A to pA
+    '''
+
     return r, rawdata
 
 
@@ -652,10 +816,12 @@ def analyse_breakdown_data(path, options=None):
         options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
+    timestamp = series.get('timestamp', np.array([]))
     v = series.get('voltage', np.array([]))
     i = series.get('current_hvsrc', np.array([]))
     i_elm = series.get('current_elm', np.array([]))
     temp = series.get('temperature_chuck', np.array([]))
+    temp_box = series.get('temperature_box', np.array([]))
     humidity = series.get('humidity_box', np.array([]))
 
     i = np.array(i)
@@ -679,7 +845,24 @@ def analyse_breakdown_data(path, options=None):
        print('%s: \tBreakdown: v_bd: %.2e V' % (lbl, v_bd))
 
     meta = read_json_file(path).get('meta')
+    start_timestamp=meta.get('start_timestamp').replace('T',' ')
     rawdata=PQC_RawData(path,test,meta,series)
+    #convert relative timestamp to absolute timestamp
+    timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
+    '''    
+    rawdata.add_data({'len':len(v),
+                      'timestamp':timestamp,
+                      'timestamp_abs':timestamp_abs,
+                      'v':v,#Volt
+                      'i_elm':i_elm*1e9,#A to nA
+                      'i':i*1e9,#A to nA
+                      'temp':temp,#degC
+                      'temp_box':temp_box,#degC
+                      'humidity':humidity,#percent
+                      'i_600':i_600*1e12,#A to pA
+                      'i_800':i_800*1e12}) #A to pA
+    '''
+
     return v_bd, rawdata
 
 
@@ -693,9 +876,12 @@ def analyse_capacitor_data(path, options=None):
         options = AnalysisOptions()
 
     series = read_json_file(path).get('series')
+    timestamp = series.get('timestamp', np.array([]))
     v = series.get('voltage_hvsrc', np.array([]))
     c = series.get('capacitance', np.array([]))
-
+    temp = series.get('temperature_chuck', np.array([]))
+    temp_box = series.get('temperature_box', np.array([]))
+    humidity = series.get('humidity_box', np.array([]))
 
     lbl = assign_label(path, test)
     x_loc = 0.3
@@ -713,7 +899,24 @@ def analyse_capacitor_data(path, options=None):
        print('%s: \tCapacitance: %.2e F, ' % (lbl, c_median))
 
     meta = read_json_file(path).get('meta')
+    start_timestamp=meta.get('start_timestamp').replace('T',' ')
     rawdata=PQC_RawData(path,test,meta,series)
+    #convert relative timestamp to absolute timestamp
+    timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
+    '''    
+    rawdata.add_data({'len':len(v),
+                      'timestamp':timestamp,
+                      'timestamp_abs':timestamp_abs,
+                      'v':v,#Volt
+                      'i_elm':i_elm*1e9,#A to nA
+                      'i':i*1e9,#A to nA
+                      'temp':temp,#degC
+                      'temp_box':temp_box,#degC
+                      'humidity':humidity,#percent
+                      'i_600':i_600*1e12,#A to pA
+                      'i_800':i_800*1e12}) #A to pA
+    '''
+
     return c_mean, c_median, d, rawdata
 
 
