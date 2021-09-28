@@ -238,12 +238,12 @@ class PQC_resultset:
             pqc.find_most_recent_file(path, "van_der_pauw", whitelist=["Polysilicon", cross], blacklist=["reverse"]),
             options=options.pushPrefix("VdP_poly_fwd"))
         self.dataseries['vdp_poly_f'].append(vdp_poly_f)
-        if rawdata is not None: self.rawdata['']=rawdata
+        if rawdata is not None: self.rawdata['Polysilicon_Van-der-Pauw_cross']=rawdata
 
         vdp_poly_r, rawdata=pqc.analyse_van_der_pauw_data(
             pqc.find_most_recent_file(path, "van_der_pauw", whitelist=["Polysilicon", "reverse", cross]),
             options=options.pushPrefix("VdP_poly_rev"))
-        if rawdata is not None: self.rawdata['']=rawdata
+        if rawdata is not None: self.rawdata['Reverse_Polysilicon_Van-der-Pauw_cross']=rawdata
         self.dataseries['vdp_poly_r'].append(vdp_poly_r)
 
         vdp_n_f, rawdata=pqc.analyse_van_der_pauw_data(
