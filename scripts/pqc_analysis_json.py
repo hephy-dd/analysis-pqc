@@ -878,7 +878,9 @@ def analyse_capacitor_data(path, options=None):
     series = read_json_file(path).get('series')
     timestamp = series.get('timestamp', np.array([]))
     v = series.get('voltage_hvsrc', np.array([]))
+    i = series.get('current_hvsrc', np.array([]))
     c = series.get('capacitance', np.array([]))
+    r = series.get('resistance', np.array([]))
     temp = series.get('temperature_chuck', np.array([]))
     temp_box = series.get('temperature_box', np.array([]))
     humidity = series.get('humidity_box', np.array([]))
@@ -902,20 +904,19 @@ def analyse_capacitor_data(path, options=None):
     start_timestamp=meta.get('start_timestamp').replace('T',' ')
     rawdata=PQC_RawData(path,test,meta,series)
     #convert relative timestamp to absolute timestamp
-    timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
-    '''    
+    timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))    
     rawdata.add_data({'len':len(v),
                       'timestamp':timestamp,
                       'timestamp_abs':timestamp_abs,
                       'v':v,#Volt
-                      'i_elm':i_elm*1e9,#A to nA
                       'i':i*1e9,#A to nA
+                      'c':c*1e12,#F to pF
+                      'r':r*1e-6,#Ohm to Mohm
                       'temp':temp,#degC
                       'temp_box':temp_box,#degC
                       'humidity':humidity,#percent
-                      'i_600':i_600*1e12,#A to pA
-                      'i_800':i_800*1e12}) #A to pA
-    '''
+                      'c_median':c_median*1e12,#F to pF
+                      'd':d*1e3}) #um to nm(?)
 
     return c_mean, c_median, d, rawdata
 

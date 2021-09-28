@@ -222,7 +222,7 @@ class PQC_resultset:
             pqc.find_most_recent_file(path, "capacitor", whitelist=["Left", "250mV", "10kHz"], blacklist=["mos"]),
             options=options
         )
-        if rawdata is not None: self.rawdata['']=rawdata
+        if rawdata is not None: self.rawdata['Capacitor_test_structure_Left_10kHz_250mV_HV_Source']=rawdata
         self.dataseries['cap_l'].append(c_median)
         self.dataseries['cap_l_tox'].append(d)
 
@@ -230,7 +230,7 @@ class PQC_resultset:
             pqc.find_most_recent_file(path, "capacitor", whitelist=["Right", "250mV", "10kHz"], blacklist=["mos"]),
             options=options
         )
-        if rawdata is not None: self.rawdata['']=rawdata
+        if rawdata is not None: self.rawdata['Capacitor_test_structure_Right_10kHz_250mV_HV_Source']=rawdata
         self.dataseries['cap_r'].append(c_median)
         self.dataseries['cap_r_tox'].append(d)
 
