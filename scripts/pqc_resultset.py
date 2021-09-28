@@ -250,25 +250,25 @@ class PQC_resultset:
             pqc.find_most_recent_file(path, "van_der_pauw", whitelist=["n", cross], blacklist=["reverse"]),
             options=options.pushPrefix("VdP_N_fwd")
         )
-        if rawdata is not None: self.rawdata['']=rawdata
+        if rawdata is not None: self.rawdata['N_Van-der-Pauw_cross']=rawdata
         self.dataseries['vdp_n_f'].append(vdp_n_f)
 
         vdp_n_r, rawdata=pqc.analyse_van_der_pauw_data(
             pqc.find_most_recent_file(path, "van_der_pauw", whitelist=["n", "reverse", cross]),
             options=options.pushPrefix("VdP_N_rev"))
-        if rawdata is not None: self.rawdata['']=rawdata
+        if rawdata is not None: self.rawdata['Reverse_N_Van-der-Pauw_cross']=rawdata
         self.dataseries['vdp_n_r'].append(vdp_n_r)
 
         vdp_pstop_f, rawdata=pqc.analyse_van_der_pauw_data(
             pqc.find_most_recent_file(path, "van_der_pauw", whitelist=["P_stop", cross], blacklist=["reverse"]),
             options=options.pushPrefix("VdP_P-Stop_fwd"))
-        if rawdata is not None: self.rawdata['']=rawdata
+        if rawdata is not None: self.rawdata['P-stop_Van-der-Pauw_cross']=rawdata
         self.dataseries['vdp_pstop_f'].append(vdp_pstop_f)
 
         vdp_pstop_r, rawdata=pqc.analyse_van_der_pauw_data(
             pqc.find_most_recent_file(path, "van_der_pauw", whitelist=["P_stop", "reverse", cross]),
             options=options.pushPrefix("VdP_P-Stop_rev"))
-        if rawdata is not None: self.rawdata['']=rawdata
+        if rawdata is not None: self.rawdata['Reverse_P-stop_Van-der-Pauw_cross']=rawdata
         self.dataseries['vdp_pstop_r'].append(vdp_pstop_r)
 
         # =================================================== Flute 2 ===================================================
