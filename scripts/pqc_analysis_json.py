@@ -643,19 +643,15 @@ def analyse_cbkr_data(path, r_sheet=np.nan, options=None, min_correlation=0.95):
     rawdata=PQC_RawData(path,test,meta,series)
     #convert relative timestamp to absolute timestamp
     timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
-    '''    
     rawdata.add_data({'len':len(v),
                       'timestamp':timestamp,
                       'timestamp_abs':timestamp_abs,
                       'v':v,#Volt
-                      'i_elm':i_elm*1e9,#A to nA
                       'i':i*1e9,#A to nA
                       'temp':temp,#degC
                       'temp_box':temp_box,#degC
                       'humidity':humidity,#percent
-                      'i_600':i_600*1e12,#A to pA
-                      'i_800':i_800*1e12}) #A to pA
-    '''
+                      'r_contact':r_contact}) #Ohm
 
     return r_contact, rawdata
 
@@ -711,19 +707,15 @@ def analyse_contact_data(path, options=None, min_correlation=0.95):
     rawdata=PQC_RawData(path,test,meta,series)
     #convert relative timestamp to absolute timestamp
     timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
-    '''    
     rawdata.add_data({'len':len(v),
                       'timestamp':timestamp,
                       'timestamp_abs':timestamp_abs,
                       'v':v,#Volt
-                      'i_elm':i_elm*1e9,#A to nA
                       'i':i*1e9,#A to nA
                       'temp':temp,#degC
                       'temp_box':temp_box,#degC
                       'humidity':humidity,#percent
-                      'i_600':i_600*1e12,#A to pA
-                      'i_800':i_800*1e12}) #A to pA
-    '''
+                      'r_contact':r_contact}) #Ohm
 
     return r_contact, rawdata
 
@@ -790,7 +782,7 @@ def analyse_meander_data(path, options=None, min_correlation=0.99):
                       'temp':temp,#degC
                       'temp_box':temp_box,#degC
                       'humidity':humidity,#percent
-                      'r':r*1e-6}) #Ohm to MOhm
+                      'r':r}) #Ohm
 
     return r, rawdata
 

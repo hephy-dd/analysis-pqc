@@ -2,6 +2,12 @@ import os
 
 class PQC_RawData:
     '''
+    This class is used to store 'raw' measurement data and extracted parameters for use with .xml templates
+    The format of fields to be filled in the xml files (capitalized) are based on https://github.com/pasenov/PQC-XML-Templates
+    Additional information about layout of fields and parameters: 
+    https://indico.cern.ch/event/1025087/contributions/4338409/attachments/2233160/3784425/Structure%20of%20HALFMOON%20Extracted%20Par.pdf
+    
+    29.09.2021, Moritz Wiehe
     '''
 
     def __init__(self,path,test,meta,series):

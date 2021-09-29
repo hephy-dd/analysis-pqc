@@ -14,7 +14,7 @@
     <DATA>
      <TIME>{{ rawdata.data.timestamp_abs[id] }}</TIME>
      <VOLTS>{{ rawdata.data.v[id] }}</VOLTS>
-     <CURRNT_NAMP>{{ rawdata.data.i[id] }}</CURRNT_NAMP>
+     <CURRNT_NAMPR>{{ rawdata.data.i_em[id] }}</CURRNT_NAMPR>
      <TEMP_DEGC>{{ rawdata.data.temp[id] }}</TEMP_DEGC>
      <AIR_TEMP_DEGC>{{ rawdata.data.temp_box[id] }}</AIR_TEMP_DEGC>
      <RH_PRCNT>{{ rawdata.data.humidity[id] }}</RH_PRCNT>
@@ -25,7 +25,9 @@
 
 {% block parameters_data %}
 
-          <RPOLY_MOHM>{{ rawdata.data.r * 1e-6 }}</RPOLY_MOHM>{# Ohm to MOhm #}
-	  {#          <RSH_OHMSQR></RSH_OHMSQR>#}
+          <ISURF_PAMPR>{{ rawdata.data.i_surf }}</ISURF_PAMPR>
+          <S0_CMSEC>{{ rawdata.data.s0 }}</S0_CMSEC>
+{#          <VFB_ACC_V>-2.508</VFB_ACC_V>#}
+{#          <VFB_INV_V>-2.247</VFB_INV_V>#}
 	  
 {% endblock %}

@@ -25,7 +25,5 @@
 
 {% block parameters_data %}
 
-          <RPOLY_MOHM>{{ rawdata.data.r * 1e-6 }}</RPOLY_MOHM>{# Ohm to MOhm #}
-	  {#          <RSH_OHMSQR></RSH_OHMSQR>#}
-	  
+          <R_OHM>{{ rawdata.data.r_contact }}</R_OHM>	  
 {% endblock %}

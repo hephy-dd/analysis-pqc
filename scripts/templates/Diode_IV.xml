@@ -26,8 +26,8 @@
 
 {% block parameters_data %}
 
-          {# <VBD_V>1000.000</VBD_V> #}
+{# <VBD_V></VBD_V> #}
           <I600_PAMPR>{{ rawdata.data.i_600 }}</I600_PAMPR>
-          {# <VI600_NAMPRMM3>0.131</VI600_NAMPRMM3> #}
+{# <VI600_NAMPRMM3>0.131</VI600_NAMPRMM3> #}
 
 {% endblock %}
