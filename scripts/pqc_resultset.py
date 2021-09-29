@@ -309,7 +309,7 @@ class PQC_resultset:
         meander_poly, rawdata=pqc.analyse_meander_data(
             pqc.find_most_recent_file(path, "meander", whitelist=["polysilicon"]),
             options=options.pushPrefix("meander_poly"))
-        if rawdata is not None: self.rawdata['']=rawdata
+        if rawdata is not None: self.rawdata['Polysilicon_meander']=rawdata
         self.dataseries['meander_poly'].append(meander_poly)
 
         v_bd, rawdata=pqc.analyse_breakdown_data(
