@@ -289,21 +289,21 @@ class PQC_resultset:
         t_line_n, rawdata=pqc.analyse_linewidth_data(
             pqc.find_most_recent_file(path, "linewidth", whitelist=["n"]), r_sheet=self.dataseries['vdp_n_f'].values[-1],
             options=options.pushPrefix("lw_n"))
-        if rawdata is not None: self.rawdata['']=rawdata
+        if rawdata is not None: self.rawdata['N_linewidth_structure']=rawdata
         self.dataseries['t_line_n'].append(t_line_n)
 
         t_line_pstop2, rawdata=pqc.analyse_linewidth_data(
             pqc.find_most_recent_file(path, "linewidth", whitelist=["P_stop", "2_wire"]),
             r_sheet=self.dataseries['vdp_pstop_f'].values[-1],
             options=options.pushPrefix("lw_p2"))
-        if rawdata is not None: self.rawdata['']=rawdata
+        if rawdata is not None: self.rawdata['P-stop_linewidth_structure_2-wire']=rawdata
         self.dataseries['t_line_pstop2'].append(t_line_pstop2)
 
         t_line_pstop4, rawdata=pqc.analyse_linewidth_data(
             pqc.find_most_recent_file(path, "linewidth", whitelist=["P_stop", "4_wire"]),
             r_sheet=self.dataseries['vdp_pstop_f'].values[-1],
             options=options.pushPrefix("lw_p4"))
-        if rawdata is not None: self.rawdata['']=rawdata
+        if rawdata is not None: self.rawdata['P-stop_linewidth_structure_4-wire']=rawdata
         self.dataseries['t_line_pstop4'].append(t_line_pstop4)
 
         meander_poly, rawdata=pqc.analyse_meander_data(
