@@ -42,7 +42,6 @@ def render_templates(pqc_resultset: PQC_resultset, templates: Iterable) -> None:
             if os.path.isfile(filename):
                 filenames.add(filename)
 
-
     for filename in filenames:
 
         basename = os.path.basename(filename)
