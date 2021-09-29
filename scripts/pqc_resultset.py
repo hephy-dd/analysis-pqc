@@ -315,7 +315,7 @@ class PQC_resultset:
         v_bd, rawdata=pqc.analyse_breakdown_data(
             pqc.find_most_recent_file(path, "breakdown", whitelist=[]),
             options=options)
-        if rawdata is not None: self.rawdata['']=rawdata
+        if rawdata is not None: self.rawdata['Dielectric_Breakdown_1']=rawdata
         self.dataseries['v_bd'].append(v_bd)
 
         # =================================================== Flute 3 ===================================================
