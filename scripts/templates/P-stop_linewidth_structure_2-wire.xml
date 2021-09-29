@@ -1,0 +1,30 @@
+{% extends 'include/db.xml' %}
+
+{% block structure_data %}
+
+    <EQUIPMENT>{{ rawdata.contact_name }} {{ rawdata.sample_position }}</EQUIPMENT>
+    <WAITING_TIME_S>{{ rawdata.WAITING_TIME_S }}</WAITING_TIME_S>
+{# <TEMP_SET_DEGC>20.</TEMP_SET_DEGC>#}
+{# <AV_TEMP_DEGC>20.006</AV_TEMP_DEGC>#}
+
+{% endblock %}
+
+{% block measurement_data %}
+{% for id in range(rawdata.data.len) %}
+    <DATA>
+     <TIME>{{ rawdata.data.timestamp_abs[id] }}</TIME>
+     <VOLTS>{{ rawdata.data.v[id] }}</VOLTS>
+     <CURRNT_NAMPR>{{ rawdata.data.i[id] }}</CURRNT_NAMPR>
+     <TEMP_DEGC>{{ rawdata.data.temp[id] }}</TEMP_DEGC>
+     <AIR_TEMP_DEGC>{{ rawdata.data.temp_box[id] }}</AIR_TEMP_DEGC>
+     <RH_PRCNT>{{ rawdata.data.humidity[id] }}</RH_PRCNT>
+    </DATA>
+    
+{% endfor %}
+{% endblock %}
+
+{% block parameters_data %}
+
+          <T_UM>{{ rawdata.data.t_line }}</T_UM>
+          <R_OHM>{{ rawdata.data.a }}</R_OHM>	  
+{% endblock %}
