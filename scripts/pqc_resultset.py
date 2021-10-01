@@ -332,7 +332,7 @@ class PQC_resultset:
             pqc.find_most_recent_file(path, "cv", whitelist=["3"]),
             options=options.pushPrefix("CV_DiodeHalf")
         )
-        if rawdata is not None: self.rawdata['']=rawdata
+        if rawdata is not None: self.rawdata['Diode_CV']=rawdata
         self.dataseries['v_fd'].append(v_fd)
         self.dataseries['rho'].append(rho)
         self.dataseries['conc'].append(conc)

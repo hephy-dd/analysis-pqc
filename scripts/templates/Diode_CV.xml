@@ -4,6 +4,9 @@
 
     <EQUIPMENT>{{ rawdata.contact_name }} {{ rawdata.sample_position }}</EQUIPMENT>
     <WAITING_TIME_S>{{ rawdata.WAITING_TIME_S }}</WAITING_TIME_S>
+    <AC_FREQ_HZ>{{ rawdata.data.ac_freq_hz }}</AC_FREQ_HZ>
+    <AC_AMPL_V>{{ rawdata.data.ac_ampl_v }}</AC_AMPL_V>
+{# <CORR_OPEN_PFRD>0.149</CORR_OPEN_PFRD>#}
 {# <TEMP_SET_DEGC>20.</TEMP_SET_DEGC>#}
 {# <AV_TEMP_DEGC>20.006</AV_TEMP_DEGC>#}
 
@@ -27,9 +30,11 @@
 
 {% block parameters_data %}
 
-	  <VFB_V>{{ rawdata.data.v_fb2 }}</VFB_V>
-          <CACC_PFRD>{{ rawdata.data.c_acc_m }}</CACC_PFRD>
-          <TOX_NM>{{ rawdata.data.t_ox }}</TOX_NM>
-          <NOX>{{ rawdata.data.n_ox }}</NOX>
+	  <VD_V>{{ rawdata.data.v_dep2 }}</VD_V>
+{#          <CMIN_PFRD>1.944</CMIN_PFRD>#}
+{#          <D_UM>332.988</D_UM>#}
+          <NA>{{ rawdata.data.conc }}</NA>
+          <RHO_KOHMCM>{{ rawdata.data.rho }}</RHO_KOHMCM>
+{#          <CMINPLNR_PFRD>6.400000E+11</CMINPLNR_PFRD>#}
 	  
 {% endblock %}

@@ -219,23 +219,28 @@ def analyse_cv_data(path, options=None):
         # print(f"{lbl}: CV: v_fd: {}")
         print('%s: \tCV: v_fd: %.2e V\trho: %.2e Ohm\tconc: %.2e cm^-3' % (lbl, v_dep2, rho, conc*1e-6))
     meta = read_json_file(path).get('meta')
+    ac_freq_hz=meta.get('lcr_frequency').split(' ')[0]
+    ac_ampl_v=meta.get('lcr_amplitude').split(' ')[0]
     start_timestamp=meta.get('start_timestamp').replace('T',' ')
     rawdata=PQC_RawData(path,test,meta,series)
     #convert relative timestamp to absolute timestamp
     timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
-    '''    
     rawdata.add_data({'len':len(v),
                       'timestamp':timestamp,
                       'timestamp_abs':timestamp_abs,
                       'v':v,#Volt
-                      'i_elm':i_elm*1e9,#A to nA
                       'i':i*1e9,#A to nA
+                      'c':c*1e12,#F to pF
+                      'r':r*1e-6,#Ohm to MOhm
                       'temp':temp,#degC
                       'temp_box':temp_box,#degC
                       'humidity':humidity,#percent
-                      'i_600':i_600*1e12,#A to pA
-                      'i_800':i_800*1e12}) #A to pA
-    '''
+                      'ac_freq_hz':ac_freq_hz,#Hz
+                      'ac_ampl_v':ac_ampl_v,#V
+                      'v_dep2':v_dep2,#V
+                      'rho':rho*0.1,#kOhm cm
+                      'conc':conc* 1e-18# 1E12cm^-3#cm-3
+    })
     return v_dep2, rho, conc, rawdata
 
 
