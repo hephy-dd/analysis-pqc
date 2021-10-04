@@ -4,6 +4,8 @@
 
     <EQUIPMENT>{{ rawdata.contact_name }} {{ rawdata.sample_position }}</EQUIPMENT>
     <WAITING_TIME_S>{{ rawdata.WAITING_TIME_S }}</WAITING_TIME_S>
+    <AC_FREQ_HZ>{{ rawdata.data.ac_freq_hz }}</AC_FREQ_HZ>
+    <AC_AMPL_V>{{ rawdata.data.ac_ampl_v }}</AC_AMPL_V>
 {# <TEMP_SET_DEGC>20.</TEMP_SET_DEGC>#}
 {# <AV_TEMP_DEGC>20.006</AV_TEMP_DEGC>#}
 

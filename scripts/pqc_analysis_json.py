@@ -300,6 +300,8 @@ def analyse_mos_data(path, options=None):
         
     meta = read_json_file(path).get('meta')
     start_timestamp=meta.get('start_timestamp').replace('T',' ')
+    ac_freq_hz=meta.get('lcr_frequency').split(' ')[0]
+    ac_ampl_v=meta.get('lcr_amplitude').split(' ')[0]
     rawdata=PQC_RawData(path,test,meta,series)
     #convert relative timestamp to absolute timestamp
     timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))
@@ -313,6 +315,8 @@ def analyse_mos_data(path, options=None):
                       'temp':temp,#degC
                       'temp_box':temp_box,#degC
                       'humidity':humidity,#percent
+                      'ac_freq_hz':ac_freq_hz,#Hz
+                      'ac_ampl_v':ac_ampl_v,#V
                       '_':v_fb1,
                       'v_fb2':v_fb2,#V
                       't_ox':t_ox*1e3,#um to nm
@@ -885,6 +889,8 @@ def analyse_capacitor_data(path, options=None):
 
     meta = read_json_file(path).get('meta')
     start_timestamp=meta.get('start_timestamp').replace('T',' ')
+    ac_freq_hz=meta.get('lcr_frequency').split(' ')[0]
+    ac_ampl_v=meta.get('lcr_amplitude').split(' ')[0]
     rawdata=PQC_RawData(path,test,meta,series)
     #convert relative timestamp to absolute timestamp
     timestamp_abs=np.array(list(map(rel_to_abs_timestamp,repeat(start_timestamp),timestamp)))    
@@ -898,6 +904,8 @@ def analyse_capacitor_data(path, options=None):
                       'temp':temp,#degC
                       'temp_box':temp_box,#degC
                       'humidity':humidity,#percent
+                      'ac_freq_hz':ac_freq_hz,#Hz
+                      'ac_ampl_v':ac_ampl_v,#V
                       'c_median':c_median*1e12,#F to pF
                       'd':d*1e3}) #um to nm(?)
 
