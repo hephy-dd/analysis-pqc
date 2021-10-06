@@ -15,13 +15,13 @@
 {% for id in range(rawdata.data.len) %}
     <DATA>
      <TIME>{{ rawdata.data.timestamp_abs[id] }}</TIME>
-     <VOLTS>{{ rawdata.data.v[id] }}</VOLTS>
-     <BIASCURRNT_NAMPR>{{ rawdata.data.i[id] }}</BIASCURRNT_NAMPR>
-     <CAPCTNC_PFRD>{{ rawdata.data.c[id] }}</CAPCTNC_PFRD>
-     <RESSTNC_MOHM>{{ rawdata.data.r[id] }}</RESSTNC_MOHM>
-     <TEMP_DEGC>{{ rawdata.data.temp[id] }}</TEMP_DEGC>
-     <AIR_TEMP_DEGC>{{ rawdata.data.temp_box[id] }}</AIR_TEMP_DEGC>
-     <RH_PRCNT>{{ rawdata.data.humidity[id] }}</RH_PRCNT>
+     <VOLTS>{{ '%.3f' % rawdata.data.v[id] }}</VOLTS>
+     <BIASCURRNT_NAMPR>{{ '%.3f' % rawdata.data.i[id] }}</BIASCURRNT_NAMPR>
+     <CAPCTNC_PFRD>{{ '%.3f' % rawdata.data.c[id] }}</CAPCTNC_PFRD>
+     <RESSTNC_MOHM>{{ '%.3f' % rawdata.data.r[id] }}</RESSTNC_MOHM>
+     <TEMP_DEGC>{{ '%.3f' % rawdata.data.temp[id] }}</TEMP_DEGC>
+     <AIR_TEMP_DEGC>{{ '%.3f' % rawdata.data.temp_box[id] }}</AIR_TEMP_DEGC>
+     <RH_PRCNT>{{ '%.3f' % rawdata.data.humidity[id] }}</RH_PRCNT>
     </DATA>
     
 {% endfor %}
@@ -29,8 +29,8 @@
 
 {% block parameters_data %}
 
-          <CACC_PFRD>{{ rawdata.data.c_median }}</CACC_PFRD>
-          <DOX_NM>{{ rawdata.data.d }}</DOX_NM>
+          <CACC_PFRD>{{ '%.3f' % rawdata.data.c_median }}</CACC_PFRD>
+          <DOX_NM>{{ '%.3f' % rawdata.data.d }}</DOX_NM>
 
 	  
 {% endblock %}

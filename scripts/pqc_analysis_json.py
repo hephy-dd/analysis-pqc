@@ -149,8 +149,8 @@ def analyse_iv_data(path, options=None):
                       'temp':temp,#degC
                       'temp_box':temp_box,#degC
                       'humidity':humidity,#percent
-                      'i_600':i_600*1e12,#A to pA
-                      'i_800':i_800*1e12}) #A to pA
+                      'i_600':i_600*1e6,#A to uA
+                      'i_800':i_800*1e6}) #A to uA
     return i_600, i_800, rawdata
 
 
@@ -165,7 +165,7 @@ def analyse_cv_data(path, options=None):
 
     series = read_json_file(path).get('series')
     timestamp = series.get('timestamp', np.array([]))
-    v = abs(series.get('voltage_hvsrc', np.array([])))
+    v = series.get('voltage_hvsrc', np.array([]))
     i = series.get('current_hvsrc', np.array([]))
     c = series.get('capacitance', np.array([]))
     c2 = series.get('capacitance2', np.array([]))
@@ -192,7 +192,7 @@ def analyse_cv_data(path, options=None):
         area = 1
         print("WARNING: clould not determine flute number - area dependent values will be wrong!")
 
-    v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status = analyse_cv(v, c, area=area, cut_param= 0.008, carrier='holes')
+    v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status = analyse_cv(abs(v), c, area=area, cut_param= 0.008, carrier='holes')
 
 
     annotate = 'V$_{{fd}}}}$: {} V\n\nT$_{{avg}}$: {} \u00B0C\nH$_{{avg}}$: {}'.format(v_dep2, round(np.mean(temp),2), round(np.mean(humidity),2)) + r'$\%$'
@@ -205,7 +205,7 @@ def analyse_cv_data(path, options=None):
         fit_curve(ax2, v_rise, a_rise * v_rise+ b_rise, color='ro')
         fit_curve(ax2, v_const, a_const * v_const+ b_const, color='kx')
         #fit_curve(ax2b, v_norm, spl_dev, color='mx')
-        plot_curve(ax2, v, 1./c**2, options.plotTitle("CV??"), 'Bias Voltage / V', '1/C$^{2}$ / F$^{-2}$', lbl, '', 0, 0 )
+        plot_curve(ax2, abs(v), 1./c**2, options.plotTitle("CV??"), 'Bias Voltage / V', '1/C$^{2}$ / F$^{-2}$', lbl, '', 0, 0 )
         plt.axvline(x=v_dep2, color='green', linestyle='dashed')
 
         resstr = f"v_fd: {v_dep2:8.2f} V\n"
@@ -320,7 +320,7 @@ def analyse_mos_data(path, options=None):
                       '_':v_fb1,
                       'v_fb2':v_fb2,#V
                       't_ox':t_ox*1e3,#um to nm
-                      'n_ox':n_ox*1e-10,#1e10cm^-2
+                      'n_ox':n_ox,#cm^-2
                       'c_acc_m':c_acc_m*1e12#F to pF
                       })
     
@@ -907,8 +907,8 @@ def analyse_capacitor_data(path, options=None):
                       'ac_freq_hz':ac_freq_hz,#Hz
                       'ac_ampl_v':ac_ampl_v,#V
                       'c_median':c_median*1e12,#F to pF
-                      'd':d*1e3}) #um to nm(?)
-
+                      'd':d*1e9}) #nm
+    #pdb.set_trace()
     return c_mean, c_median, d, rawdata
 
 
