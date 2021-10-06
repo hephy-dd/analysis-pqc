@@ -77,9 +77,9 @@ class PQC_Values:
             return self.values[index]*self.show_multiplier
         else:
             stats = self.get_stats()
-            sel={0: stats.selMed,
-                 1: stats.selAvg,
-                 2: stats.selStd,
+            sel={0: stats.totMed,
+                 1: stats.totAvg,
+                 2: stats.totStd,
                  3: len(stats.values),
                  4: len(stats.values)/stats.nTot, }
             return sel.get(index-len(self.values), "error")
@@ -93,9 +93,9 @@ class PQC_Values:
             return num2str(self.values[index]*self.show_multiplier, self.expected_value)
         else:
             stats = self.get_stats()
-            sel={0: num2str(stats.selMed, self.expected_value),
-                 1: num2str(stats.selAvg, self.expected_value),
-                 2: num2str(stats.selStd, self.expected_value),
+            sel={0: num2str(stats.totMed, self.expected_value),
+                 1: num2str(stats.totAvg, self.expected_value),
+                 2: num2str(stats.totStd, self.expected_value),
                  3: "{}/{}".format(len(stats.values), stats.nTot),
                  4: "{:3.2f}".format(len(stats.values)/stats.nTot), }
             return sel.get(index-len(self.values), "error")
