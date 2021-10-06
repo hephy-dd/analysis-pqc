@@ -43,6 +43,8 @@ expression with wildcard support. The flag can be set multiple times,
 eg. `-t*.html` for all HTML reports, `-tresults.html` for a specific HTML
 report, `-t*.tex -t*.html` for all LaTeX and HTML reports, or `-t*` for all.
 
+XML files are generated with the -t*.xml flag. XML templates are located in scripts/templates.
+
 For custom configurations clone and edit file `scripts/config/default.yaml` and
 use flag `-c <name>` to load custom configuration from
 `scripts/config/<name>.yaml`.
@@ -72,6 +74,11 @@ optional arguments:
 Templates that contain ```stdout``` will be sent to the stdout stream automatically, all others will be located in DIR/analysis_<batch-name>/
 
 ## Other scripts
+### upload xml files to the database
+Upload all .xml files in <path> (including subdirectories) to the database: 'production' (cmsr) or 'development' (int2r)
+```bash
+python3 scripts/upload_db.py -db <database> <path>
+```
 
 ### Analyze JSON
 
