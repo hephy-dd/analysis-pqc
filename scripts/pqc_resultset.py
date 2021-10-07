@@ -181,7 +181,9 @@ class PQC_resultset:
             return
 
         self.flutes.append("")
-        self.labels.append(os.path.basename(path))
+        label=os.path.basename(path)
+        self.labels.append(label)
+        self.rawdata[label]={}
 
         # TODO
         x = pqc.find_all_files_from_path(path, "van_der_pauw")
@@ -206,13 +208,13 @@ class PQC_resultset:
             options=options
         )
         self.dataseries['v_th'].append(v_th)
-        if rawdata is not None: self.rawdata['FET']=rawdata
+        if rawdata is not None: self.rawdata[label]['FET']=rawdata
 
         _, v_fb2, t_ox, n_ox, c_acc_m, rawdata = pqc.analyse_mos_data(
             pqc.find_most_recent_file(path, "mos", whitelist=[]),
             options=options
         )
-        if rawdata is not None: self.rawdata['MOS_capacitor_HV_Source']=rawdata
+        if rawdata is not None: self.rawdata[label]['MOS_capacitor_HV_Source']=rawdata
         self.dataseries['v_fb2'].append(v_fb2)
         self.dataseries['t_ox'].append(t_ox)
         self.dataseries['n_ox'].append(n_ox)
@@ -222,7 +224,7 @@ class PQC_resultset:
             pqc.find_most_recent_file(path, "capacitor", whitelist=["Left", "250mV", "10kHz"], blacklist=["mos"]),
             options=options
         )
-        if rawdata is not None: self.rawdata['Capacitor_test_structure_Left_10kHz_250mV_HV_Source']=rawdata
+        if rawdata is not None: self.rawdata[label]['Capacitor_test_structure_Left_10kHz_250mV_HV_Source']=rawdata
         self.dataseries['cap_l'].append(c_median)
         self.dataseries['cap_l_tox'].append(d)
 
@@ -230,7 +232,7 @@ class PQC_resultset:
             pqc.find_most_recent_file(path, "capacitor", whitelist=["Right", "250mV", "10kHz"], blacklist=["mos"]),
             options=options
         )
-        if rawdata is not None: self.rawdata['Capacitor_test_structure_Right_10kHz_250mV_HV_Source']=rawdata
+        if rawdata is not None: self.rawdata[label]['Capacitor_test_structure_Right_10kHz_250mV_HV_Source']=rawdata
         self.dataseries['cap_r'].append(c_median)
         self.dataseries['cap_r_tox'].append(d)
 
@@ -238,37 +240,37 @@ class PQC_resultset:
             pqc.find_most_recent_file(path, "van_der_pauw", whitelist=["Polysilicon", cross], blacklist=["reverse"]),
             options=options.pushPrefix("VdP_poly_fwd"))
         self.dataseries['vdp_poly_f'].append(vdp_poly_f)
-        if rawdata is not None: self.rawdata['Polysilicon_Van-der-Pauw_cross']=rawdata
+        if rawdata is not None: self.rawdata[label]['Polysilicon_Van-der-Pauw_cross']=rawdata
 
         vdp_poly_r, rawdata=pqc.analyse_van_der_pauw_data(
             pqc.find_most_recent_file(path, "van_der_pauw", whitelist=["Polysilicon", "reverse", cross]),
             options=options.pushPrefix("VdP_poly_rev"))
-        if rawdata is not None: self.rawdata['Reverse_Polysilicon_Van-der-Pauw_cross']=rawdata
+        if rawdata is not None: self.rawdata[label]['Reverse_Polysilicon_Van-der-Pauw_cross']=rawdata
         self.dataseries['vdp_poly_r'].append(vdp_poly_r)
 
         vdp_n_f, rawdata=pqc.analyse_van_der_pauw_data(
             pqc.find_most_recent_file(path, "van_der_pauw", whitelist=["n", cross], blacklist=["reverse"]),
             options=options.pushPrefix("VdP_N_fwd")
         )
-        if rawdata is not None: self.rawdata['N_Van-der-Pauw_cross']=rawdata
+        if rawdata is not None: self.rawdata[label]['N_Van-der-Pauw_cross']=rawdata
         self.dataseries['vdp_n_f'].append(vdp_n_f)
 
         vdp_n_r, rawdata=pqc.analyse_van_der_pauw_data(
             pqc.find_most_recent_file(path, "van_der_pauw", whitelist=["n", "reverse", cross]),
             options=options.pushPrefix("VdP_N_rev"))
-        if rawdata is not None: self.rawdata['Reverse_N_Van-der-Pauw_cross']=rawdata
+        if rawdata is not None: self.rawdata[label]['Reverse_N_Van-der-Pauw_cross']=rawdata
         self.dataseries['vdp_n_r'].append(vdp_n_r)
 
         vdp_pstop_f, rawdata=pqc.analyse_van_der_pauw_data(
             pqc.find_most_recent_file(path, "van_der_pauw", whitelist=["P_stop", cross], blacklist=["reverse"]),
             options=options.pushPrefix("VdP_P-Stop_fwd"))
-        if rawdata is not None: self.rawdata['P-stop_Van-der-Pauw_cross']=rawdata
+        if rawdata is not None: self.rawdata[label]['P-stop_Van-der-Pauw_cross']=rawdata
         self.dataseries['vdp_pstop_f'].append(vdp_pstop_f)
 
         vdp_pstop_r, rawdata=pqc.analyse_van_der_pauw_data(
             pqc.find_most_recent_file(path, "van_der_pauw", whitelist=["P_stop", "reverse", cross]),
             options=options.pushPrefix("VdP_P-Stop_rev"))
-        if rawdata is not None: self.rawdata['Reverse_P-stop_Van-der-Pauw_cross']=rawdata
+        if rawdata is not None: self.rawdata[label]['Reverse_P-stop_Van-der-Pauw_cross']=rawdata
         self.dataseries['vdp_pstop_r'].append(vdp_pstop_r)
 
         # =================================================== Flute 2 ===================================================
@@ -283,39 +285,39 @@ class PQC_resultset:
         self.dataseries['s0'].append(s0)
         if rawdata is not None:
             rawdata.add_data({'s0':s0})
-            self.rawdata['GCD']=rawdata
+            self.rawdata[label]['GCD']=rawdata
 
 
         t_line_n, rawdata=pqc.analyse_linewidth_data(
             pqc.find_most_recent_file(path, "linewidth", whitelist=["n"]), r_sheet=self.dataseries['vdp_n_f'].values[-1],
             options=options.pushPrefix("lw_n"))
-        if rawdata is not None: self.rawdata['N_linewidth_structure']=rawdata
+        if rawdata is not None: self.rawdata[label]['N_linewidth_structure']=rawdata
         self.dataseries['t_line_n'].append(t_line_n)
 
         t_line_pstop2, rawdata=pqc.analyse_linewidth_data(
             pqc.find_most_recent_file(path, "linewidth", whitelist=["P_stop", "2_wire"]),
             r_sheet=self.dataseries['vdp_pstop_f'].values[-1],
             options=options.pushPrefix("lw_p2"))
-        if rawdata is not None: self.rawdata['P-stop_linewidth_structure_2-wire']=rawdata
+        if rawdata is not None: self.rawdata[label]['P-stop_linewidth_structure_2-wire']=rawdata
         self.dataseries['t_line_pstop2'].append(t_line_pstop2)
 
         t_line_pstop4, rawdata=pqc.analyse_linewidth_data(
             pqc.find_most_recent_file(path, "linewidth", whitelist=["P_stop", "4_wire"]),
             r_sheet=self.dataseries['vdp_pstop_f'].values[-1],
             options=options.pushPrefix("lw_p4"))
-        if rawdata is not None: self.rawdata['P-stop_linewidth_structure_4-wire']=rawdata
+        if rawdata is not None: self.rawdata[label]['P-stop_linewidth_structure_4-wire']=rawdata
         self.dataseries['t_line_pstop4'].append(t_line_pstop4)
 
         meander_poly, rawdata=pqc.analyse_meander_data(
             pqc.find_most_recent_file(path, "meander", whitelist=["polysilicon"]),
             options=options.pushPrefix("meander_poly"))
-        if rawdata is not None: self.rawdata['Polysilicon_meander']=rawdata
+        if rawdata is not None: self.rawdata[label]['Polysilicon_meander']=rawdata
         self.dataseries['meander_poly'].append(meander_poly)
 
         v_bd, rawdata=pqc.analyse_breakdown_data(
             pqc.find_most_recent_file(path, "breakdown", whitelist=[]),
             options=options)
-        if rawdata is not None: self.rawdata['Dielectric_Breakdown_1']=rawdata
+        if rawdata is not None: self.rawdata[label]['Dielectric_Breakdown_1']=rawdata
         self.dataseries['v_bd'].append(v_bd)
 
         # =================================================== Flute 3 ===================================================
@@ -326,13 +328,13 @@ class PQC_resultset:
             options=options.pushPrefix("IV_DiodeHalf")
         )
         self.dataseries['i600'].append(i600)
-        if rawdata is not None: self.rawdata['Diode_IV']=rawdata
+        if rawdata is not None: self.rawdata[label]['Diode_IV']=rawdata
         
         v_fd, rho, conc, rawdata = pqc.analyse_cv_data(
             pqc.find_most_recent_file(path, "cv", whitelist=["3"]),
             options=options.pushPrefix("CV_DiodeHalf")
         )
-        if rawdata is not None: self.rawdata['Diode_CV']=rawdata
+        if rawdata is not None: self.rawdata[label]['Diode_CV']=rawdata
         self.dataseries['v_fd'].append(v_fd)
         self.dataseries['rho'].append(rho)
         self.dataseries['conc'].append(conc)
@@ -341,7 +343,7 @@ class PQC_resultset:
             pqc.find_most_recent_file(path, "van_der_pauw", whitelist=["metal", "clover"], blacklist=["reverse"]),
             options=options.pushPrefix("VdP_Metal_fwd"),
             min_correlation=0.95)
-        if rawdata is not None: self.rawdata['Metal_clover_leaf_Van-der-Pauw']=rawdata
+        if rawdata is not None: self.rawdata[label]['Metal_clover_leaf_Van-der-Pauw']=rawdata
         self.dataseries['vdp_metclo_f'].append(vdp_metclo_f)
 
         vdp_metclo_r, rawdata=pqc.analyse_van_der_pauw_data(
@@ -349,26 +351,26 @@ class PQC_resultset:
             options=options.pushPrefix("VdP_Metal_rev"),
             min_correlation=0.95
         )
-        if rawdata is not None: self.rawdata['Reverse_Metal_clover_leaf_Van-der-Pauw']=rawdata
+        if rawdata is not None: self.rawdata[label]['Reverse_Metal_clover_leaf_Van-der-Pauw']=rawdata
         self.dataseries['vdp_metclo_r'].append(vdp_metclo_r)
 
         vdp_p_cross_bridge_f, rawdata=pqc.analyse_van_der_pauw_data(
             pqc.find_most_recent_file(path, "van_der_pauw", whitelist=["P", "cross_bridge"], blacklist=["reverse"]),
             options=options.pushPrefix("VdP_P-edge_fwd"))
-        if rawdata is not None: self.rawdata['P_cross-bridge_Van-der-Pauw']=rawdata
+        if rawdata is not None: self.rawdata[label]['P_cross-bridge_Van-der-Pauw']=rawdata
         self.dataseries['vdp_p_cross_bridge_f'].append(vdp_p_cross_bridge_f)
 
         vdp_p_cross_bridge_r, rawdata=pqc.analyse_van_der_pauw_data(
             pqc.find_most_recent_file(path, "van_der_pauw", whitelist=["P", "cross_bridge", "reverse"]),
             options=options.pushPrefix("VdP_P-edge_rev"))
-        if rawdata is not None: self.rawdata['Reverse_P_cross-bridge_Van-der-Pauw']=rawdata
+        if rawdata is not None: self.rawdata[label]['Reverse_P_cross-bridge_Van-der-Pauw']=rawdata
         self.dataseries['vdp_p_cross_bridge_r'].append(vdp_p_cross_bridge_r)
 
         t_line_p_cross_bridge, rawdata=pqc.analyse_linewidth_data(
             pqc.find_most_recent_file(path, "linewidth", whitelist=["P", "cross_bridge"]),
             r_sheet=self.dataseries['vdp_p_cross_bridge_f'].values[-1],
             options=options.pushPrefix("lw_P-edge"))
-        if rawdata is not None: self.rawdata['P_cross-bridge_linewidth']=rawdata
+        if rawdata is not None: self.rawdata[label]['P_cross-bridge_linewidth']=rawdata
         self.dataseries['t_line_p_cross_bridge'].append(t_line_p_cross_bridge)
 
         vdp_bulk_f, rawdata=pqc.analyse_van_der_pauw_data(
@@ -376,27 +378,27 @@ class PQC_resultset:
             options=options.pushPrefix("VdP_bulk_fwd"),
             min_correlation=0.85)
         self.dataseries['vdp_bulk_f'].append(vdp_bulk_f)
-        if rawdata is not None: self.rawdata['Bulk_cross']=rawdata
+        if rawdata is not None: self.rawdata[label]['Bulk_cross']=rawdata
 
         vdp_bulk_r, rawdata=pqc.analyse_van_der_pauw_data(
             pqc.find_most_recent_file(path, whitelist=["bulk", "reverse", "cross"]),
             options=options.pushPrefix("VdP_bulk_rev"),
             min_correlation=0.85)
-        if rawdata is not None: self.rawdata['Reverse_bulk_cross']=rawdata
+        if rawdata is not None: self.rawdata[label]['Reverse_bulk_cross']=rawdata
         self.dataseries['vdp_bulk_r'].append(vdp_bulk_r)
 
         bulk_rsheet = (self.dataseries['vdp_bulk_f'].values[-1] + self.dataseries['vdp_bulk_r'].values[-1]) / 2
         bulk_rho0 = bulk_rsheet * np.log(2.) * 2. * 187e-6 / (2 - np.sqrt(2.)) * 1e-1
         self.dataseries['vdp_bulk_rho'].append(bulk_rho0 * 1.081)
-        self.rawdata['Bulk_cross'].add_data({'vdp_bulk_rho':bulk_rho0 * 1.081})
-        self.rawdata['Reverse_bulk_cross'].add_data({'vdp_bulk_rho':bulk_rho0 * 1.081})
+        if 'Bulk_cross' in self.rawdata[label]: self.rawdata[label]['Bulk_cross'].add_data({'vdp_bulk_rho':bulk_rho0 * 1.081})
+        if 'Reverse_bulk_cross' in self.rawdata[label]: self.rawdata[label]['Reverse_bulk_cross'].add_data({'vdp_bulk_rho':bulk_rho0 * 1.081})
         self.dataseries['vdp_bulk_rho_old'].append(bulk_rho0 * 1.218)
 
         meander_metal, rawdata=pqc.analyse_meander_data(
             pqc.find_most_recent_file(path, "meander", whitelist=["metal"]),
             options=options.pushPrefix("meander_metal"))
         self.dataseries['meander_metal'].append(meander_metal)
-        if rawdata is not None: self.rawdata['Metal_meander']=rawdata
+        if rawdata is not None: self.rawdata[label]['Metal_meander']=rawdata
 
         # =================================================== Flute 4 ===================================================
 
@@ -410,39 +412,39 @@ class PQC_resultset:
         self.dataseries['s0_gcd05'].append(s0_gcd05)
         if rawdata is not None:
             rawdata.add_data({'s0':s0_gcd05})
-            self.rawdata['GCD05']=rawdata
+            self.rawdata[label]['GCD05']=rawdata
 
         
         r_contact_n, rawdata=pqc.analyse_cbkr_data(
             pqc.find_most_recent_file(path, "cbkr", whitelist=["n"]),
             r_sheet=self.dataseries['vdp_n_f'].values[-1],
             options=options.pushPrefix("cbkr_n"))
-        if rawdata is not None: self.rawdata['N_CBKR']=rawdata
+        if rawdata is not None: self.rawdata[label]['N_CBKR']=rawdata
         self.dataseries['r_contact_n'].append(r_contact_n)
 
         r_contact_poly, rawdata=pqc.analyse_cbkr_data(
             pqc.find_most_recent_file(path, "cbkr", whitelist=["Polysilicon"]),
             r_sheet=self.dataseries['vdp_poly_f'].values[-1],
             options=options.pushPrefix("cbkr_poly"))
-        if rawdata is not None: self.rawdata['Polysilicon_CBKR']=rawdata
+        if rawdata is not None: self.rawdata[label]['Polysilicon_CBKR']=rawdata
         self.dataseries['r_contact_poly'].append(r_contact_poly)
 
         contact_poly, rawdata=pqc.analyse_contact_data(
             pqc.find_most_recent_file(path, "contact", whitelist=["chain", "polysilicon"]),
             options=options.pushPrefix("contact_chain_poly"))
-        if rawdata is not None: self.rawdata['Polysilicon_contact_chain']=rawdata
+        if rawdata is not None: self.rawdata[label]['Polysilicon_contact_chain']=rawdata
         self.dataseries['contact_poly'].append(contact_poly)
 
         contact_p, rawdata=pqc.analyse_contact_data(
             pqc.find_most_recent_file(path, "contact", whitelist=["chain", "P"]),
             options=options.pushPrefix("contact_chain_p"))
-        if rawdata is not None: self.rawdata['P_contact_chain']=rawdata
+        if rawdata is not None: self.rawdata[label]['P_contact_chain']=rawdata
         self.dataseries['contact_p'].append(contact_p)
 
         contact_n, rawdata=pqc.analyse_contact_data(
             pqc.find_most_recent_file(path, "contact", whitelist=["chain", "N"]),
             options=options.pushPrefix("contact_chain_n"))
-        if rawdata is not None: self.rawdata['N_contact_chain']=rawdata
+        if rawdata is not None: self.rawdata[label]['N_contact_chain']=rawdata
         self.dataseries['contact_n'].append(contact_n)
 
     def analyze(self, basepath, create_plots=False, force_eval=False):

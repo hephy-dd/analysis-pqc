@@ -30,12 +30,15 @@ def render_templates(pqc_resultset: PQC_resultset, templates: Iterable) -> None:
     statements, eg. ['*.xml', '*.txt'].
     """
     template_dir = os.path.join(os.path.dirname(__file__), "templates")
-
+    # Create output directory
+    create_dir(pqc_resultset.output_dir)
+    
     # Create the jinja2 environment.
     # Notice the use of trim_blocks, which greatly helps control whitespace.
     j2_env = Environment(loader=FileSystemLoader(template_dir), trim_blocks=True)
 
     filenames = set()
+
     for spec in templates:
         for filename in glob.glob(os.path.join(template_dir, spec)):
             # Ignore sub directories
@@ -47,33 +50,47 @@ def render_templates(pqc_resultset: PQC_resultset, templates: Iterable) -> None:
         basename = os.path.basename(filename)
         template_id, extension = os.path.splitext(basename)
 
-        # Skip xml templates of tests which were not carried out
         is_xml_template = extension == '.xml'
-        is_valid_template = any(key for key in pqc_resultset.rawdata.keys() if key in basename)
-        if is_xml_template and not is_valid_template:
-            print(f"skipping XML template: {filename}")
-            continue
-        rendered_content = j2_env.get_template(basename).render(
-            batch=pqc_resultset.batch,
-            dataseries=pqc_resultset.dataseries,
-            histograms=pqc_resultset.histograms,
-            rawdata=pqc_resultset.rawdata[template_id]
-        )
 
-        # Handle special stdout templates
-        if "stdout" in basename:
-            print(rendered_content)
-        else:
-            create_dir(pqc_resultset.output_dir)
-            if is_xml_template: output_filename = os.path.join(pqc_resultset.output_dir, pqc_resultset.rawdata[template_id].out_file_name)
-            else: output_filename = os.path.join(pqc_resultset.output_dir, basename)
+        # In case of xml template: generate one file per wafers / halfmoon
+        if is_xml_template:
+            for label in pqc_resultset.rawdata:
+                is_valid_template = any(key for key in pqc_resultset.rawdata[label] if key in basename)
+                if is_valid_template:
+                    rendered_content = j2_env.get_template(basename).render(
+                        batch=pqc_resultset.batch,
+                        dataseries=pqc_resultset.dataseries,
+                        histograms=pqc_resultset.histograms,
+                        rawdata=pqc_resultset.rawdata[label][template_id]
+                    )
+                    xml_output_dir=pqc_resultset.output_dir+os.sep+label
+                    create_dir(xml_output_dir)
+                    write_to_file(xml_output_dir,pqc_resultset.rawdata[label][template_id].out_file_name, rendered_content)
+                else:
+                    #print(f"skipping XML template: {filename}")
+                    continue
+        else:#not an xml template, one file for all measurements
+
+            rendered_content = j2_env.get_template(basename).render(
+                batch=pqc_resultset.batch,
+                dataseries=pqc_resultset.dataseries,
+                histograms=pqc_resultset.histograms
+            )
+            write_to_file(pqc_resultset.output_dir, basename, rendered_content)
+
             
-            with open(output_filename, "w") as fh:
-                print(f"rendering file {output_filename} ... ", end="", flush=True)
-                fh.write(rendered_content)
-                print("done.")
-
-
+def write_to_file(output_dir,basename,content):
+    # Handle special stdout templates
+    if "stdout" in basename:
+        print(content)
+    else:
+        output_filename = os.path.join(output_dir,basename)
+        
+        with open(output_filename, "w") as fh:
+            print(f"rendering file {output_filename} ... ", end="", flush=True)
+            fh.write(content)
+            print("done.")
+            
 def plot_timeline(pqc_batches: list, filename: str,
                   show_batch_numbers: bool = True) -> None:
     """Render timeline figure for batches."""
@@ -345,7 +362,6 @@ def main() -> None:
             config=config
         )
         render_templates(pqc_results, args.templates)
-    #pdb.set_trace()
     plt.show()
 
 
