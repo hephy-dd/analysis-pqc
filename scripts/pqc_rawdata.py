@@ -33,8 +33,8 @@ class PQC_RawData:
         #self.LOCATION='Hephy'
         self.INITIATED_BY_USER=self.operator
         self.RUN_BEGIN_TIMESTAMP=self.start_timestamp.replace('T',' ')
-        self.COMMENT_DESCRIPTION=''
-        self.VERSION=''
+        self.COMMENT_DESCRIPTION='Test'
+        self.VERSION=self.IVCV+'_measurement-004'
         self.FILE_NAME=filename
         self.WAITING_TIME_S=self.waiting_time.split(' ')[0]
         
