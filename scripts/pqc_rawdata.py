@@ -38,7 +38,7 @@ class PQC_RawData:
         self.FILE_NAME=filename
         self.WAITING_TIME_S=self.waiting_time.split(' ')[0]
         
-        self.NAME_LABEL=self.sample_name[7:]#removing 'HPK_VPX'
+        self.NAME_LABEL=self.edit_sample_name(self.sample_name,location)
         self.KIND_OF_PART='{} Halfmoon {}'.format(sensortype.replace('-',''),location[0])
         self.KIND_OF_HM_SET_ID={'L':'Left','R':'Right'}[location[1]]
         self.KIND_OF_HM_FLUTE_ID,self.KIND_OF_HM_STRUCT_ID,self.KIND_OF_HM_CONFIG_ID=self.get_structure(self.contact_name,self.measurement_name)
@@ -46,6 +46,12 @@ class PQC_RawData:
         
     def add_data(self,data_dict):
         self.data={**self.data,**data_dict}
+
+    def edit_sample_name(self,sample_name,location):
+        sample_name=sample_name.replace('HPK_VPX','')
+        sample_name=sample_name.replace('E'+location[1],'EE')
+        sample_name=sample_name.replace('W'+location[1],'WW')
+        return sample_name
 
     def get_structure(self,contact_name,measurement_name):
         lookup={
