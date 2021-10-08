@@ -25,7 +25,7 @@ def get_run_number(db_instance):
 def upload_to_db(filename, db_instance):
 
     try:
-        p1 = subprocess.run(['python3', 'ext'+os.sep+'cmsdbldr_client.py', '--login', f'--url=https://cmsdca.cern.ch/trk_loader/trker/{db_instance}', '{filename}'],  capture_output=True)
+        p1 = subprocess.run(['python3', 'ext'+os.sep+'cmsdbldr_client.py', '--login', f'--url=https://cmsdca.cern.ch/trk_loader/trker/{db_instance}', f'{filename}'],  capture_output=True)
 
         answer = p1.stdout.decode()
         answer = answer.split()
