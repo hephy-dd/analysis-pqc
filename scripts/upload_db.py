@@ -12,7 +12,7 @@ logging.basicConfig(filename='xml_upload.log', level=logging.INFO)#, format='%(l
 
 def get_run_number(db_instance):
     
-    p1 = subprocess.run( ['python3', 'ext'+os.sep+'rhapi.py', '--login', '--url=https://cmsdca.cern.ch/trk_rhapi', '-f', 'csv', '--clean',f"select r.run_number from trker_{db_instance}.trk_ot_test_nextrun_v r"], capture_output=True)
+    p1 = subprocess.run( ['python3', 'scripts'+os.sep+'ext'+os.sep+'rhapi.py', '--login', '--url=https://cmsdca.cern.ch/trk_rhapi', '-f', 'csv', '--clean',f"select r.run_number from trker_{db_instance}.trk_ot_test_nextrun_v r"], capture_output=True)
     #python3 ext/rhapi.py --login --url=https://cmsdca.cern.ch/trk_rhapi -f csv --clean "select r.run_number from trker_cmsr.trk_ot_test_nextrun_v r"
     answer = p1.stdout.decode()
     answer = answer.split()
@@ -25,8 +25,9 @@ def get_run_number(db_instance):
 def upload_to_db(filename, db_instance):
 
     try:
-        p1 = subprocess.run(['python3', 'ext'+os.sep+'cmsdbldr_client.py', '--login', f'--url=https://cmsdca.cern.ch/trk_loader/trker/{db_instance}', f'{filename}'],  capture_output=True)
-
+        #p1 = subprocess.run(['python3', 'ext'+os.sep+'cmsdbldr_client.py', '--login', f'--url=https://cmsdca.cern.ch/trk_loader/trker/{db_instance}', f'{filename}'],  capture_output=True)
+        p1 = subprocess.run(['python3', 'scripts'+os.sep+'ext'+os.sep+'cmsdbldr_client.py', '--login', f'--url=https://cmsdca.cern.ch/trk_loader/trker/{db_instance}', f'{filename}'])
+        # python3 ext/cmsdbldr_client.py --login --url=https://cmsdca.cern.ch/trk_loader/trker/int2r filename
         answer = p1.stdout.decode()
         answer = answer.split()
         logging.info(f'Uploading file {filename} to {db} database, replied with {answer}')
