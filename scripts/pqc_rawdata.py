@@ -15,7 +15,12 @@ class PQC_RawData:
         self.path=path
         self.test=test        
         self.sample_name=meta.get('sample_name')
-        man,batch,wafer,sensortype,hm,location=self.sample_name.split('_')
+        try:
+            man,batch,wafer,sensortype,hm,location=self.sample_name.split('_')
+        except:
+            # Sample name could not be parsed
+            man,batch,wafer,sensortype,hm,location='__','__','__','__','__','__'
+            
         self.sample_position=meta.get('sample_position')
         self.sample_comment=meta.get('sample_comment')
         self.contact_name=meta.get('contact_name')
@@ -40,7 +45,7 @@ class PQC_RawData:
         
         self.NAME_LABEL=self.edit_sample_name(self.sample_name,location)
         self.KIND_OF_PART='{} Halfmoon {}'.format(sensortype.replace('-',''),location[0])
-        self.KIND_OF_HM_SET_ID={'L':'Left','R':'Right'}[location[1]]
+        self.KIND_OF_HM_SET_ID={'L':'Left','R':'Right','_':'__'}[location[1]]
         self.KIND_OF_HM_FLUTE_ID,self.KIND_OF_HM_STRUCT_ID,self.KIND_OF_HM_CONFIG_ID=self.get_structure(self.contact_name,self.measurement_name)
         self.PROCEDURE_TYPE=self.measurement_name
         
