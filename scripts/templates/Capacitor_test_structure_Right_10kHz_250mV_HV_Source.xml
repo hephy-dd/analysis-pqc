@@ -29,7 +29,7 @@
 
 {% block parameters_data %}
 
-          <CACC_PFRD>{{ '%.3f' % rawdata.data.c_median }}</CACC_PFRD>
+          <CAC_PFRD>{{ '%.3f' % rawdata.data.c_median }}</CAC_PFRD>
           <DOX_NM>{{ '%.3f' % rawdata.data.d }}</DOX_NM>
 
 	  
