@@ -15,9 +15,9 @@ class PQC_RawData:
         self.path=path
         self.test=test        
         self.sample_name=meta.get('sample_name')
-        try:
+        if 'HPK_VPX' in self.sample_name:
             man,batch,wafer,sensortype,hm,location=self.sample_name.split('_')
-        except:
+        else:
             # Sample name could not be parsed
             man,batch,wafer,sensortype,hm,location='__','__','__','__','__','__'
             
@@ -52,10 +52,11 @@ class PQC_RawData:
     def add_data(self,data_dict):
         self.data={**self.data,**data_dict}
 
-    def edit_sample_name(self,sample_name,location):
+    def edit_sample_name(self,sample_name,location=None):
         sample_name=sample_name.replace('HPK_VPX','')
-        sample_name=sample_name.replace('E'+location[1],'EE')
-        sample_name=sample_name.replace('W'+location[1],'WW')
+        if location:
+            sample_name=sample_name.replace('E'+location[1],'EE')
+            sample_name=sample_name.replace('W'+location[1],'WW')
         return sample_name
 
     def get_structure(self,contact_name,measurement_name):
