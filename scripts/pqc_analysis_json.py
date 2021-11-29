@@ -149,8 +149,8 @@ def analyse_iv_data(path, options=None):
                       'temp':temp,#degC
                       'temp_box':temp_box,#degC
                       'humidity':humidity,#percent
-                      'i_600':i_600*1e6,#A to uA
-                      'i_800':i_800*1e6}) #A to uA
+                      'i_600':i_600*1e12,#A to pA
+                      'i_800':i_800*1e12}) #A to pA
     return i_600, i_800, rawdata
 
 
@@ -192,7 +192,7 @@ def analyse_cv_data(path, options=None):
         area = 1
         print("WARNING: clould not determine flute number - area dependent values will be wrong!")
 
-    v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status = analyse_cv(abs(v), c, area=area, cut_param= 0.008, carrier='holes')
+    v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status = analyse_cv(abs(v), c, area=area, cut_param= 0.03, carrier='holes')#cut_param= 0.008 for tracker, 0.03 for 120um
 
 
     annotate = 'V$_{{fd}}}}$: {} V\n\nT$_{{avg}}$: {} \u00B0C\nH$_{{avg}}$: {}'.format(v_dep2, round(np.mean(temp),2), round(np.mean(humidity),2)) + r'$\%$'
