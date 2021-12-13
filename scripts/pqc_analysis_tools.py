@@ -154,7 +154,7 @@ def normalise_parameter(parameter, unit):
     return x, unit
 
 
-def plot_curve(ax, x, y, title, xlabel, ylabel, legend=None, annotate=None, x_loc=0, y_loc=0):
+def plot_curve(ax, x, y, title, xlabel, ylabel, legend=None, annotate=None, x_loc=0, y_loc=0,yscale='linear'):
     """This function plots the x,y data and sets the desired labes into the axis
     etc. ax is an axes object and is necessary to create two or more subplots.
     In that case we want to overlay the curve and the fit.
@@ -162,6 +162,7 @@ def plot_curve(ax, x, y, title, xlabel, ylabel, legend=None, annotate=None, x_lo
 
     # plt.figure()
     ax.plot(x, y, '-o', ms=3, label=legend)
+    ax.set_yscale(yscale)
     if annotate:
         plt.annotate(annotate, (x_loc, y_loc), xycoords='figure fraction', color='black', bbox=dict(facecolor='deepskyblue', alpha=0.75), horizontalalignment='right', verticalalignment='top')
     plt.title(title)

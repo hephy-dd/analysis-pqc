@@ -20,7 +20,8 @@ class PQC_RawData:
         else:
             # Sample name could not be parsed
             man,batch,wafer,sensortype,hm,location='__','__','__','__','__','__'
-            
+
+        self.sensortype=sensortype.replace('-','') # 2-S to 2S
         self.sample_position=meta.get('sample_position')
         self.sample_comment=meta.get('sample_comment')
         self.contact_name=meta.get('contact_name')
@@ -38,15 +39,15 @@ class PQC_RawData:
         #self.LOCATION='Hephy'
         self.INITIATED_BY_USER=self.operator
         self.RUN_BEGIN_TIMESTAMP=self.start_timestamp.replace('T',' ')
-        self.COMMENT_DESCRIPTION='Test'
+        self.COMMENT_DESCRIPTION=''
         self.VERSION=self.IVCV+'_measurement-004'
         self.FILE_NAME=filename
         self.WAITING_TIME_S=self.waiting_time.split(' ')[0]
         
         self.NAME_LABEL=self.edit_sample_name(self.sample_name,location)
-        self.KIND_OF_PART='{} Halfmoon {}'.format(sensortype.replace('-',''),location[0])
+        self.KIND_OF_PART='{} Halfmoon {}'.format(self.sensortype,location[0])
         self.KIND_OF_HM_SET_ID={'L':'Left','R':'Right','_':'__'}[location[1]]
-        self.KIND_OF_HM_FLUTE_ID,self.KIND_OF_HM_STRUCT_ID,self.KIND_OF_HM_CONFIG_ID=self.get_structure(self.contact_name,self.measurement_name)
+        self.KIND_OF_HM_FLUTE_ID,self.KIND_OF_HM_STRUCT_ID,self.KIND_OF_HM_CONFIG_ID=self.get_structure()
         self.PROCEDURE_TYPE=self.measurement_name
         
     def add_data(self,data_dict):
@@ -59,9 +60,9 @@ class PQC_RawData:
             sample_name=sample_name.replace('W'+location[1],'WW')
         return sample_name
 
-    def get_structure(self,contact_name,measurement_name):
+    def get_structure(self):
         lookup={
-            'FET':['PQC1','FET_PSS','Not Used'],
+            'FET':['PQC1','FET','Not Used'],
             'MOS capacitor (HV Source)':['PQC1','MOS_QUARTER','Not Used'],
             'Capacitor test structure Left 10kHz 250mV (HV Source)':['PQC1','CAP_W','Not Used'],
             'Capacitor test structure Right 10kHz 250mV (HV Source)':['PQC1','CAP_E','Not Used'],
@@ -93,9 +94,9 @@ class PQC_RawData:
             'Polysilicon contact chain':['PQC4','CC_POLY','Not Used'],
             'P+ contact chain':['PQC4','CC_EDGE','Not Used'],
             'N+ contact chain':['PQC4','CC_STRIP','Not Used']}
-        FLUTE_ID,STRUCT_ID,CONFIG_ID=lookup[measurement_name]
+        FLUTE_ID,STRUCT_ID,CONFIG_ID=lookup[self.measurement_name]
 
-        if FLUTE_ID[-1] != contact_name[-1]:
+        if FLUTE_ID[-1] != self.contact_name[-1]:
             raise ValueError('Flute nr. mismatch',self.sample_name,self.test)
 
         return FLUTE_ID,STRUCT_ID,CONFIG_ID
