@@ -128,8 +128,8 @@ def analyse_iv_data(path, options=None):
         annotate +='rH$_{avg}$:' + '{:0.2f}'.format(np.mean(humidity)) + r'$\%$'
 
         fig,ax = plt.subplots(1,1)
-        plot_curve(ax, v, i*1e6, options.plotTitle("diode IV??"), 'Reverse Bias Voltage / A', 'Current / uA', 'SMU', annotate, x_loc, y_loc)
-        plot_curve(ax, v, i_elm*1e6, options.plotTitle("diode IV??"), 'Reverse Bias Voltage / A', 'Current / uA', 'Electrometer', annotate, x_loc, y_loc)
+        plot_curve(ax, v, i*1e6, options.plotTitle("diode IV??"), 'Reverse Bias Voltage / A', 'Current / uA', 'SMU', annotate, x_loc, y_loc,yscale='log')
+        plot_curve(ax, v, i_elm*1e6, options.plotTitle("diode IV??"), 'Reverse Bias Voltage / A', 'Current / uA', 'Electrometer', annotate, x_loc, y_loc,yscale='log')
         options.savePlot("diode_iv??", fig)
 
     if options.print:
