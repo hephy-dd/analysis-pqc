@@ -14,7 +14,7 @@
     <DATA>
      <TIME>{{ rawdata.data.timestamp_abs[id] }}</TIME>
      <VOLTS>{{ '%.6E' % rawdata.data.v[id] }}</VOLTS>
-     <CURRNT_NAMPR>{{ '%.6E' % rawdata.data.i[id] }}</CURRNT_NAMPR>
+     <CURRNT_NAMP>{{ '%.6E' % rawdata.data.i[id] }}</CURRNT_NAMP>
      <TEMP_DEGC>{{ '%.3f' % rawdata.data.temp[id] }}</TEMP_DEGC>
      <AIR_TEMP_DEGC>{{ '%.3f' % rawdata.data.temp_box[id] }}</AIR_TEMP_DEGC>
      <RH_PRCNT>{{ '%.3f' % rawdata.data.humidity[id] }}</RH_PRCNT>

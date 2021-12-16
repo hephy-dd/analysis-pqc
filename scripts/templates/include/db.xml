@@ -51,8 +51,8 @@
     <CHILD_DATA_SET>
      <HEADER>
       <TYPE>
-       <EXTENSION_TABLE_NAME>HALFMOON_{{ rawdata.IVCV }}_PAR</EXTENSION_TABLE_NAME>
-       <NAME>Tracker Halfmoon {{ rawdata.IVCV }} Parameters</NAME>
+       <EXTENSION_TABLE_NAME>HALFMOON_{{ rawdata.PAR_EXTENSION_TABLE_NAME }}_PAR</EXTENSION_TABLE_NAME>
+       <NAME>Tracker Halfmoon {{ rawdata.PAR_EXTENSION_TABLE_NAME }} Parameters</NAME>
       </TYPE>
      </HEADER>
      <DATA_SET>

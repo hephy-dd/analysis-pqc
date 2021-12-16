@@ -27,11 +27,11 @@ def get_run_number(db_instance):
 def upload_to_db(filename, db_instance):
     ext_filename = os.path.join(script_path, 'ext', 'cmsdbldr_client.py')    
     try:
-        p1 = subprocess.run(['python3', ext_filename, '--login', f'--url=https://cmsdca.cern.ch/trk_loader/trker/{db_instance}', f'{filename}'])
+        p1 = subprocess.run(['python3', ext_filename, '--login', f'--url=https://cmsdca.cern.ch/trk_loader/trker/{db_instance}', f'{filename}'], capture_output=True)
         # python3 ext/cmsdbldr_client.py --login --url=https://cmsdca.cern.ch/trk_loader/trker/int2r filename
         answer = p1.stdout.decode()
         answer = answer.split()
-        logging.info(f'Uploading file {filename} to {db} database, replied with {answer}')
+        logging.info(f'Uploading file {filename} to {db_instance} database, replied with {answer}')
     except Exception as error:
         print(error)
 
@@ -63,7 +63,7 @@ def run(path,db):
     filenames=[]
     for root, dirs, files in os.walk(path):
         xml_files=[filename for filename in files if os.path.splitext(filename)[1] == '.xml']
-        for xml_file in xml_files: filenames.append(root + os.sep + xml_file)
+        for xml_file in xml_files: filenames.append(root + xml_file)
 
     print(f'Upload {len(filenames)} files to {db} database, continue? (yes)')
     choice = input().lower()
