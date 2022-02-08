@@ -69,7 +69,7 @@ class PQC_RawData:
 
     def get_structure(self):
         lookup={
-            'FET':['PQC1','FET_'+self.sensortype,'Not Used'],
+            'FET':['PQC1','FET_PSS','Not Used'],# PQC Flute 1 has PSS layout FET
             'MOS capacitor (HV Source)':['PQC1','MOS_QUARTER','Not Used'],
             'Capacitor test structure Left 10kHz 250mV (HV Source)':['PQC1','CAP_W','Not Used'],
             'Capacitor test structure Right 10kHz 250mV (HV Source)':['PQC1','CAP_E','Not Used'],
