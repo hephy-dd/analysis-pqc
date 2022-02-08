@@ -31,7 +31,6 @@ def upload_to_db(filename, db_instance):
         # python3 ext/cmsdbldr_client.py --login --url=https://cmsdca.cern.ch/trk_loader/trker/int2r filename
         answer = p1.stdout.decode()
         answer = answer.split()
-        logging.info(f'Uploading file {filename} to {db_instance} database, replied with {answer}')
         return answer
     except Exception as error:
         print(error)
@@ -56,7 +55,7 @@ def update_file(filename,pattern,replace):
 
     
 def run(path,db):
-
+   
     if db == 'development': db_instance = 'int2r'
     elif db == 'production': db_instance = 'cmsr'
     else: raise Exception('DB not understood, choose production or development')
@@ -65,13 +64,15 @@ def run(path,db):
     for root, dirs, files in os.walk(path):
         xml_files=[filename for filename in files if os.path.splitext(filename)[1] == '.xml']
         for xml_file in xml_files: filenames.append(os.path.join(root,xml_file))
-
-    print(f'Upload {len(filenames)} files to {db} database, continue? (yes)')
+    number_of_files=len(filenames)
+    print(f'Upload {number_of_files} files to {db} database, continue? (yes)')
     choice = input().lower()
 
     uploaded=0
     failed=[]
     if choice == 'yes':
+        logging.info('-----------------------------------------------------------------')
+        logging.info(f'Uploading {number_of_files} files from {path} to {db} database\n')
         for ifile,filename in enumerate(filenames):
 
             ##Query of run number not necessary, will be assigned on upload
@@ -80,13 +81,14 @@ def run(path,db):
             print('Uploading file',ifile,end='\r')
             answer=upload_to_db(filename,db_instance)
             if answer[3]!='200':
+                logging.info(f'Failed: Uploading file {filename} to {db} database, replied with {answer}')
                 failed.append(filename)
             else:
                 uploaded+=1
-
+        print('\n')
         print(uploaded,'files uploaded')
-        print('Failed:',failed)
-            
+        logging.info(f'Uploaded/Total: {uploaded}/{number_of_files}\n')
+
     else:
         print('Nothing uploaded')    
 
