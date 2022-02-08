@@ -32,6 +32,7 @@ def upload_to_db(filename, db_instance):
         answer = p1.stdout.decode()
         answer = answer.split()
         logging.info(f'Uploading file {filename} to {db_instance} database, replied with {answer}')
+        return answer
     except Exception as error:
         print(error)
 
@@ -63,18 +64,28 @@ def run(path,db):
     filenames=[]
     for root, dirs, files in os.walk(path):
         xml_files=[filename for filename in files if os.path.splitext(filename)[1] == '.xml']
-        for xml_file in xml_files: filenames.append(root + xml_file)
+        for xml_file in xml_files: filenames.append(os.path.join(root,xml_file))
 
     print(f'Upload {len(filenames)} files to {db} database, continue? (yes)')
     choice = input().lower()
+
+    uploaded=0
+    failed=[]
     if choice == 'yes':
         for ifile,filename in enumerate(filenames):
 
             ##Query of run number not necessary, will be assigned on upload
             #run=get_run_number(db_instance) 
             #update_file(filename,'<RUN_NUMBER></RUN_NUMBER>',f'<RUN_NUMBER>{run}</RUN_NUMBER>')
+            print('Uploading file',ifile,end='\r')
+            answer=upload_to_db(filename,db_instance)
+            if answer[3]!='200':
+                failed.append(filename)
+            else:
+                uploaded+=1
 
-            upload_to_db(filename,db_instance)
+        print(uploaded,'files uploaded')
+        print('Failed:',failed)
             
     else:
         print('Nothing uploaded')    

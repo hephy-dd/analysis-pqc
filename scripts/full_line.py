@@ -44,7 +44,7 @@ def render_templates(pqc_resultset: PQC_resultset, templates: Iterable) -> None:
             # Ignore sub directories
             if os.path.isfile(filename):
                 filenames.add(filename)
-
+    xml_counter=0
     for filename in filenames:
 
         basename = os.path.basename(filename)
@@ -55,7 +55,7 @@ def render_templates(pqc_resultset: PQC_resultset, templates: Iterable) -> None:
         # In case of xml template: generate one file per wafers / halfmoon
         if is_xml_template:
             for label in pqc_resultset.rawdata:
-                is_valid_template = any(key for key in pqc_resultset.rawdata[label] if key in basename)
+                is_valid_template = any(key for key in pqc_resultset.rawdata[label] if key == template_id)
                 if is_valid_template:
                     rendered_content = j2_env.get_template(basename).render(
                         batch=pqc_resultset.batch,
@@ -66,6 +66,7 @@ def render_templates(pqc_resultset: PQC_resultset, templates: Iterable) -> None:
                     xml_output_dir=pqc_resultset.output_dir+os.sep+label
                     create_dir(xml_output_dir)
                     write_to_file(xml_output_dir,pqc_resultset.rawdata[label][template_id].out_file_name, rendered_content)
+                    xml_counter+=1
                 else:
                     #print(f"skipping XML template: {filename}")
                     continue
@@ -77,6 +78,7 @@ def render_templates(pqc_resultset: PQC_resultset, templates: Iterable) -> None:
                 histograms=pqc_resultset.histograms
             )
             write_to_file(pqc_resultset.output_dir, basename, rendered_content)
+    return xml_counter
 
             
 def write_to_file(output_dir,basename,content):
@@ -361,7 +363,10 @@ def main() -> None:
             force_eval=args.force,
             config=config
         )
-        render_templates(pqc_results, args.templates)
+        xml_counter=render_templates(pqc_results, args.templates)
+        print(sum([len(pqc_results.rawdata[key]) for key in pqc_results.rawdata]),'datasets analyzed')
+        print(xml_counter,'XML-files generated')
+
     plt.show()
 
 
