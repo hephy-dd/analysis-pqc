@@ -14,14 +14,14 @@ class PQC_RawData:
         self.data={}
         self.path=path
         self.test=test        
-        self.sample_name=meta.get('sample_name')
+        self.sample_name=meta.get('sample_name').replace('2_S','2-S')
         if 'HPK_VPX' in self.sample_name:
             man,batch,wafer,sensortype,hm,location=self.sample_name.split('_')
         else:
             # Sample name could not be parsed
             man,batch,wafer,sensortype,hm,location='__','__','__','__','__','__'
 
-        self.sensortype=sensortype.replace('-','') # 2-S to 2S
+        self.sensortype=sensortype.replace('2-S','2S').replace('PSP','PS-p').replace('PSS','PS-s')
         self.sample_position=meta.get('sample_position')
         self.sample_comment=meta.get('sample_comment')
         self.contact_name=meta.get('contact_name')
