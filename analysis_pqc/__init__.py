@@ -6,15 +6,16 @@
 ## ------------------------------------
 
 import warnings
+import traceback
+from collections import namedtuple
+
 import numpy as np
 
 from scipy.interpolate import CubicSpline
 from scipy.stats import linregress
 import scipy.signal
-from collections import namedtuple
-import traceback
 
-__version__ = '0.3.1'
+__version__ = '0.4.0'
 
 __all__ = [
     'STATUS_NONE',
