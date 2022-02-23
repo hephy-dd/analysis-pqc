@@ -1,0 +1,73 @@
+<?xml version='1.0'  encoding='UTF-8' standalone='yes'?>
+<ROOT>
+ <HEADER>
+  <TYPE>
+   <EXTENSION_TABLE_NAME>HALFMOON_METADATA</EXTENSION_TABLE_NAME>
+   <NAME>Tracker Halfmoon Metadata</NAME>
+  </TYPE>
+  <RUN mode="SEQUENCE_NUMBER" sequence="TRK_OT_RUN_SEQ">
+    <RUN_TYPE>PQC</RUN_TYPE>
+{#    <RUN_NUMBER></RUN_NUMBER>#}
+    <LOCATION>Hephy</LOCATION>
+{# or {{ rawdata.LOCATION }} #}
+    <INITIATED_BY_USER>{{ rawdata.INITIATED_BY_USER }}</INITIATED_BY_USER>
+    <RUN_BEGIN_TIMESTAMP>{{ rawdata.RUN_BEGIN_TIMESTAMP }}</RUN_BEGIN_TIMESTAMP>
+    <COMMENT_DESCRIPTION>{{ rawdata.sample_comment }}</COMMENT_DESCRIPTION>
+  </RUN>
+ </HEADER>
+ <DATA_SET>
+  <COMMENT_DESCRIPTION>Metadata with flute and structure</COMMENT_DESCRIPTION>
+  <VERSION>v2</VERSION>
+  <PART>
+    <NAME_LABEL>{{ rawdata.NAME_LABEL }}</NAME_LABEL>
+    <KIND_OF_PART>{{ rawdata.KIND_OF_PART }}</KIND_OF_PART>
+  </PART>
+  <DATA>
+   <KIND_OF_HM_SET_ID>{{ rawdata.KIND_OF_HM_SET_ID }}</KIND_OF_HM_SET_ID>
+   <KIND_OF_HM_FLUTE_ID>{{ rawdata.KIND_OF_HM_FLUTE_ID }}</KIND_OF_HM_FLUTE_ID>
+   <KIND_OF_HM_STRUCT_ID>{{ rawdata.KIND_OF_HM_STRUCT_ID }}</KIND_OF_HM_STRUCT_ID>
+   <KIND_OF_HM_CONFIG_ID>{{ rawdata.KIND_OF_HM_CONFIG_ID }}</KIND_OF_HM_CONFIG_ID>
+
+   <PROCEDURE_TYPE>{{ rawdata.PROCEDURE_TYPE }}</PROCEDURE_TYPE>
+   <FILE_NAME>{{ rawdata.FILE_NAME }}</FILE_NAME>
+{% block structure_data %}{% endblock %}
+  </DATA>
+  <CHILD_DATA_SET>
+   <HEADER>
+    <TYPE>
+     <EXTENSION_TABLE_NAME>TEST_SENSOR_{{ rawdata.IVCV }}</EXTENSION_TABLE_NAME>
+     <NAME>Tracker Halfmoon {{ rawdata.IVCV }} Test</NAME>
+    </TYPE>
+   </HEADER>
+   <DATA_SET>
+    <COMMENT_DESCRIPTION>{{ rawdata.COMMENT_DESCRIPTION }}</COMMENT_DESCRIPTION>
+    <VERSION>{{ rawdata.VERSION }}</VERSION>
+    <PART>
+      <NAME_LABEL>{{ rawdata.NAME_LABEL }}</NAME_LABEL>
+      <KIND_OF_PART>{{ rawdata.KIND_OF_PART }}</KIND_OF_PART>
+    </PART>
+
+{% block measurement_data %}{% endblock %}
+    <CHILD_DATA_SET>
+     <HEADER>
+      <TYPE>
+       <EXTENSION_TABLE_NAME>HALFMOON_{{ rawdata.PAR_EXTENSION_TABLE_NAME }}_PAR</EXTENSION_TABLE_NAME>
+       <NAME>Tracker Halfmoon {{ rawdata.PAR_EXTENSION_TABLE_NAME }} Parameters</NAME>
+      </TYPE>
+     </HEADER>
+     <DATA_SET>
+      <COMMENT_DESCRIPTION>{{ rawdata.COMMENT_DESCRIPTION }}</COMMENT_DESCRIPTION>
+      <VERSION>{{ rawdata.VERSION }}</VERSION>
+      <PART>
+        <NAME_LABEL>{{ rawdata.NAME_LABEL }}</NAME_LABEL>
+        <KIND_OF_PART>{{ rawdata.KIND_OF_PART }}</KIND_OF_PART>
+      </PART>
+      <DATA>
+{% block parameters_data %}{% endblock %}
+      </DATA>
+     </DATA_SET>
+    </CHILD_DATA_SET>
+   </DATA_SET>
+  </CHILD_DATA_SET>
+ </DATA_SET>
+</ROOT>

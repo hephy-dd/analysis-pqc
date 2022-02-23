@@ -10,10 +10,13 @@ import dateutil.parser as timestamp_parser
 import matplotlib.pyplot as plt
 import numpy as np
 
+from datetime import datetime,timedelta
+
 __all__ = [
     'find_most_recent_file',
     'find_all_files_from_path',
     'get_timestamp',
+    'rel_to_abs_timestamp',
     'assign_label',
     'read_json_file',
     'units',
@@ -117,6 +120,11 @@ def get_timestamp(filename):
         ret = timestamp_parser.parse(data['meta']['start_timestamp'])
     return ret
 
+def rel_to_abs_timestamp(start_time,incr_time):
+    dt_start_time=datetime.strptime(start_time,'%Y-%m-%d %H:%M:%S')
+    dt_new_time=dt_start_time+timedelta(seconds=incr_time)
+    return dt_new_time.strftime('%Y-%m-%d %H:%M:%S.%f')
+
 
 def units(data, unit):
     """This function converts the unit scale to the correct one."""
@@ -146,7 +154,7 @@ def normalise_parameter(parameter, unit):
     return x, unit
 
 
-def plot_curve(ax, x, y, title, xlabel, ylabel, legend=None, annotate=None, x_loc=0, y_loc=0):
+def plot_curve(ax, x, y, title, xlabel, ylabel, legend=None, annotate=None, x_loc=0, y_loc=0,yscale='linear'):
     """This function plots the x,y data and sets the desired labes into the axis
     etc. ax is an axes object and is necessary to create two or more subplots.
     In that case we want to overlay the curve and the fit.
@@ -154,6 +162,7 @@ def plot_curve(ax, x, y, title, xlabel, ylabel, legend=None, annotate=None, x_lo
 
     # plt.figure()
     ax.plot(x, y, '-o', ms=3, label=legend)
+    ax.set_yscale(yscale)
     if annotate:
         plt.annotate(annotate, (x_loc, y_loc), xycoords='figure fraction', color='black', bbox=dict(facecolor='deepskyblue', alpha=0.75), horizontalalignment='right', verticalalignment='top')
     plt.title(title)
