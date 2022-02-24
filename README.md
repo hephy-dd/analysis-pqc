@@ -32,7 +32,7 @@ python setup.py develop
 python setup.py test
 ```
 
-Run full-line scripts
+## Run full-line script
 
 ```bash
 python scripts/full_line.py /PQC/Tracker/Production/Data/VPX35953/ -HP -t*.html -o ../test-pqc
@@ -74,8 +74,9 @@ optional arguments:
 Templates that contain ```stdout``` will be sent to the stdout stream automatically, all others will be located in DIR/analysis_<batch-name>/
 
 ## Other scripts
-### upload xml files to the database
-Upload all .xml files in <path> (including subdirectories) to the database: 'production' (cmsr) or 'development' (int2r)
+
+### Upload XML files to the database
+Upload all .xml files in <path> (including subdirectories) to the database: `production` (cmsr) or `development` (int2r)
 ```bash
 python3 scripts/upload_db.py -db <database> <path>
 ```
