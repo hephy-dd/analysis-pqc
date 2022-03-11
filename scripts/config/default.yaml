@@ -268,3 +268,18 @@ pqc_values:
     expected_value: 85.0
     unit: kOhm
     show_multiplier: 1e-3
+
+analysis_parameters:
+  analyse_iv:
+  analyse_cv:
+    cut_param: 0.008
+  analyse_mos:
+  analyse_gcd:
+  analyse_fet:
+  analyse_van_der_pauw:
+  analyse_linewidth:
+  analyse_cbkr:
+  analyse_contact:
+  analyse_meander:
+  analyse_breakdown:
+  analyse_capacitor:

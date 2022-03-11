@@ -93,10 +93,13 @@ class AnalysisOptions:
         return (f"{prefix}: {self.label}").replace('_', ' ')
 
 
-def analyse_iv_data(path, options=None):
+def analyse_iv_data(path, options=None,config=None):
     test = 'iv'
     if path is None:
         return NOT_MEASURED, NOT_MEASURED, None
+
+    if config:
+        kwargs=config['analysis_parameters']['analyse_iv']    
 
     if options is None:
         options = AnalysisOptions()
@@ -154,12 +157,14 @@ def analyse_iv_data(path, options=None):
     return i_600, i_800, rawdata
 
 
-def analyse_cv_data(path, options=None):
+def analyse_cv_data(path, options=None,config=None):
     test = 'cv'
 
     if path is None:
         return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, None
 
+    if config:
+        kwargs=config['analysis_parameters']['analyse_cv']    
     if options is None:
         options = AnalysisOptions()
 
@@ -192,7 +197,7 @@ def analyse_cv_data(path, options=None):
         area = 1
         print("WARNING: clould not determine flute number - area dependent values will be wrong!")
 
-    v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status = analyse_cv(abs(v), c, area=area, cut_param= 0.008, carrier='holes')#cut_param= 0.008 for tracker, 0.03 for 120um
+    v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status = analyse_cv(abs(v), c, area=area, carrier='holes',**kwargs)#cut_param= 0.008 for tracker, 0.03 for 120um
 
 
     annotate = 'V$_{{fd}}}}$: {} V\n\nT$_{{avg}}$: {} \u00B0C\nH$_{{avg}}$: {}'.format(v_dep2, round(np.mean(temp),2), round(np.mean(humidity),2)) + r'$\%$'
@@ -244,11 +249,14 @@ def analyse_cv_data(path, options=None):
     return v_dep2, rho, conc, rawdata
 
 
-def analyse_mos_data(path, options=None):
+def analyse_mos_data(path, options=None,config=None):
     test = 'mos'
 
     if path is None:
         return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, None
+
+    if config:
+        kwargs=config['analysis_parameters']['analyse_mos']    
 
     if options is None:
         options = AnalysisOptions()
@@ -327,11 +335,14 @@ def analyse_mos_data(path, options=None):
     return v_fb1, v_fb2, t_ox, n_ox, c_acc_m, rawdata
 
 
-def analyse_gcd_data(path, options=None):
+def analyse_gcd_data(path, options=None,config=None):
     test = 'gcd'
 
     if path is None:
         return NOT_MEASURED, NOT_MEASURED, None
+
+    if config:
+        kwargs=config['analysis_parameters']['analyse_gcd']    
 
     if options is None:
         options = AnalysisOptions()
@@ -394,11 +405,14 @@ def analyse_gcd_data(path, options=None):
     return gcd_result.i_surf, gcd_result.i_bulk, rawdata
 
 
-def analyse_fet_data(path, options=None):
+def analyse_fet_data(path, options=None,config=None):
     test = 'fet'
 
     if path is None:
         return NOT_MEASURED, None
+
+    if config:
+        kwargs=config['analysis_parameters']['analyse_fet']    
 
     if options is None:
         options = AnalysisOptions()
@@ -469,12 +483,15 @@ def analyse_fet_data(path, options=None):
     return v_th, rawdata
 
 
-def analyse_van_der_pauw_data(path, options=None, min_correlation=0.99):
+def analyse_van_der_pauw_data(path, options=None, min_correlation=0.99,config=None):
     test = 'van-der-pauw'
 
     if path is None:
         options.popPrefix("-")
         return NOT_MEASURED, None
+
+    if config:
+        kwargs=config['analysis_parameters']['analyse_van_der_pauw']    
 
     if options is None:
         options = AnalysisOptions()
@@ -539,12 +556,15 @@ def analyse_van_der_pauw_data(path, options=None, min_correlation=0.99):
     return r_sheet, rawdata
 
 
-def analyse_linewidth_data(path, r_sheet=np.nan, options=None, min_correlation=0.9):
+def analyse_linewidth_data(path, r_sheet=np.nan, options=None, min_correlation=0.9,config=None):
     test = 'linewidth'
 
     if path is None:
         options.popPrefix("-")
         return NOT_MEASURED, None
+
+    if config:
+        kwargs=config['analysis_parameters']['analyse_linewidth']    
 
     if options is None:
         options = AnalysisOptions()
@@ -603,12 +623,15 @@ def analyse_linewidth_data(path, r_sheet=np.nan, options=None, min_correlation=0
     return t_line, rawdata
 
 
-def analyse_cbkr_data(path, r_sheet=np.nan, options=None, min_correlation=0.95):
+def analyse_cbkr_data(path, r_sheet=np.nan, options=None, min_correlation=0.95,config=None):
     test = 'cbkr'
 
     if path is None:
         options.popPrefix("-")
         return NOT_MEASURED, None
+
+    if config:
+        kwargs=config['analysis_parameters']['analyse_cbkr']    
 
     if options is None:
         options = AnalysisOptions()
@@ -665,12 +688,15 @@ def analyse_cbkr_data(path, r_sheet=np.nan, options=None, min_correlation=0.95):
     return r_contact, rawdata
 
 
-def analyse_contact_data(path, options=None, min_correlation=0.95):
+def analyse_contact_data(path, options=None, min_correlation=0.95,config=None):
     test= 'contact'
 
     if path is None:
         options.popPrefix("-")
         return NOT_MEASURED, None
+
+    if config:
+        kwargs=config['analysis_parameters']['analyse_contact']    
 
     if options is None:
         options = AnalysisOptions()
@@ -729,12 +755,15 @@ def analyse_contact_data(path, options=None, min_correlation=0.95):
     return r_contact, rawdata
 
 
-def analyse_meander_data(path, options=None, min_correlation=0.99):
+def analyse_meander_data(path, options=None, min_correlation=0.99,config=None):
     test = 'meander'
 
     if path is None:
         options.popPrefix("-")
         return NOT_MEASURED, None
+
+    if config:
+        kwargs=config['analysis_parameters']['analyse_meander']    
 
     if options is None:
         options = AnalysisOptions()
@@ -796,11 +825,14 @@ def analyse_meander_data(path, options=None, min_correlation=0.99):
     return r, rawdata
 
 
-def analyse_breakdown_data(path, options=None):
+def analyse_breakdown_data(path, options=None,config=None):
     test = 'breakdown'
 
     if path is None:
         return NOT_MEASURED, None
+
+    if config:
+        kwargs=config['analysis_parameters']['analyse_breakdown']    
 
     if options is None:
         options = AnalysisOptions()
@@ -853,11 +885,14 @@ def analyse_breakdown_data(path, options=None):
     return v_bd, rawdata
 
 
-def analyse_capacitor_data(path, options=None):
+def analyse_capacitor_data(path, options=None,config=None):
     test = 'capacitor'
 
     if path is None:
         return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, None
+
+    if config:
+        kwargs=config['analysis_parameters']['analyse_capacitor']    
 
     if options is None:
         options = AnalysisOptions()
