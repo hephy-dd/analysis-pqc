@@ -286,7 +286,7 @@ def load_batch(path: str, outdir: str = None, *, lazy: bool = False,
     # Prevent to create ouput directory if not given
     if has_outdir:
         pqc_results.prepare_analysis_dir(outdir)
-    pqc_results.analyze(path, create_plots=create_plots, force_eval=force_eval)
+    pqc_results.analyze(path, create_plots=create_plots, force_eval=force_eval,config=config)
 
     # Render histograms (optional)
     if create_histograms:
@@ -347,7 +347,6 @@ def main() -> None:
 
     # Load configuration
     config = load_configuration(args.config)
-
     # Create output directory
     create_dir(outdir)
 
