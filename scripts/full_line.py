@@ -9,8 +9,7 @@ from collections.abc import Iterable
 from datetime import timedelta
 
 import matplotlib.pyplot as plt
-from matplotlib import rcParams
-from matplotlib import gridspec
+from matplotlib import gridspec, rcParams
 from matplotlib.figure import Figure
 
 from jinja2 import Environment, FileSystemLoader
@@ -32,7 +31,7 @@ def render_templates(pqc_resultset: PQC_resultset, templates: Iterable) -> None:
     template_dir = os.path.join(os.path.dirname(__file__), "templates")
     # Create output directory
     create_dir(pqc_resultset.output_dir)
-    
+
     # Create the jinja2 environment.
     # Notice the use of trim_blocks, which greatly helps control whitespace.
     j2_env = Environment(loader=FileSystemLoader(template_dir), trim_blocks=True)
@@ -44,7 +43,9 @@ def render_templates(pqc_resultset: PQC_resultset, templates: Iterable) -> None:
             # Ignore sub directories
             if os.path.isfile(filename):
                 filenames.add(filename)
-    xml_counter=0
+
+    xml_counter = 0
+
     for filename in filenames:
 
         basename = os.path.basename(filename)
@@ -66,33 +67,36 @@ def render_templates(pqc_resultset: PQC_resultset, templates: Iterable) -> None:
                     xml_output_dir=pqc_resultset.output_dir+os.sep+label
                     create_dir(xml_output_dir)
                     write_to_file(xml_output_dir,pqc_resultset.rawdata[label][template_id].out_file_name, rendered_content)
-                    xml_counter+=1
+                    xml_counter += 1
                 else:
-                    #print(f"skipping XML template: {filename}")
+                    # print(f"skipping XML template: {filename}")
                     continue
-        else:#not an xml template, one file for all measurements
-
+        else:
+            # not an xml template, one file for all measurements
             rendered_content = j2_env.get_template(basename).render(
                 batch=pqc_resultset.batch,
                 dataseries=pqc_resultset.dataseries,
                 histograms=pqc_resultset.histograms
             )
             write_to_file(pqc_resultset.output_dir, basename, rendered_content)
-    return xml_counter
 
-            
-def write_to_file(output_dir,basename,content):
+    if xml_counter:
+        print(xml_counter, f"{xml_counter} XML files generated.")
+
+
+def write_to_file(output_dir, basename, content) -> None:
     # Handle special stdout templates
     if "stdout" in basename:
         print(content)
     else:
         output_filename = os.path.join(output_dir,basename)
-        
+
         with open(output_filename, "w") as fh:
             print(f"rendering file {output_filename} ... ", end="", flush=True)
             fh.write(content)
             print("done.")
-            
+
+
 def plot_timeline(pqc_batches: list, filename: str,
                   show_batch_numbers: bool = True) -> None:
     """Render timeline figure for batches."""
@@ -286,7 +290,11 @@ def load_batch(path: str, outdir: str = None, *, lazy: bool = False,
     # Prevent to create ouput directory if not given
     if has_outdir:
         pqc_results.prepare_analysis_dir(outdir)
-    pqc_results.analyze(path, create_plots=create_plots, force_eval=force_eval,config=config)
+    pqc_results.analyze(path, create_plots=create_plots, force_eval=force_eval,
+                        config=config)
+
+    count = sum([len(pqc_results.rawdata[key]) for key in pqc_results.rawdata])
+    print(f"{count} datasets analyzed.")
 
     # Render histograms (optional)
     if create_histograms:
@@ -297,7 +305,7 @@ def load_batch(path: str, outdir: str = None, *, lazy: bool = False,
     return pqc_results
 
 
-def run_multibatch(path: str, outdir: str, *, config: dict):
+def run_multibatch(path: str, outdir: str, *, config: dict) -> None:
     print("Multibatch mode - experimental!")
     dirs = glob.glob(os.path.join(path, "*"))
     dirs = [t for t in dirs if "histograms" not in t and "VPX" in t]  # TODO!
@@ -362,9 +370,7 @@ def main() -> None:
             force_eval=args.force,
             config=config
         )
-        xml_counter=render_templates(pqc_results, args.templates)
-        print(sum([len(pqc_results.rawdata[key]) for key in pqc_results.rawdata]),'datasets analyzed')
-        print(xml_counter,'XML-files generated')
+        render_templates(pqc_results, args.templates)
 
     plt.show()
 
