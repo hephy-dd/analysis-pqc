@@ -97,7 +97,7 @@ def analyse_iv_data(path, options=None, config=None):
         return NOT_MEASURED, NOT_MEASURED, None
 
     if config:
-        kwargs = config["analysis_parameters"]["analyse_iv"]
+        kwargs = config.get("analysis_parameters", {}).get("analyse_iv", {})
 
     if options is None:
         options = AnalysisOptions()
@@ -198,7 +198,7 @@ def analyse_cv_data(path, options=None, config=None):
     if config is None:
         kwargs = {}
     else:
-        kwargs = config["analysis_parameters"]["analyse_cv"]
+        kwargs = config.get("analysis_parameters", {}).get("analyse_cv", {})
 
     if options is None:
         options = AnalysisOptions()
@@ -347,7 +347,7 @@ def analyse_mos_data(path, options=None, config=None):
     if config is None:
         kwargs = {}
     else:
-        kwargs = config["analysis_parameters"]["analyse_mos"]
+        kwargs = config.get("analysis_parameters", {}).get("analyse_mos", {})
 
     if options is None:
         options = AnalysisOptions()
@@ -476,7 +476,7 @@ def analyse_gcd_data(path, options=None, config=None):
     if config is None:
         kwargs = {}
     else:
-        kwargs = config["analysis_parameters"]["analyse_gcd"]
+        kwargs = config.get("analysis_parameters", {}).get("analyse_gcd", {})
 
     if options is None:
         options = AnalysisOptions()
@@ -570,7 +570,7 @@ def analyse_fet_data(path, options=None, config=None):
     if config is None:
         kwargs = {}
     else:
-        kwargs = config["analysis_parameters"]["analyse_fet"]
+        kwargs = config.get("analysis_parameters", {}).get("analyse_fet", {})
 
     if options is None:
         options = AnalysisOptions()
@@ -681,7 +681,7 @@ def analyse_van_der_pauw_data(path, options=None, min_correlation=0.99, config=N
     if config is None:
         kwargs = {}
     else:
-        kwargs = config["analysis_parameters"]["analyse_van_der_pauw"]
+        kwargs = config.get("analysis_parameters", {}).get("analyse_van_der_pauw", {})
 
     if options is None:
         options = AnalysisOptions()
@@ -778,7 +778,7 @@ def analyse_linewidth_data(
     if config is None:
         kwargs = {}
     else:
-        kwargs = config["analysis_parameters"]["analyse_linewidth"]
+        kwargs = config.get("analysis_parameters", {}).get("analyse_linewidth", {})
 
     if options is None:
         options = AnalysisOptions()
@@ -872,7 +872,7 @@ def analyse_cbkr_data(
     if config is None:
         kwargs = {}
     else:
-        kwargs = config["analysis_parameters"]["analyse_cbkr"]
+        kwargs = config.get("analysis_parameters", {}).get("analyse_cbkr", {})
 
     if options is None:
         options = AnalysisOptions()
@@ -958,7 +958,7 @@ def analyse_contact_data(path, options=None, min_correlation=0.95, config=None):
     if config is None:
         kwargs = {}
     else:
-        kwargs = config["analysis_parameters"]["analyse_contact"]
+        kwargs = config.get("analysis_parameters", {}).get("analyse_contact", {})
 
     if options is None:
         options = AnalysisOptions()
@@ -1049,7 +1049,7 @@ def analyse_meander_data(path, options=None, min_correlation=0.99, config=None):
     if config is None:
         kwargs = {}
     else:
-        kwargs = config["analysis_parameters"]["analyse_meander"]
+        kwargs = config.get("analysis_parameters", {}).get("analyse_meander", {})
 
     if options is None:
         options = AnalysisOptions()
@@ -1136,7 +1136,7 @@ def analyse_breakdown_data(path, options=None, config=None):
     if config is None:
         kwargs = {}
     else:
-        kwargs = config["analysis_parameters"]["analyse_breakdown"]
+        kwargs = config.get("analysis_parameters", {}).get("analyse_breakdown", {})
 
     if options is None:
         options = AnalysisOptions()
@@ -1217,7 +1217,7 @@ def analyse_capacitor_data(path, options=None, config=None):
     if config is None:
         kwargs = {}
     else:
-        kwargs = config["analysis_parameters"]["analyse_capacitor"]
+        kwargs = config.get("analysis_parameters", {}).get("analyse_capacitor", {})
 
     if options is None:
         options = AnalysisOptions()
