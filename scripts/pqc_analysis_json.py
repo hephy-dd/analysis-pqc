@@ -119,7 +119,7 @@ def analyse_iv_data(path, options=None,config=None):
     x_loc = 0.5
     y_loc = 0.65
 
-    v_max, i_max, i_800, i_600, status = analyse_iv(v, i)
+    v_max, i_max, i_800, i_600, status = analyse_iv(v, i, **kwargs)
 
     lbl = assign_label(path, test)
 
@@ -163,8 +163,11 @@ def analyse_cv_data(path, options=None,config=None):
     if path is None:
         return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, None
 
-    if config:
+    if config is None:
+        kwargs={}
+    else:
         kwargs=config['analysis_parameters']['analyse_cv']    
+
     if options is None:
         options = AnalysisOptions()
 
@@ -197,7 +200,7 @@ def analyse_cv_data(path, options=None,config=None):
         area = 1
         print("WARNING: clould not determine flute number - area dependent values will be wrong!")
 
-    v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status = analyse_cv(abs(v), c, area=area, carrier='holes',**kwargs)#cut_param= 0.008 for tracker, 0.03 for 120um
+    v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status = analyse_cv(abs(v), c, area=area, carrier='holes', **kwargs)#cut_param= 0.008 for tracker, 0.03 for 120um
 
 
     annotate = 'V$_{{fd}}}}$: {} V\n\nT$_{{avg}}$: {} \u00B0C\nH$_{{avg}}$: {}'.format(v_dep2, round(np.mean(temp),2), round(np.mean(humidity),2)) + r'$\%$'
@@ -255,7 +258,9 @@ def analyse_mos_data(path, options=None,config=None):
     if path is None:
         return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, None
 
-    if config:
+    if config is None:
+        kwargs={}
+    else:
         kwargs=config['analysis_parameters']['analyse_mos']    
 
     if options is None:
@@ -278,7 +283,7 @@ def analyse_mos_data(path, options=None,config=None):
     #v_norm, v_unit = normalise_parameter(v, 'V')
     #c_norm, c_unit = normalise_parameter(c, 'F')
     try:
-        v_fb1, v_fb2, c_acc, c_inv, t_ox, n_ox, a_acc, b_acc, v_acc, a_dep, b_dep, v_dep, a_inv, b_inv, v_inv,  spl_dev, status = analyse_mos(v, c)
+        v_fb1, v_fb2, c_acc, c_inv, t_ox, n_ox, a_acc, b_acc, v_acc, a_dep, b_dep, v_dep, a_inv, b_inv, v_inv,  spl_dev, status = analyse_mos(v, c, **kwargs)
         lbl = assign_label(path, test)
         c_acc_m = np.mean(c_acc)
 
@@ -341,7 +346,9 @@ def analyse_gcd_data(path, options=None,config=None):
     if path is None:
         return NOT_MEASURED, NOT_MEASURED, None
 
-    if config:
+    if config is None:
+        kwargs={}
+    else:
         kwargs=config['analysis_parameters']['analyse_gcd']    
 
     if options is None:
@@ -363,7 +370,7 @@ def analyse_gcd_data(path, options=None,config=None):
 
     lbl = assign_label(path, test)
 
-    gcd_result = analyse_gcd(v,i_em, maxreldev=0.03)
+    gcd_result = analyse_gcd(v,i_em, maxreldev=0.03, **kwargs)
 
     if options.plot:
         fig, ax = plt.subplots(1,1)
@@ -411,7 +418,9 @@ def analyse_fet_data(path, options=None,config=None):
     if path is None:
         return NOT_MEASURED, None
 
-    if config:
+    if config is None:
+        kwargs={}
+    else:
         kwargs=config['analysis_parameters']['analyse_fet']    
 
     if options is None:
@@ -432,7 +441,7 @@ def analyse_fet_data(path, options=None,config=None):
 
     iz_em = i_em - i_em[0]
 
-    v_th, a, b, spl_dev, status = analyse_fet(v, i_em)
+    v_th, a, b, spl_dev, status = analyse_fet(v, i_em, **kwargs)
 
     fit  = np.array([a*i +b for i in v])
 
@@ -490,7 +499,9 @@ def analyse_van_der_pauw_data(path, options=None, min_correlation=0.99,config=No
         options.popPrefix("-")
         return NOT_MEASURED, None
 
-    if config:
+    if config is None:
+        kwargs={}
+    else:
         kwargs=config['analysis_parameters']['analyse_van_der_pauw']    
 
     if options is None:
@@ -510,7 +521,7 @@ def analyse_van_der_pauw_data(path, options=None, min_correlation=0.99,config=No
 
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
-    r_sheet, a, b, x_fit, spl_dev, status, r_value = analyse_van_der_pauw(i, v)
+    r_sheet, a, b, x_fit, spl_dev, status, r_value = analyse_van_der_pauw(i, v, **kwargs)
 
     if(abs(r_value) < min_correlation):  # r_value is the correlation coefficient
         r_sheet = np.nan
@@ -563,7 +574,9 @@ def analyse_linewidth_data(path, r_sheet=np.nan, options=None, min_correlation=0
         options.popPrefix("-")
         return NOT_MEASURED, None
 
-    if config:
+    if config is None:
+        kwargs={}
+    else:
         kwargs=config['analysis_parameters']['analyse_linewidth']    
 
     if options is None:
@@ -583,7 +596,7 @@ def analyse_linewidth_data(path, r_sheet=np.nan, options=None, min_correlation=0
 
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
-    t_line, a, b, x_fit, spl_dev, r_value, status = analyse_linewidth(i, v, r_sheet=r_sheet, cut_param=-1., min_correlation=min_correlation, debug=0)
+    t_line, a, b, x_fit, spl_dev, r_value, status = analyse_linewidth(i, v, r_sheet=r_sheet, cut_param=-1., min_correlation=min_correlation, debug=0, **kwargs)
 
     fit = np.array([a*x +b for x in x_fit])
     if options.plot:
@@ -630,7 +643,9 @@ def analyse_cbkr_data(path, r_sheet=np.nan, options=None, min_correlation=0.95,c
         options.popPrefix("-")
         return NOT_MEASURED, None
 
-    if config:
+    if config is None:
+        kwargs={}
+    else:
         kwargs=config['analysis_parameters']['analyse_cbkr']    
 
     if options is None:
@@ -650,7 +665,7 @@ def analyse_cbkr_data(path, r_sheet=np.nan, options=None, min_correlation=0.95,c
     lbl = assign_label(path, test)
     lbl_vdp = assign_label(path, test, vdp=True)
 
-    r_contact, a, b, x_fit, spl_dev, r_value, status = analyse_cbkr(i, v, r_sheet, cut_param=0.01, debug=0)
+    r_contact, a, b, x_fit, spl_dev, r_value, status = analyse_cbkr(i, v, r_sheet, cut_param=0.01, debug=0, **kwargs)
     x_fit = np.array(x_fit)
     fit = np.array([a*x +b for x in x_fit])
 
@@ -695,7 +710,9 @@ def analyse_contact_data(path, options=None, min_correlation=0.95,config=None):
         options.popPrefix("-")
         return NOT_MEASURED, None
 
-    if config:
+    if config is None:
+        kwargs={}
+    else:
         kwargs=config['analysis_parameters']['analyse_contact']    
 
     if options is None:
@@ -714,7 +731,7 @@ def analyse_contact_data(path, options=None, min_correlation=0.95,config=None):
         return np.nan, None
 
     lbl = assign_label(path, test)
-    r_contact, a, b, x_fit, spl_dev, status, r_value = analyse_contact(i, v, cut_param=0.01, debug=0)
+    r_contact, a, b, x_fit, spl_dev, status, r_value = analyse_contact(i, v, cut_param=0.01, debug=0, **kwargs)
 
     if abs(r_value) < min_correlation:
         r_contact = np.nan
@@ -762,7 +779,9 @@ def analyse_meander_data(path, options=None, min_correlation=0.99,config=None):
         options.popPrefix("-")
         return NOT_MEASURED, None
 
-    if config:
+    if config is None:
+        kwargs={}
+    else:
         kwargs=config['analysis_parameters']['analyse_meander']    
 
     if options is None:
@@ -785,7 +804,7 @@ def analyse_meander_data(path, options=None, min_correlation=0.99,config=None):
 
     lbl = assign_label(path, test)
 
-    r, status, r_value = analyse_meander(i, v)
+    r, status, r_value = analyse_meander(i, v, **kwargs)
 
     if (r_value < min_correlation):
         r = np.nan
@@ -831,7 +850,9 @@ def analyse_breakdown_data(path, options=None,config=None):
     if path is None:
         return NOT_MEASURED, None
 
-    if config:
+    if config is None:
+        kwargs={}
+    else:
         kwargs=config['analysis_parameters']['analyse_breakdown']    
 
     if options is None:
@@ -855,7 +876,7 @@ def analyse_breakdown_data(path, options=None,config=None):
     if len(v) == 0:
         return np.nan, None
 
-    v_bd, status = analyse_breakdown(v, i, debug=0)
+    v_bd, status = analyse_breakdown(v, i, debug=0, **kwargs)
 
     if options.plot:
         fig, ax = plt.subplots(1,1)
@@ -891,7 +912,9 @@ def analyse_capacitor_data(path, options=None,config=None):
     if path is None:
         return NOT_MEASURED, NOT_MEASURED, NOT_MEASURED, None
 
-    if config:
+    if config is None:
+        kwargs={}
+    else:
         kwargs=config['analysis_parameters']['analyse_capacitor']    
 
     if options is None:
@@ -914,7 +937,7 @@ def analyse_capacitor_data(path, options=None,config=None):
     if len(v) <= 3 or len(c) <= 3:
         return np.nan, np.nan, np.nan, None
 
-    c_mean, c_median, d, status = analyse_capacitor(v, c, debug=0)
+    c_mean, c_median, d, status = analyse_capacitor(v, c, debug=0, **kwargs)
 
     if options.plot:
         pass
