@@ -272,7 +272,8 @@ pqc_values:
 analysis_parameters:
 #  analyse_iv:
   analyse_cv:
-    cut_param: 0.008
+    cut_param: 0.02
+    max_v: 400
 #  analyse_mos:
 #  analyse_gcd:
 #  analyse_fet:
