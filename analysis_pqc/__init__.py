@@ -198,8 +198,8 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, max_v=5
     spl_dev = scipy.signal.savgol_filter(y_norm, window_length=savgol_windowsize, polyorder=1, deriv=1)
 
     # for definition of fit region, only consider voltages < max_v
-    idv_max=max([i for i,a in enumerate(v) if abs(a)<max_v])
-    spl_dev=spl_dev[:idv_max]
+    idv_max = max([i for i,a in enumerate(v) if abs(a) < max_v])
+    spl_dev = spl_dev[:idv_max]
 
     idx_rise = []
     idx_const = []
