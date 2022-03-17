@@ -154,7 +154,7 @@ def analyse_iv(v, i, debug=False):
 
 
 @params('v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status')
-def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_windowsize=None, min_correl=0.1, debug=False):
+def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, max_v=500, savgol_windowsize=None, min_correl=0.1, debug=False):
     """
     Diode CV: Extract depletion voltage and resistivity.
 
@@ -164,6 +164,7 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
     area ... implant size in [m^2] - defaults to quarter
     carrier ... majority charge carriers ['holes', 'electrons']
     cut_param ... used to cut on 1st derivative to id voltage regions
+    max_v ... for definition of fit region, only consider voltages < max_v
     savgol_windowsize ... number of points to calculate the derivative, needs to be odd
     min_correl ... minimum correlation coefficient to say that it worked
 
@@ -195,6 +196,10 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, savgol_
     #spl = CubicSpline(x_norm, y_norm)
     #spl_dev = spl(x_norm, 1)
     spl_dev = scipy.signal.savgol_filter(y_norm, window_length=savgol_windowsize, polyorder=1, deriv=1)
+
+    # for definition of fit region, only consider voltages < max_v
+    idv_max=max([i for i,a in enumerate(v) if abs(a)<max_v])
+    spl_dev=spl_dev[:idv_max]
 
     idx_rise = []
     idx_const = []

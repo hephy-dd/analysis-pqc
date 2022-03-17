@@ -273,6 +273,7 @@ analysis_parameters:
 #  analyse_iv:
   analyse_cv:
     cut_param: 0.008
+    max_v: 500
 #  analyse_mos:
 #  analyse_gcd:
 #  analyse_fet:
