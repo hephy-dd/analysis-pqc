@@ -1,13 +1,15 @@
 from itertools import islice
 
-from analysis_pqc import params
 import numpy as np
+
+from analysis_pqc import params
 
 __all__ = [
     'num2str',
     'make_chunks',
     'PQC_Values'
 ]
+
 
 def num2str(num, basenum=None):
     if basenum is None:
@@ -18,10 +20,8 @@ def num2str(num, basenum=None):
 
 
 def make_chunks(data, size):
-    it = iter(data)
-
     for i in range(0, len(data), size):
-        yield [k for k in islice(it, size)]
+        yield [k for k in islice(iter(data), size)]
 
 
 class PQC_Values:
@@ -29,34 +29,31 @@ class PQC_Values:
     This class holds one parameter obtained via the PQC measurements, but for
     all samples measured the order in the array is cucial for the correct mapping,
     so be careful to reorder everything in the PQC_resultset.dataseries at once.
+
+    If properties `min_allowed` or `max_allowed` are set to `None` they will
+    return always default values based on attributes `expected_value` and
+    `stray`.
     """
 
     def __init__(self, name='na', label='na', expected_value=0., unit='',
                  show_multiplier=1e0, stray=0.5, values=None, min_allowed=None,
                  max_allowed=None):
-        self.values = []
+        self._min_allowed = None
+        self._max_allowed = None
+
         self.name = name
         self.label = label
         self.unit = unit
         self.show_multiplier = show_multiplier
 
         if values is None:
-            self.values = []
-        else:
-            self.values = values
+            values = []
+        self.values = values
 
-        if min_allowed is None:
-            self.min_allowed = expected_value * (1 - stray)
-        else:
-            self.min_allowed = min_allowed
-
-        if max_allowed is None:
-            self.max_allowed = expected_value * (1 + stray)
-        else:
-            self.max_allowed = max_allowed
-
-        self.stray = stray
         self.expected_value = expected_value
+        self.stray = stray
+        self.min_allowed = min_allowed
+        self.max_allowed = max_allowed
 
     def __len__(self):
         return len(self.values)
@@ -64,6 +61,26 @@ class PQC_Values:
     def __str__(self):
         preview = format(np.array(self.values) * self.show_multiplier)
         return f"{self.name}{preview}{self.unit}"
+
+    @property
+    def min_allowed(self):
+        if self._min_allowed is None:
+            return self.expected_value * (1 - self.stray)
+        return self._min_allowed
+
+    @min_allowed.setter
+    def min_allowed(self, value):
+        self._min_allowed = value
+
+    @property
+    def max_allowed(self):
+        if self._max_allowed is None:
+            return self.expected_value * (1 + self.stray)
+        return self._max_allowed
+
+    @max_allowed.setter
+    def max_allowed(self, value):
+        self._max_allowed = value
 
     def append(self, val):
         self.values.append(val)
@@ -77,11 +94,13 @@ class PQC_Values:
             return self.values[index]*self.show_multiplier
         else:
             stats = self.get_stats()
-            sel={0: stats.totMed,
-                 1: stats.totAvg,
-                 2: stats.totStd,
-                 3: len(stats.values),
-                 4: len(stats.values)/stats.nTot, }
+            sel = {
+                0: stats.totMed,
+                1: stats.totAvg,
+                2: stats.totStd,
+                3: len(stats.values),
+                4: len(stats.values)/stats.nTot,
+            }
             return sel.get(index-len(self.values), "error")
 
     def get_value_string(self, index, niceText=True):
@@ -93,11 +112,13 @@ class PQC_Values:
             return num2str(self.values[index]*self.show_multiplier, self.expected_value)
         else:
             stats = self.get_stats()
-            sel={0: num2str(stats.totMed, self.expected_value),
-                 1: num2str(stats.totAvg, self.expected_value),
-                 2: num2str(stats.totStd, self.expected_value),
-                 3: "{}/{}".format(len(stats.values), stats.nTot),
-                 4: "{:3.2f}".format(len(stats.values)/stats.nTot), }
+            sel = {
+                0: num2str(stats.totMed, self.expected_value),
+                1: num2str(stats.totAvg, self.expected_value),
+                2: num2str(stats.totStd, self.expected_value),
+                3: "{}/{}".format(len(stats.values), stats.nTot),
+                4: "{:3.2f}".format(len(stats.values)/stats.nTot),
+            }
             return sel.get(index-len(self.values), "error")
 
     def get_status(self, index):
@@ -170,6 +191,6 @@ class PQC_Values:
         return values, nTot, nNan, nTooHigh, nTooLow, totAvg, totStd, totMed, selAvg, selStd, selMed
 
     @classmethod
-    def merge(new, parents, name='na', label='na'):
+    def merge(cls, parents, name='na', label='na'):
         values = np.concatenate( [t.values for t in parents])
-        return new(name, label, parents[0].expected_value, parents[0].unit, parents[0].show_multiplier, values=values, stray=parents[0].stray)
+        return cls(name, label, parents[0].expected_value, parents[0].unit, parents[0].show_multiplier, values=values, stray=parents[0].stray)
