@@ -1,9 +1,4 @@
-## ------------------------------------
-## analyse_pqc_functions.py
-##
-## Set of analysis function for PQC measurements.
-##
-## ------------------------------------
+"""Set of analysis function for PQC measurements."""
 
 import warnings
 import traceback
@@ -15,7 +10,7 @@ from scipy.interpolate import CubicSpline
 from scipy.stats import linregress
 import scipy.signal
 
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 
 __all__ = [
     'STATUS_NONE',
@@ -193,8 +188,8 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, max_v=5
     # get spline fit, requires strictlty increasing array
     y_norm = c / np.max(c)
     x_norm = np.arange(len(y_norm))
-    #spl = CubicSpline(x_norm, y_norm)
-    #spl_dev = spl(x_norm, 1)
+    # spl = CubicSpline(x_norm, y_norm)
+    # spl_dev = spl(x_norm, 1)
     spl_dev = scipy.signal.savgol_filter(y_norm, window_length=savgol_windowsize, polyorder=1, deriv=1)
 
     # for definition of fit region, only consider voltages < max_v
