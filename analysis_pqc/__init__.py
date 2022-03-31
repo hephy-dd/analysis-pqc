@@ -1,9 +1,4 @@
-## ------------------------------------
-## analyse_pqc_functions.py
-##
-## Set of analysis function for PQC measurements.
-##
-## ------------------------------------
+"""Set of analysis function for PQC measurements."""
 
 import warnings
 import traceback
@@ -15,7 +10,7 @@ from scipy.interpolate import CubicSpline
 from scipy.stats import linregress
 import scipy.signal
 
-__version__ = '0.5.0'
+__version__ = '0.6.1'
 
 __all__ = [
     'STATUS_NONE',
@@ -90,13 +85,13 @@ def line_regr_with_cuts(x, y, cut_param, debug=False):
     spl_dev = spl(x_norm, 1)
 
     # only use data points if local slope is above cut_param
-    idx_fit = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) > cut_param) ]
+    idx_fit = [i for i in range(len(spl_dev)) if (abs(spl_dev[i]) > cut_param)]
 
     with warnings.catch_warnings():
         warnings.filterwarnings('error')
         try:
-            x_fit = x[ idx_fit[0]:idx_fit[-1]+1 ]
-            y_fit = y[ idx_fit[0]:idx_fit[-1]+1 ]
+            x_fit = x[idx_fit[0]:idx_fit[-1] + 1]
+            y_fit = y[idx_fit[0]:idx_fit[-1] + 1]
             a, b, r_value, p_value, std_err = scipy.stats.linregress(x_fit, y_fit)
             status = STATUS_PASSED
         except np.RankWarning:
@@ -136,8 +131,8 @@ def analyse_iv(v, i, debug=False):
     idx_maxi = np.argmax(np.abs(i))
     v_max = v[idx_maxv]
     i_max = i[idx_maxv]
-    i_800 = np.array([ i[k] for k in range(len(v)) if np.abs(v[k]) == 800 ])
-    i_600 = np.array([ i[k] for k in range(len(v)) if np.abs(v[k]) == 600 ])
+    i_800 = np.array([i[k] for k in range(len(v)) if np.abs(v[k]) == 800])
+    i_600 = np.array([i[k] for k in range(len(v)) if np.abs(v[k]) == 600])
 
     if len(i_800) != 1:
         i_800 = np.nan
@@ -183,18 +178,18 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, max_v=5
     status = STATUS_NONE
 
     if savgol_windowsize is None:
-        #savgol_windowsize = int(len(c)/40+1)*2+1  # a suitable off windowsie - making 20 windows along the whole measurement
-        savgol_windowsize = int(len(c)/30+1)*2+1  # a suitable off windowsie - making 15 windows along the whole measurement
+        # savgol_windowsize = int(len(c) / 40 + 1) * 2 + 1  # a suitable off windowsie - making 20 windows along the whole measurement
+        savgol_windowsize = int(len(c) / 30 + 1) * 2 + 1  # a suitable off windowsie - making 15 windows along the whole measurement
         # the window size needs to be an odd number, therefore this strange calculation
 
     # invert and square
-    c = 1./c**2
+    c = 1. / c**2
 
     # get spline fit, requires strictlty increasing array
     y_norm = c / np.max(c)
     x_norm = np.arange(len(y_norm))
-    #spl = CubicSpline(x_norm, y_norm)
-    #spl_dev = spl(x_norm, 1)
+    # spl = CubicSpline(x_norm, y_norm)
+    # spl_dev = spl(x_norm, 1)
     spl_dev = scipy.signal.savgol_filter(y_norm, window_length=savgol_windowsize, polyorder=1, deriv=1)
 
     # for definition of fit region, only consider voltages < max_v
@@ -209,14 +204,13 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, max_v=5
 
         try:
             # get regions for indexing
-            idx_rise = [ i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) > cut_param) ]  # the first and last value seems to be off sometimes
-            idx_const = [ i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) < cut_param) and i > idx_rise[-1] ]
+            idx_rise = [i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) > cut_param)]  # the first and last value seems to be off sometimes
+            idx_const = [i for i in range(2, len(spl_dev-1)) if ((spl_dev[i]) < cut_param) and i > idx_rise[-1]]
 
-
-            v_rise = v[ idx_rise[0]:idx_rise[-1]+1 ]
-            v_const = v[ idx_const[0]:idx_const[-1]+1 ]
-            c_rise = c[ idx_rise[0]:idx_rise[-1]+1 ]
-            c_const = c[ idx_const[0]:idx_const[-1]+1 ]
+            v_rise = v[idx_rise[0]:idx_rise[-1] + 1]
+            v_const = v[idx_const[0]:idx_const[-1] + 1]
+            c_rise = c[idx_rise[0]:idx_rise[-1] + 1]
+            c_const = c[idx_const[0]:idx_const[-1] + 1]
 
             # line fits to each region
             a_rise, b_rise, r_value_rise, p_value_rise, std_err_rise = scipy.stats.linregress(v_rise, c_rise)
@@ -301,31 +295,30 @@ def analyse_mos(v, c, cut_param=0.02, debug=False, min_r_value=0.4):
     spl_dev = spl(x_norm, 1)
 
     # get regions for indexing
-    idx_acc = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < cut_param and v[i] > v[np.argmax(spl_dev)]) ]
-    idx_dep = [ i for i in range(len(spl_dev)) if (v[i] > v[np.argmax(spl_dev)] - 0.25  and v[i] < v[np.argmax(spl_dev)] + 0.25) ]
-    idx_inv = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < cut_param and v[i] < v[np.argmin(spl_dev)]) ]
-
+    idx_acc = [i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < cut_param and v[i] > v[np.argmax(spl_dev)])]
+    idx_dep = [i for i in range(len(spl_dev)) if (v[i] > v[np.argmax(spl_dev)] - 0.25 and v[i] < v[np.argmax(spl_dev)] + 0.25)]
+    idx_inv = [i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < cut_param and v[i] < v[np.argmin(spl_dev)])]
 
     with warnings.catch_warnings():
         warnings.filterwarnings('error')
 
         try:
-            v_acc = v[ idx_acc[0]:idx_acc[-1]+1 ]
-            v_dep = v[ idx_dep[0]:idx_dep[-1]+1 ]
-            v_inv = v[ idx_inv[0]:idx_inv[-1]+1 ]
-            c_acc = c[ idx_acc[0]:idx_acc[-1]+1 ]
-            c_dep = c[ idx_dep[0]:idx_dep[-1]+1 ]
-            c_inv = c[ idx_inv[0]:idx_inv[-1]+1 ]
+            v_acc = v[idx_acc[0]:idx_acc[-1] + 1]
+            v_dep = v[idx_dep[0]:idx_dep[-1] + 1]
+            v_inv = v[idx_inv[0]:idx_inv[-1] + 1]
+            c_acc = c[idx_acc[0]:idx_acc[-1] + 1]
+            c_dep = c[idx_dep[0]:idx_dep[-1] + 1]
+            c_inv = c[idx_inv[0]:idx_inv[-1] + 1]
 
             # line fits to each region
             a_acc, b_acc, r_value_acc, p_value, std_err = scipy.stats.linregress(v_acc, c_acc)
             a_dep, b_dep, r_value_dep, p_value, std_err = scipy.stats.linregress(v_dep, c_dep)
             a_inv, b_inv, r_value_inv, p_value, std_err = scipy.stats.linregress(v_inv, c_inv)
 
-            #print("  r: "+str(r_value_acc)+"  "+str(r_value_dep)+"  "+str(r_value_inv))
+            # print("  r: "+str(r_value_acc)+"  "+str(r_value_dep)+"  "+str(r_value_inv))
 
             if (np.abs(np.array([r_value_acc, r_value_dep, r_value_inv])) > min_r_value).all():
-                #print("yes")
+                # print("yes")
                 # flatband voltage via inflection
                 v_fb1 = v[np.argmax(spl_dev)]
 
@@ -388,22 +381,22 @@ def analyse_gcd(v, i, cut_param=0.01, debug=False, maxreldev=0.01):
     # get regions for indexing
     try:
         vmin = v[np.argmin(i)]
-        idx_acc = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < 0.03 and v[i] < (vmin - 4.5)) ]
-        idx_dep = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < 0.01 and v[i] > (vmin - 2.5) and v[i] < (vmin + 2.5)) ]
-        idx_inv = [ i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < 0.01 and v[i] > (vmin + 4.5)) ]
-        v_acc = v[ idx_acc[0]:idx_acc[-1]+1 ]
-        v_dep = v[ idx_dep[0]:idx_dep[-1]+1 ]
-        v_inv = v[ idx_inv[0]:idx_inv[-1]+1 ]
-        i_acc = i [ idx_acc[0]:idx_acc[-1]+1 ]
-        i_dep = i [ idx_dep[0]:idx_dep[-1]+1 ]
-        i_inv = i [ idx_inv[0]:idx_inv[-1]+1 ]
+        idx_acc = [i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < 0.03 and v[i] < (vmin - 4.5))]
+        idx_dep = [i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < 0.01 and v[i] > (vmin - 2.5) and v[i] < (vmin + 2.5))]
+        idx_inv = [i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < 0.01 and v[i] > (vmin + 4.5))]
+        v_acc = v[idx_acc[0]:idx_acc[-1] + 1]
+        v_dep = v[idx_dep[0]:idx_dep[-1] + 1]
+        v_inv = v[idx_inv[0]:idx_inv[-1] + 1]
+        i_acc = i[idx_acc[0]:idx_acc[-1] + 1]
+        i_dep = i[idx_dep[0]:idx_dep[-1] + 1]
+        i_inv = i[idx_inv[0]:idx_inv[-1] + 1]
 
         if (len(v_acc) == 0):
             v_acc = v[1:6]
             i_acc = i[1:6]
         if (len(v_dep) == 0):
-            v_dep = v[np.argmin(i):(np.argmin(i)+5)]
-            i_dep = i[np.argmin(i):(np.argmin(i)+5)]
+            v_dep = v[np.argmin(i):(np.argmin(i) + 5)]
+            i_dep = i[np.argmin(i):(np.argmin(i) + 5)]
         if (len(v_acc) == 0):
             v_inv = v[-5:]
             i_inv = i[-5:]
@@ -412,8 +405,8 @@ def analyse_gcd(v, i, cut_param=0.01, debug=False, maxreldev=0.01):
         # until this is fixed stay with a simpler selection
         v_acc = v[1:6]
         i_acc = i[1:6]
-        v_dep = v[np.argmin(i):(np.argmin(i)+5)]
-        i_dep = i[np.argmin(i):(np.argmin(i)+5)]
+        v_dep = v[np.argmin(i):(np.argmin(i) + 5)]
+        i_dep = i[np.argmin(i):(np.argmin(i) + 5)]
         v_inv = v[-5:]
         i_inv = i[-5:]
 
@@ -481,7 +474,7 @@ def analyse_fet(v, i, debug=False, numDev=6, thrMultDev=0.33):
     maximum = np.argmax(spl_dev)
     i_0 = i[maximum]
     v_0 = v[maximum]
-    a = (i[maximum] - i[maximum-1]) / (v[maximum] - v[maximum-1])
+    a = (i[maximum] - i[maximum - 1]) / (v[maximum] - v[maximum - 1])
     b = i_0 - a*v_0
 
     # threshold voltage via tangent
@@ -553,7 +546,7 @@ def analyse_linewidth(i, v, r_sheet=np.nan, cut_param=1e-5, min_correlation=0.99
         return np.nan, np.nan, np.nan, x_fit, spl_dev, r_value, status
 
 
-    t_line = r_sheet * 128.5 * 1./a
+    t_line = r_sheet * 128.5 * 1. / a
 
     return t_line, a, b, x_fit, spl_dev, r_value, status
 
@@ -579,9 +572,9 @@ def analyse_cbkr(i, v, r_sheet=-1, cut_param=1e-5, debug=False):
         r_contact = -1
     else:
         # note: The contact isn't symmetric. It's 12.5 by 13.5 um. Solution for now is to use 13 um.
-        d = 13 # contact size
-        w = 33 # diffusion width
-        r_contact = a - (4*r_sheet*d**2) / (3*w**2) * (1 + d/(2*w - 2*d))
+        d = 13  # contact size
+        w = 33  # diffusion width
+        r_contact = a - (4 * r_sheet * d**2) / (3 * w**2) * (1 + d/(2 * w - 2 * d))
 
     return r_contact, a, b, x_fit, spl_dev, r_value, status
 
@@ -648,7 +641,6 @@ def analyse_breakdown(v, i, debug=False):
     if len(v) > 0:
         v_bd = v[-1]
 
-
     return v_bd, status
 
 
@@ -675,6 +667,6 @@ def analyse_capacitor(v, c, debug=False):
     #oxide thickness
     #  d = eps_r * epx_0 * area / capacitance
     # area: (130 um)^2 = 16.9e-9 m^2
-    d = 3.9*8.85e-12*16.9*1e-9/c_median
+    d = 3.9 * 8.85e-12 * 16.9 * 1e-9 / c_median
 
     return c_mean, c_median, d, status
