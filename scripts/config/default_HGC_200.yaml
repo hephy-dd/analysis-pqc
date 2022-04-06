@@ -1,0 +1,299 @@
+version: 1
+pqc_values:
+  v_th:
+    name: fet
+    label: FET Vth
+    expected_value: 2.5 
+    unit: V
+    stray: 0.4 
+  v_fb2:
+    name: v_fb
+    label: Flatband voltage
+    expected_value: 2.5
+    unit: V
+    stray: 0.33
+  t_ox:
+    name: t_ox
+    label: Oxide thickness
+    expected_value: 740.0 
+    unit: nm
+    show_multiplier: 1e3
+    stray: 0.08
+  n_ox:
+    name: n_ox
+    label: Oxide concentration
+    expected_value: 10.5
+    unit: 1E10cm^-2
+    show_multiplier: 1e-10
+  c_acc_m:
+    name: c_acc
+    label: Accumulation capacitance
+    expected_value: 77.0 
+    unit: pF
+    show_multiplier: 1e12
+    stray: 0.06
+  cap_l:
+    name: cap_l
+    label: Capacitor
+    expected_value: 3.0
+    unit: pF
+    show_multiplier: 1e12
+  cap_r:
+    name: cap_r
+    label: Capacitor
+    expected_value: 3.0
+    unit: pF
+    show_multiplier: 1e12
+  cap_l_tox:
+    name: capl_tox
+    label: "Capacitor: Oxide Thickness"
+    expected_value: 1.0
+    unit: nm
+    show_multiplier: 1e9
+  cap_r_tox:
+    name: capr_tox
+    label: "Capacitor: Oxide Thickness"
+    expected_value: 1.0
+    unit: nm
+    show_multiplier: 1e9
+  vdp_poly_f:
+    name: vdpPoly
+    label: Polysilicon VdP
+    expected_value: 2.2
+    unit: kOhm/sq
+    show_multiplier: 1e-3
+    stray: 0.3
+  vdp_poly_r:
+    name: vdpPoly_r
+    label: Polysilicon VdP reverse
+    expected_value: 2.2
+    unit: kOhm/sq
+    show_multiplier: 1e-3
+    stray: 0.3
+  vdp_n_f:
+    name: vdpN
+    label: N+ VdP
+    expected_value: 35.0
+    unit: Ohm/sq
+    stray: 0.3
+  vdp_n_r:
+    name: vdpN_r
+    label: N+ VdP reverse
+    expected_value: 35.0
+    unit: Ohm/sq
+    stray: 0.3
+  vdp_pstop_f:
+    name: vdpPstp
+    label: P-stop VdP
+    expected_value: 19.0
+    unit: kOhm/sq
+    show_multiplier: 1e-3
+    stray: 0.3
+  vdp_pstop_r:
+    name: vdpPstp_r
+    label: P-stop VdP reverse
+    expected_value: 19.0
+    unit: kOhm/sq
+    show_multiplier: 1e-3
+    stray: 0.3
+  i_surf:
+    name: i_surf
+    label: Surface current
+    expected_value: 39 
+    unit: pA
+    show_multiplier: -1e12
+    stray: 0.33
+  s0:
+    name: s0
+    label: Surface generation velocity
+    expected_value: 7 
+    unit: cm/s
+    stray: 0.33
+  meander_poly:
+    name: meand_poly
+    label: Polisilicon Resistor
+    expected_value: 1.7
+    unit: MOhm
+    show_multiplier: 1e-6
+  t_line_n:
+    name: lw_n
+    label: Linewidth N+
+    expected_value: 35.0
+    unit: um
+  t_line_pstop2:
+    name: lw_pstp2
+    label: Linewidth P-stop 2 Wire
+    expected_value: 38.0
+    unit: um
+  t_line_pstop4:
+    name: lw_pstp4
+    label: Linewidth P-stop 4 Wire
+    expected_value: 55.0
+    unit: um
+  v_bd:
+    name: v_bd
+    label: Breakdown Voltage
+    expected_value: 215.0
+    unit: V
+  i600:
+    name: i600
+    label: I @ 600V
+    expected_value: 150 
+    unit: uA
+    show_multiplier: 1e6
+    stray: 1.0
+  i300:
+    name: i300
+    label: I @ 300V
+    expected_value: 3.5 
+    unit: uA
+    show_multiplier: 1e9
+    stray: 1.0
+  v_fd:
+    name: v_fd
+    label: Full depletion Voltage
+    expected_value: 130 
+    unit: V
+    stray: 0.33
+  rho:
+    name: rho
+    label: rho
+    expected_value: 3.5 
+    unit: kOhm cm
+    show_multiplier: 0.1
+    min_allowed: 3.5 
+    max_allowed: 10.0
+  conc:
+    name: d_conc
+    label: Doping Concentration
+    expected_value: 6.5 
+    unit: 1E12cm^-3
+    show_multiplier: 1e-18
+  meander_metal:
+    name: meand_metal
+    label: Metal Meander
+    expected_value: 260.0
+    unit: Ohm
+  vdp_metclo_f:
+    name: vdp_met
+    label: Metal Cloverleaf VdP
+    expected_value: 25.0
+    unit: mOhm/sq
+    show_multiplier: 1e3
+  vdp_metclo_r:
+    name: vdp_met_r
+    label: Metal Cloverleaf VdP reverse
+    expected_value: 25.0
+    unit: mOhm/sq
+    show_multiplier: 1e3
+  vdp_p_cross_bridge_f:
+    name: vdp_cb
+    label: Cross Bridge VdP
+    expected_value: 1.5
+    unit: kOhm/sq
+    show_multiplier: 1e-3
+  vdp_p_cross_bridge_r:
+    name: vdp_cb_r
+    label: Cross Bridge VdP reverse
+    expected_value: 1.5
+    unit: kOhm/sq
+    show_multiplier: 1e-3
+  t_line_p_cross_bridge:
+    name: t_line_cb
+    label: Linewidth cross bridge P
+    expected_value: 35.0
+    unit: um
+  vdp_bulk_f:
+    name: vdpBulk
+    label: Bulk VdP Cross
+    expected_value: 66.0
+    unit: kOhm/sq
+    show_multiplier: 1e-3
+    stray: 0.8
+  vdp_bulk_r:
+    name: vdpBulk_r
+    label: Bulk VdP Cross rev
+    expected_value: 66.0
+    unit: kOhm/sq
+    show_multiplier: 1e-3
+    stray: 0.8
+  vdp_bulk_rho_old:
+    name: vdpBulk_rho_old
+    label: Bulk VdP Resistivity (1.218)
+    expected_value: 3.5 
+    unit: kOhm*cm (1.218)
+    min_allowed: 3.5
+    max_allowed: 10.0
+  vdp_bulk_rho:
+    name: vdpBulk_rho
+    label: Bulk VdP Resistivity (1.081)
+    expected_value: 3.5 
+    unit: kOhm*cm (1.081)
+    min_allowed: 3.5
+    max_allowed: 10.0
+  i_surf05:
+    name: i_surf05
+    label: Surface current 05
+    expected_value: 50 
+    unit: pA
+    show_multiplier: -1e12
+    stray: 0.33
+    max_allowed: 80 
+  s0_gcd05:
+    name: s0_gcd05
+    label: Surface generation velocity GCD05
+    expected_value: 7 
+    unit: cm/s
+    stray: 0.33
+  i_bulk05:
+    name: i_bulk05
+    label: Bulk current 05
+    expected_value: 0.7
+    unit: pA
+    show_multiplier: -1e12
+    stray: 1
+  r_contact_n:
+    name: r_cont_n
+    label: Rcontact N+
+    expected_value: 27.0
+    unit: Ohm
+  r_contact_poly:
+    name: r_cont_poly
+    label: Rcontact polysilicon
+    expected_value: 100.0
+    unit: kOhm
+    show_multiplier: 1e-3
+  contact_poly:
+    name: cont_poly
+    label: Contact Chain PolySi
+    expected_value: 20.0
+    unit: MOhm
+    show_multiplier: 1e-6
+  contact_p:
+    name: cont_p
+    label: Contact Chain P
+    expected_value: 600 
+    unit: kOhm
+    show_multiplier: 1e-3
+  contact_n:
+    name: cont_n
+    label: Contact Chain N
+    expected_value: 600 
+    unit: kOhm
+    show_multiplier: 1e-3
+
+analysis_parameters:
+#  analyse_iv:
+  analyse_cv:
+    cut_param: 0.02
+    max_v: 400
+#  analyse_mos:
+#  analyse_gcd:
+#  analyse_fet:
+#  analyse_van_der_pauw:
+#  analyse_linewidth:
+#  analyse_cbkr:
+#  analyse_contact:
+#  analyse_meander:
+#  analyse_breakdown:
+#  analyse_capacitor:
