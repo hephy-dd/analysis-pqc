@@ -25,7 +25,15 @@ def get_run_number(db_instance):
 
 
 def upload_to_db(filename, db_instance):
-    ext_filename = os.path.join(script_path, 'ext', 'cmsdbldr_client.py')    
+    ext_filename = os.path.join(script_path, 'ext', 'cmsdbldr_client.py')
+
+    #cmsdbldr_client.py reads the login credentials from a cache file, generate cache file if not present
+    default_cache_file='.session.cache'
+    if not os.path.isfile(default_cache_file):
+        print('No cache file found, login:')
+        ext_rhapi = os.path.join(script_path, 'ext', 'rhapi.py')    
+        subprocess.run( ['python3', ext_rhapi, '--login', '--url=https://cmsdca.cern.ch/trk_rhapi'], capture_output=False)
+    
     try:
         p1 = subprocess.run(['python3', ext_filename, '--login', f'--url=https://cmsdca.cern.ch/trk_loader/trker/{db_instance}', f'{filename}'], capture_output=True)
         # python3 ext/cmsdbldr_client.py --login --url=https://cmsdca.cern.ch/trk_loader/trker/int2r filename
