@@ -146,7 +146,7 @@ pqc_values:
     name: i300
     label: I @ 300V
     expected_value: 3.5 
-    unit: uA
+    unit: nA
     show_multiplier: 1e9
     stray: 1.0
   v_fd:
