@@ -107,7 +107,7 @@ def line_regr_with_cuts(x, y, cut_param, debug=False):
 ## Main Analysis Functions
 ## ------------------------------------
 
-@params('v_max, i_max, i_800, i_600, status')
+@params('v_max, i_max, i_800, i_600, i300, status')
 def analyse_iv(v, i, debug=False):
     """
     Diode IV: Extract current in standard situation.
@@ -120,10 +120,11 @@ def analyse_iv(v, i, debug=False):
     i_max ... max. current
     i_800 ... current @ 800V
     i_600 ... current @ 600V
+    i_300 ... current @ 300V
     """
 
     ## init
-    v_max = i_max = i_800 = i_600 = np.nan
+    v_max = i_max = i_800 = i_600 = i_300 = np.nan
     status = STATUS_NONE
 
     ## init
@@ -133,6 +134,7 @@ def analyse_iv(v, i, debug=False):
     i_max = i[idx_maxv]
     i_800 = np.array([i[k] for k in range(len(v)) if np.abs(v[k]) == 800])
     i_600 = np.array([i[k] for k in range(len(v)) if np.abs(v[k]) == 600])
+    i_300 = np.array([i[k] for k in range(len(v)) if np.abs(v[k]) == 300])
 
     if len(i_800) != 1:
         i_800 = np.nan
@@ -142,10 +144,14 @@ def analyse_iv(v, i, debug=False):
         i_600 = np.nan
     else:
         i_600 = i_600[0]
+    if len(i_300) != 1:
+        i_300 = np.nan
+    else:
+        i_300 = i_300[0]
 
     status = STATUS_PASSED
 
-    return v_max, i_max, i_800, i_600, status
+    return v_max, i_max, i_800, i_600, i_300, status
 
 
 @params('v_dep1, v_dep2, rho, conc, a_rise, b_rise, v_rise, a_const, b_const, v_const, spl_dev, status')
@@ -193,7 +199,7 @@ def analyse_cv(v, c, area=1.56e-6, carrier='electrons', cut_param=0.008, max_v=5
     spl_dev = scipy.signal.savgol_filter(y_norm, window_length=savgol_windowsize, polyorder=1, deriv=1)
 
     # for definition of fit region, only consider voltages < max_v
-    idv_max = max([i for i, a in enumerate(v) if abs(a) < max_v])
+    idv_max = max([i for i,a in enumerate(v) if abs(a) < max_v])
     spl_dev = spl_dev[:idv_max]
 
     idx_rise = []

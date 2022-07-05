@@ -28,6 +28,7 @@
 
 {# <VBD_V></VBD_V> #}
           <I600_PAMPR>{{ '%.3f' % rawdata.data.i_600 }}</I600_PAMPR>
+          <I300_PAMPR>{{ '%.3f' % rawdata.data.i_300 }}</I300_PAMPR>
 {# <VI600_NAMPRMM3>0.131</VI600_NAMPRMM3> #}
 
 {% endblock %}

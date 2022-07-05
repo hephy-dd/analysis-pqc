@@ -117,7 +117,7 @@ def analyse_iv_data(path, options=None, config=None):
     x_loc = 0.5
     y_loc = 0.65
 
-    v_max, i_max, i_800, i_600, status = analyse_iv(v, i, **kwargs)
+    v_max, i_max, i_800, i_600, i_300, status = analyse_iv(v, i, **kwargs)
 
     lbl = assign_label(path, test)
 
@@ -126,6 +126,8 @@ def analyse_iv_data(path, options=None, config=None):
             "I$_{max}$" + ": {:6.2f} uA @ {:6.2f} V".format(i_max * 1e6, max(v)) + "\n"
         )
         annotate += "I$_{600V}$" + ": {:8.2f} uA ".format(i_600 * 1e6) + "\n"
+
+        annotate += "I$_{300V}$" + ": {:8.2f} nA ".format(i_300 * 1e9) + "\n"
 
         annotate += "T$_{avg}$" + ": {:0.2f} $^\circ C$".format(np.mean(temp)) + "\n"
         annotate += "rH$_{avg}$:" + "{:0.2f}".format(np.mean(humidity)) + r"$\%$"
@@ -161,7 +163,7 @@ def analyse_iv_data(path, options=None, config=None):
 
     if options.print:
         print(
-            "%s:  IV:\ti_600: %.3f uA\ti_800: %.3f uA" % (lbl, i_600 * 1e6, i_800 * 1e6)
+            "%s:  IV:\ti_600: %.3f uA\ti_300: %.3f nA" % (lbl, i_600 * 1e6, i_300 * 1e9)
         )
 
     meta = read_json_file(path).get("meta")
@@ -182,11 +184,12 @@ def analyse_iv_data(path, options=None, config=None):
             "temp": temp,  # degC
             "temp_box": temp_box,  # degC
             "humidity": humidity,  # percent
+            "i_300": i_300 * 1e12,
             "i_600": i_600 * 1e12,  # A to pA
             "i_800": i_800 * 1e12,
         }
     )  # A to pA
-    return i_600, i_800, rawdata
+    return i_600, i_300, rawdata
 
 
 def analyse_cv_data(path, options=None, config=None):

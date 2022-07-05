@@ -132,6 +132,10 @@ class PQC_resultset:
                 "i600", "I @ 600V", 100.0, "uA", 1e6, stray=1.0
             )
 
+            self.dataseries["i300"] = PQC_Values(
+                "i300", "I @ 300V", 100.0, "nA", 1e9, stray=1.0
+            )
+
             self.dataseries["v_fd"] = PQC_Values(
                 "v_fd", "Full depletion Voltage", 260.0, "V", stray=0.33
             )
@@ -515,12 +519,13 @@ class PQC_resultset:
         # =================================================== Flute 3 ===================================================
 
         # we want this for FLute_3 and not Flute_1
-        i600, _, rawdata = pqc.analyse_iv_data(
+        i600, i300, rawdata = pqc.analyse_iv_data(
             pqc.find_most_recent_file(path, "iv", whitelist=["3"]),
             options=options.pushPrefix("IV_DiodeHalf"),
             config=config,
         )
         self.dataseries["i600"].append(i600)
+        self.dataseries["i300"].append(i300)
         if rawdata is not None:
             self.rawdata[label]["Diode_IV"] = rawdata
         v_fd, rho, conc, rawdata = pqc.analyse_cv_data(
