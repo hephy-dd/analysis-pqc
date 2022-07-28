@@ -184,9 +184,9 @@ class PQC_resultset:
             )
             self.dataseries["vdp_bulk_rho"] = PQC_Values(
                 "vdpBulk_rho",
-                "Bulk VdP Resistivity (1.081)",
+                "Bulk VdP Resistivity (VDP_bulk_F)",
                 3.5,
-                "kOhm*cm (1.081)",
+                "kOhm*cm (VDP_bulk_F)",
                 1.0,
                 min_allowed=3.5,
                 max_allowed=10.0,
@@ -632,15 +632,16 @@ class PQC_resultset:
             self.dataseries["vdp_bulk_f"].values[-1]
             + self.dataseries["vdp_bulk_r"].values[-1]
         ) / 2
+
         bulk_rho0 = bulk_rsheet * np.log(2.0) * 2.0 * 187e-6 / (2 - np.sqrt(2.0)) * 1e-1
-        self.dataseries["vdp_bulk_rho"].append(bulk_rho0 * 1.081)
+        self.dataseries["vdp_bulk_rho"].append(bulk_rho0 * config['VDP_bulk_F'])
         if "Bulk_cross" in self.rawdata[label]:
             self.rawdata[label]["Bulk_cross"].add_data(
-                {"vdp_bulk_rho": bulk_rho0 * 1.081}
+                {"vdp_bulk_rho": bulk_rho0 * config['VDP_bulk_F']}
             )
         if "Reverse_bulk_cross" in self.rawdata[label]:
             self.rawdata[label]["Reverse_bulk_cross"].add_data(
-                {"vdp_bulk_rho": bulk_rho0 * 1.081}
+                {"vdp_bulk_rho": bulk_rho0 * config['VDP_bulk_F']}
             )
         self.dataseries["vdp_bulk_rho_old"].append(bulk_rho0 * 1.218)
 
