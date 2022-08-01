@@ -226,9 +226,9 @@ pqc_values:
     max_allowed: 10.0
   vdp_bulk_rho:
     name: vdpBulk_rho
-    label: Bulk VdP Resistivity (1.081)
+    label: Bulk VdP Resistivity (VDP_bulk_F)
     expected_value: 3.5 
-    unit: kOhm*cm (1.081)
+    unit: kOhm*cm (VDP_bulk_F)
     min_allowed: 3.5
     max_allowed: 10.0
   i_surf05:
@@ -297,3 +297,5 @@ analysis_parameters:
 #  analyse_meander:
 #  analyse_breakdown:
 #  analyse_capacitor:
+
+VDP_bulk_F: 2.034
