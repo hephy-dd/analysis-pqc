@@ -184,9 +184,9 @@ class PQC_resultset:
             )
             self.dataseries["vdp_bulk_rho"] = PQC_Values(
                 "vdpBulk_rho",
-                "Bulk VdP Resistivity (VDP_bulk_F)",
+                "Bulk VdP Resistivity",
                 3.5,
-                "kOhm*cm (VDP_bulk_F)",
+                "kOhm*cm",
                 1.0,
                 min_allowed=3.5,
                 max_allowed=10.0,
