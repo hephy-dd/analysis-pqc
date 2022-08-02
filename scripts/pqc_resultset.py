@@ -173,15 +173,6 @@ class PQC_resultset:
             self.dataseries["vdp_bulk_r"] = PQC_Values(
                 "vdpBulk_r", "Bulk VdP Cross rev", 66.0, "kOhm/sq", 1e-3, stray=0.8
             )
-            self.dataseries["vdp_bulk_rho_old"] = PQC_Values(
-                "vdpBulk_rho_old",
-                "Bulk VdP Resistivity (1.218)",
-                3.5,
-                "kOhm*cm (1.218)",
-                1.0,
-                min_allowed=3.5,
-                max_allowed=10.0,
-            )
             self.dataseries["vdp_bulk_rho"] = PQC_Values(
                 "vdpBulk_rho",
                 "Bulk VdP Resistivity",
@@ -643,7 +634,6 @@ class PQC_resultset:
             self.rawdata[label]["Reverse_bulk_cross"].add_data(
                 {"vdp_bulk_rho": bulk_rho0 * config['VDP_bulk_F']}
             )
-        self.dataseries["vdp_bulk_rho_old"].append(bulk_rho0 * 1.218)
 
         meander_metal, rawdata = pqc.analyse_meander_data(
             pqc.find_most_recent_file(path, "meander", whitelist=["metal"]),

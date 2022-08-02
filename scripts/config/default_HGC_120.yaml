@@ -217,13 +217,6 @@ pqc_values:
     unit: kOhm/sq
     show_multiplier: 1e-3
     stray: 0.8
-  vdp_bulk_rho_old:
-    name: vdpBulk_rho_old
-    label: Bulk VdP Resistivity (1.218)
-    expected_value: 3.5 
-    unit: kOhm*cm (1.218)
-    min_allowed: 3.5
-    max_allowed: 10.0
   vdp_bulk_rho:
     name: vdpBulk_rho
     label: Bulk VdP Resistivity
