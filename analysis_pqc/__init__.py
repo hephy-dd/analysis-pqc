@@ -10,7 +10,7 @@ from scipy.interpolate import CubicSpline
 from scipy.stats import linregress
 import scipy.signal
 
-__version__ = '0.7.0'
+__version__ = '0.7.1'
 
 __all__ = [
     'STATUS_NONE',

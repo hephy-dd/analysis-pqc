@@ -7,7 +7,7 @@ Analysis functions for PQC measurements.
 Install using pip (>= 19.0) in a virtual environment.
 
 ```bash
-pip install git+https://github.com/hephy-dd/analysis-pqc.git@0.7.0
+pip install git+https://github.com/hephy-dd/analysis-pqc.git@0.7.1
 ```
 
 **Note:** this does not install the bundled analysis scripts.
@@ -21,15 +21,14 @@ git clone https://github.com/hephy-dd/analysis-pqc.git -b <branch/tag>
 cd analysis-pqc
 ```
 
-Create a virtual environment
+Create a [virtual environment](https://docs.python.org/3/tutorial/venv.html).
 
 ```bash
 python3 -m venv env
-. env/bin/activate # env/Scripts/activate.bat on Windows
-python -m pip install -r requirements.txt
-python -m pip install -r scripts/requirements.txt
-python setup.py develop
-python setup.py test
+. env/bin/activate  # env/Scripts/activate.bat on Windows
+pip install --upgrade pip
+pip install --editable .
+pip install -r scripts/requirements.txt
 ```
 
 ## Run full-line script
