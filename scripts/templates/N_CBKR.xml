@@ -25,6 +25,6 @@
 
 {% block parameters_data %}
 
-{#          <RC_OHM>1.110667E+5</RC_OHM>#}
-          <R_OHM>{{ '%.3f' % rawdata.data.r_contact }}</R_OHM>	  
+{#          <R_OHM>1.110667E+5</R_OHM>#}
+          <RC_OHM>{{ '%.3f' % rawdata.data.r_contact }}</RC_OHM>	  
 {% endblock %}
