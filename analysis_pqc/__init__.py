@@ -409,12 +409,13 @@ def analyse_gcd(v, i, cut_param=0.01, debug=False, maxreldev=0.01):
 
         # the selection above is not stable
         # until this is fixed stay with a simpler selection
-        v_acc = v[1:6]
-        i_acc = i[1:6]
-        v_dep = v[np.argmin(i):(np.argmin(i) + 5)]
-        i_dep = i[np.argmin(i):(np.argmin(i) + 5)]
-        v_inv = v[-5:]
-        i_inv = i[-5:]
+        # v_acc = v[1:6]
+        # i_acc = i[1:6]
+        # v_dep = v[np.argmin(i):(np.argmin(i) + 5)]
+        # i_dep = i[np.argmin(i):(np.argmin(i) + 5)]
+        # v_inv = v[-5:]
+        # i_inv = i[-5:]
+        print("we are executing this")
 
         i_acc_avg = np.mean(i_acc)
         i_dep_avg = np.mean(i_dep)
