@@ -442,14 +442,15 @@ class PQC_resultset:
 
         # =================================================== Flute 2 ===================================================
 
-        i_surf, _, rawdata = pqc.analyse_gcd_data(
+        i_surf, i_bulk, rawdata = pqc.analyse_gcd_data(
             pqc.find_most_recent_file(path, "gcd", whitelist=[]),
             options=options.pushPrefix("GCD"),
             config=config,
         )  # only i_surf valid
         self.dataseries["i_surf"].append(i_surf)
         # s0 = i_surf / q / ni[cm^-3] / Agate[cm^2]
-        s0 = -i_surf / 1.602e-19 / 7.01e9 / 0.505e-2
+        s0 = i_surf / 1.602e-19 / 7.01e9 / 0.505e-2
+        print("This is in the rawdata_flute2: I_surf: {x}; I_bulk: {y}".format(x=i_surf, y=i_bulk))
         self.dataseries["s0"].append(s0)
         if rawdata is not None:
             rawdata.add_data({"s0": s0})
@@ -653,7 +654,8 @@ class PQC_resultset:
         )  # for i_bulk
         self.dataseries["i_surf05"].append(i_surf05)
         self.dataseries["i_bulk05"].append(i_bulk05)
-        s0_gcd05 = -i_surf05 / 1.602e-19 / 7.01e9 / 0.732e-2
+        s0_gcd05 = i_surf05 / 1.602e-19 / 7.01e9 / 0.732e-2
+        print("This is in the rawdata_flute4: I_surf: {x}; I_bulk: {y}".format(x=i_surf05, y=i_bulk05))
         self.dataseries["s0_gcd05"].append(s0_gcd05)
         if rawdata is not None:
             rawdata.add_data({"s0": s0_gcd05})

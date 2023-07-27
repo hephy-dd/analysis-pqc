@@ -7,6 +7,7 @@ from collections import namedtuple
 import numpy as np
 
 from scipy.interpolate import CubicSpline
+from scipy.interpolate import interp1d
 from scipy.stats import linregress
 import scipy.signal
 
@@ -350,92 +351,156 @@ def analyse_mos(v, c, cut_param=0.02, debug=False, min_r_value=0.4):
 
 
 @params('i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, i_acc_relstd, i_dep_relstd, i_inv_relstd, spl_dev, status')
-def analyse_gcd(v, i, cut_param=0.01, debug=False, maxreldev=0.01):
-    """
-    Gate Controlled Diode: Generation currents.
+#def analyse_gcd(v, i, cut_param=0.01, debug=False, maxreldev=0.01):
+# """
+# Gate Controlled Diode: Generation currents.
 
+# Parameters:
+# v ... voltage
+# i ... current
+# cut_param ... used to cut on 1st derivative to id voltage regions
+# maxreldev ... maximum relative (to the abs max in the three regions) standart deviation to consider measurement as good
+
+# Returns:
+# i_surf ... surface generation current
+# i_bulk ... bulk generation current
+# """
+
+# # init
+# i_surf = i_bulk = np.nan
+# i_acc = i_dep = i_inv = spl_dev = np.nan
+# status = STATUS_NONE
+# v_acc = []
+# v_dep = []
+# v_inv = []
+# # get spline fit, requires strictlty increasing array
+# y_norm = np.abs(i) / np.max(np.abs(i))
+# x_norm = np.arange(len(y_norm))
+
+# spl = CubicSpline(x_norm, y_norm)
+# spl_dev = spl(x_norm, 1)
+
+# i_acc_relstd = np.nan
+# i_dep_relstd = np.nan
+# i_inv_relstd = np.nan
+
+
+# # get regions for indexing
+# try:
+#     vmin = v[np.argmin(i)]
+#     idx_acc = [i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < 0.03 and v[i] < (vmin - 4.5))]
+#     idx_dep = [i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < 0.01 and v[i] > (vmin - 2.5) and v[i] < (vmin + 2.5))]
+#     idx_inv = [i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < 0.01 and v[i] > (vmin + 4.5))]
+#     v_acc = v[idx_acc[0]:idx_acc[-1] + 1]
+#     v_dep = v[idx_dep[0]:idx_dep[-1] + 1]
+#     v_inv = v[idx_inv[0]:idx_inv[-1] + 1]
+#     i_acc = i[idx_acc[0]:idx_acc[-1] + 1]
+#     i_dep = i[idx_dep[0]:idx_dep[-1] + 1]
+#     i_inv = i[idx_inv[0]:idx_inv[-1] + 1]
+
+#     if (len(v_acc) == 0):
+#         v_acc = v[1:6]
+#         i_acc = i[1:6]
+#     if (len(v_dep) == 0):
+#         v_dep = v[np.argmin(i):(np.argmin(i) + 5)]
+#         i_dep = i[np.argmin(i):(np.argmin(i) + 5)]
+#     if (len(v_acc) == 0):
+#         v_inv = v[-5:]
+#         i_inv = i[-5:]
+
+#     # the selection above is not stable
+#     # until this is fixed stay with a simpler selection
+#     # v_acc = v[1:6]
+#     # i_acc = i[1:6]
+#     # v_dep = v[np.argmin(i):(np.argmin(i) + 5)]
+#     # i_dep = i[np.argmin(i):(np.argmin(i) + 5)]
+#     # v_inv = v[-5:]
+#     # i_inv = i[-5:]
+#     print("we are executing this")
+
+#     i_acc_avg = np.mean(i_acc)
+#     i_dep_avg = np.mean(i_dep)
+#     i_inv_avg = np.mean(i_inv)
+
+#     i_max = np.max(np.abs([i_dep_avg, i_inv_avg, i_acc_avg]))
+
+#     i_acc_relstd = np.std(i_acc)/i_max
+#     i_dep_relstd = np.std(i_dep)/i_max
+#     i_inv_relstd = np.std(i_inv)/i_max
+
+#     # surface and bulk generation current
+#     i_surf = i_dep_avg - i_inv_avg
+#     i_bulk = i_acc_avg - i_inv_avg
+
+#     if (np.array([i_acc_relstd, i_dep_relstd, i_inv_relstd]) > maxreldev).any():
+#         i_surf = np.nan
+#         i_bulk = np.nan
+
+#     if (np.array([i_acc_avg, i_dep_avg, i_inv_avg]) > 1e-3).any():  # electrometer overange condition
+#         i_surf = np.nan
+#         i_bulk = np.nan
+
+#     status = STATUS_PASSED
+
+# except (ValueError, TypeError, IndexError):
+#     status = STATUS_FAILED
+#     i_surf = np.nan
+#     i_bulk = np.nan
+
+# return i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, i_acc_relstd, i_dep_relstd, i_inv_relstd, spl_dev, status
+def analyse_gcd(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.01):#numeric test
+    """
     Parameters:
-    v ... voltage
-    i ... current
-    cut_param ... used to cut on 1st derivative to id voltage regions
-    maxreldev ... maximum relative (to the abs max in the three regions) standart deviation to consider measurement as good
-
-    Returns:
-    i_surf ... surface generation current
-    i_bulk ... bulk generation current
+        voltage: voltage range of the analysis, as an array
+        current: measured current, as an array
+    
+    Return:
+        surface current, bulk generation current
     """
-
-    # init
-    i_surf = i_bulk = np.nan
-    i_acc = i_dep = i_inv = spl_dev = np.nan
     status = STATUS_NONE
-    v_acc = []
-    v_dep = []
-    v_inv = []
-    # get spline fit, requires strictlty increasing array
-    y_norm = np.abs(i) / np.max(np.abs(i))
-    x_norm = np.arange(len(y_norm))
-
-    spl = CubicSpline(x_norm, y_norm)
-    spl_dev = spl(x_norm, 1)
-
-    i_acc_relstd = np.nan
-    i_dep_relstd = np.nan
-    i_inv_relstd = np.nan
-
-
-    # get regions for indexing
     try:
-        vmin = v[np.argmin(i)]
-        idx_acc = [i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < 0.03 and v[i] < (vmin - 4.5))]
-        idx_dep = [i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < 0.01 and v[i] > (vmin - 2.5) and v[i] < (vmin + 2.5))]
-        idx_inv = [i for i in range(len(spl_dev)) if (abs(spl_dev[i]) < 0.01 and v[i] > (vmin + 4.5))]
-        v_acc = v[idx_acc[0]:idx_acc[-1] + 1]
-        v_dep = v[idx_dep[0]:idx_dep[-1] + 1]
-        v_inv = v[idx_inv[0]:idx_inv[-1] + 1]
-        i_acc = i[idx_acc[0]:idx_acc[-1] + 1]
-        i_dep = i[idx_dep[0]:idx_dep[-1] + 1]
-        i_inv = i[idx_inv[0]:idx_inv[-1] + 1]
+        derivative = np.gradient(current)
+        der_min = min(derivative) #transition point from depletion to inversion
+        der_max = max(derivative) #transition point from accumulation to depletion
+        ind_min = int(np.where(derivative==der_min)[0])
+        ind_max = int(np.where(derivative==der_max)[0])
+        print(der_min,der_max,ind_min,ind_max)
+        
+        #move points more precisely 
+        length = len(current)
+        ind_1 = round(ind_min - 0.25*length)
+        ind_2 = round(ind_max + 0.25*length)
+        print(ind_1, ind_2)
+        i_dep=np.mean(current[round(ind_min+0.1*length):round(ind_max-0.1*length)])
+        i_acc=np.mean(current[ind_2:])
+        i_inv=np.mean(current[:ind_1])
+        print("I_dep:{x};  I_acc:{y}; I_inv:{z}".format(x=str(i_dep),y=str(i_acc),z=str(i_inv)))
 
-        if (len(v_acc) == 0):
-            v_acc = v[1:6]
-            i_acc = i[1:6]
-        if (len(v_dep) == 0):
-            v_dep = v[np.argmin(i):(np.argmin(i) + 5)]
-            i_dep = i[np.argmin(i):(np.argmin(i) + 5)]
-        if (len(v_acc) == 0):
-            v_inv = v[-5:]
-            i_inv = i[-5:]
+        if i_inv>=i_acc:
+            k=round(0.1*length)
+            i_inv = current[ind_min-k]
+            # while i_inv <=i_acc:
+            #     index = ind_min-k
+            #     i_inv = current[index]
+            #     k+1
+        #suface and bulk current
+        i_surf = abs(i_inv-i_dep)
+        i_bulk = abs(abs(i_acc)-abs(i_inv))
+        print(i_surf,i_bulk)
+        
 
-        # the selection above is not stable
-        # until this is fixed stay with a simpler selection
-        # v_acc = v[1:6]
-        # i_acc = i[1:6]
-        # v_dep = v[np.argmin(i):(np.argmin(i) + 5)]
-        # i_dep = i[np.argmin(i):(np.argmin(i) + 5)]
-        # v_inv = v[-5:]
-        # i_inv = i[-5:]
-        print("we are executing this")
-
-        i_acc_avg = np.mean(i_acc)
-        i_dep_avg = np.mean(i_dep)
-        i_inv_avg = np.mean(i_inv)
-
-        i_max = np.max(np.abs([i_dep_avg, i_inv_avg, i_acc_avg]))
+        #detect whether the measurement was good:
+        i_max = np.max(np.abs([i_dep, i_inv, i_acc]))
 
         i_acc_relstd = np.std(i_acc)/i_max
         i_dep_relstd = np.std(i_dep)/i_max
         i_inv_relstd = np.std(i_inv)/i_max
 
-        # surface and bulk generation current
-        i_surf = i_dep_avg - i_inv_avg
-        i_bulk = i_acc_avg - i_inv_avg
-
         if (np.array([i_acc_relstd, i_dep_relstd, i_inv_relstd]) > maxreldev).any():
             i_surf = np.nan
             i_bulk = np.nan
 
-        if (np.array([i_acc_avg, i_dep_avg, i_inv_avg]) > 1e-3).any():  # electrometer overange condition
+        if (np.array([i_acc, i_dep, i_inv]) > 1e-3).any():  # electrometer overange condition
             i_surf = np.nan
             i_bulk = np.nan
 
@@ -445,8 +510,137 @@ def analyse_gcd(v, i, cut_param=0.01, debug=False, maxreldev=0.01):
         status = STATUS_FAILED
         i_surf = np.nan
         i_bulk = np.nan
+    
+    #parameters that were needed before and technically are not needed anymore:
+    v_acc = voltage[1:6]
+    v_dep = voltage[np.argmin(current):(np.argmin(current) + 5)]
+    v_inv = voltage[-5:]
+    spl_dev= "norm"
 
-    return i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, i_acc_relstd, i_dep_relstd, i_inv_relstd, spl_dev, status
+    # this can be commented out later just here to make sure what i am doing is not complete bullshit
+
+    # plt.scatter(voltage,current)
+    # plt.scatter(voltage, derivative)
+    # plt.scatter(voltage[ind_min],i_inv)
+    # plt.scatter(voltage[ind_max],i_acc)
+    # plt.scatter(np.mean(voltage[ind_min:ind_max]),i_dep)
+    # plt.show()
+
+    return abs(i_surf), abs(i_bulk), i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, i_acc_relstd, i_dep_relstd, i_inv_relstd, spl_dev, status
+
+# def analyse_gcd(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.01):#symbolic test
+#     """
+#     Parameters:
+#         voltage: voltage range of the analysis, as an array
+#         current: measured current, as an array
+    
+#     Return:
+#         surface current, bulk generation current
+#     """
+#     status = STATUS_NONE
+#     try:
+#         # Choose the degree of the polynomial, e.g., 2 for a quadratic fit
+#         degree = 10
+
+#         # Fit a polynomial curve through the data points
+#         coefficients = np.polyfit(voltage, current, degree)
+#         polynomial_fit = np.poly1d(coefficients)
+
+#         derivative_all = polynomial_fit.deriv()(voltage)
+#         derv_two_all = polynomial_fit.deriv(2)(voltage)
+#         # Specify the relative percentage of the data you want to extract from the center
+#         middle_percentage = 0.7  
+
+#         # Calculate the number of points to extract based on the percentage
+#         num_points_to_extract = int(len(voltage) * middle_percentage)
+
+#         # Calculate the middle index
+#         middle_index = len(voltage) // 2
+
+#         # Calculate the range to extract the data
+#         middle_range_start = middle_index - num_points_to_extract // 2
+#         middle_range_end = middle_index + num_points_to_extract // 2 + 1
+
+#         # Extract the middle part of the data
+#         i_middle = current[middle_range_start:middle_range_end]
+#         v_middle = voltage[middle_range_start:middle_range_end]
+#         i_fit_middle = polynomial_fit(v_middle)
+#         derivative = derivative_all[middle_range_start:middle_range_end]
+#         derv_2 = derv_two_all[middle_range_start:middle_range_end]
+
+#         der_min = min(derivative) #transition point from depletion to inversion
+#         der_max = max(derivative) #transition point from accumulation to depletion
+#         ind_min = int(np.where(derivative==der_min)[0][0])#for the normal data you only
+#         ind_max = int(np.where(derivative==der_max)[0][0])
+#         print(der_min,der_max,ind_min,ind_max)
+
+#         #move points more precisely 
+#         l_all = len(current)
+#         l_dep = ind_max-ind_min
+#         ind_1 = round(ind_min - 0.15*l_all)
+#         ind_2 = round(ind_max + 0.2*l_all)
+#         print(ind_1, ind_2)
+#         i_dep=np.mean(i_middle[round(ind_min+0.2*l_dep):round(ind_max-0.2*l_dep)])
+#         i_acc=np.mean(current[ind_2:])
+#         i_inv=np.mean(current[:ind_1])
+#         print("I_dep:{x};  I_acc:{y}; I_inv:{z}".format(x=str(i_dep),y=str(i_acc),z=str(i_inv)))
+
+#         if i_inv>=i_acc:
+#             k=round(0.1*l_all)
+#             i_inv = current[ind_min-k]
+#             # while i_inv <=i_acc:
+#             #     index = ind_min-k
+#             #     i_inv = current[index]
+#             #     k+1
+        
+#         #detect whether the measurement was good:
+#         i_max = np.max(np.abs([i_dep, i_inv, i_acc]))
+
+#         i_acc_relstd = np.std(i_acc)/i_max
+#         i_dep_relstd = np.std(i_dep)/i_max
+#         i_inv_relstd = np.std(i_inv)/i_max
+        
+#         i_surf = abs(i_inv-i_dep)
+#         i_bulk = abs(i_acc-i_inv)
+        
+#         print(i_surf,i_bulk)
+
+#         if (np.array([i_acc_relstd, i_dep_relstd, i_inv_relstd]) > maxreldev).any():
+#             i_surf = np.nan
+#             i_bulk = np.nan
+
+#         if (np.array([i_acc, i_dep, i_inv]) > 1e-3).any():  # electrometer overange condition
+#             i_surf = np.nan
+#             i_bulk = np.nan
+
+#         status = STATUS_PASSED
+
+#     except (ValueError, TypeError, IndexError):
+#         status = STATUS_FAILED
+#         i_surf = np.nan
+#         i_bulk = np.nan
+    
+#     #parameters that were needed before and technically are not needed anymore:
+#     v_acc = voltage[1:6]
+#     v_dep = voltage[np.argmin(current):(np.argmin(current) + 5)]
+#     v_inv = voltage[-5:]
+#     spl_dev= "norm"
+
+#     # this can be commented out later just here to make sure what i am doing is not complete bullshit
+
+#     # plt.scatter(voltage,current)
+#     # plt.plot(v_middle, i_fit_middle)
+#     # plt.plot(v_middle,derivative)
+#     # plt.plot(v_middle,derv_2)
+#     # plt.scatter(v_middle[ind_min],i_middle[ind_min],label="index_min")
+#     # plt.scatter(v_middle[ind_max],i_middle[ind_max],label="index_max")
+#     # plt.scatter(v_middle[ind_min],i_inv,label="i_inv")
+#     # plt.scatter(v_middle[ind_max],i_acc,label="i_acc")
+#     # plt.scatter(np.mean(v_middle[ind_min:ind_max]),i_dep,label="i_dep")
+#     # plt.legend()
+#     # plt.show()
+
+#     return i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, i_acc_relstd, i_dep_relstd, i_inv_relstd, spl_dev, status
 
 
 @params('v_th, a, b, spl_dev, status')
