@@ -500,7 +500,7 @@ def analyse_gcd_data(path, options=None, config=None):
     lbl = assign_label(path, test)
 
     gcd_result = analyse_gcd(v, i_em, maxreldev=0.03, **kwargs)
-    print("This is in the analysis: I_surf: {x}; I_bulk: {y}".format(x=gcd_result.i_surf, y=gcd_result.i_bulk))
+    
 
     if options.plot:
         fig, ax = plt.subplots(1, 1)
