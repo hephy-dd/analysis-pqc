@@ -237,6 +237,8 @@ pqc_values:
     label: Rcontact N+
     expected_value: 27.0
     unit: Ohm
+    min_allowed: 50
+    max_allowed: 500
   r_contact_poly:
     name: r_cont_poly
     label: Rcontact polysilicon
