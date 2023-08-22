@@ -11,7 +11,7 @@ from scipy.interpolate import interp1d
 from scipy.stats import linregress
 import scipy.signal
 
-__version__ = '0.8.0'
+__version__ = '0.8.1'
 
 __all__ = [
     'STATUS_NONE',
@@ -24,6 +24,7 @@ __all__ = [
     'analyse_mos',
     'analyse_gcd',
     'analyse_gcd_num',
+    'analyse_gcd_legacy',
     'analyse_gcd_sym',
     'analyse_fet',
     'analyse_van_der_pauw',
@@ -352,46 +353,56 @@ def analyse_mos(v, c, cut_param=0.02, debug=False, min_r_value=0.4):
     return v_fb1, v_fb2, c_acc, c_inv, t_ox, n_ox, a_acc, b_acc, v_acc, a_dep, b_dep, v_dep, a_inv, b_inv, v_inv, spl_dev, status
 
 
-#numeric code for gcd analysis
 @params('i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, i_acc_relstd, i_dep_relstd, i_inv_relstd, spl_dev, status')
-def analyse_gcd_num(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.01):#numeric calcutlation
+def analyse_gcd_num(v, i, cut_param=0.01, debug=False, maxreldev=0.01):
     """
+    Gate Controlled Diode: Generation currents (numeric calcutlation).
+
     Parameters:
-        voltage: voltage range of the analysis, as an array
-        current: measured current, as an array
+        v ... voltage range of the analysis, as an array
+        i ... measured current, as an array
 
     Return:
         surface current, bulk generation current
     """
+    voltage = v
+    current = i
+    # initialize defaults
+    i_surf = i_bulk = np.nan
+    i_acc = i_dep = i_inv = spl_dev = np.nan
+    i_acc_relstd = i_dep_relstd = i_inv_relstd = np.nan
     status = STATUS_NONE
+    v_acc = []
+    v_dep = []
+    v_inv = []
     try:
         derivative = np.gradient(current)
         der_min = min(derivative) #transition point from depletion to inversion
         der_max = max(derivative) #transition point from accumulation to depletion
-        ind_min = int(np.where(derivative==der_min)[0])
-        ind_max = int(np.where(derivative==der_max)[0])
-        #print(der_min,der_max,ind_min,ind_max)
+        ind_min = int(np.where(derivative == der_min)[0])
+        ind_max = int(np.where(derivative == der_max)[0])
+        # print(der_min,der_max,ind_min,ind_max)
 
-        #move points more precisely
+        # move points more precisely
         length = len(current)
         ind_1 = round(ind_min - 0.25*length)
         ind_2 = round(ind_max + 0.25*length)
-        #print(ind_1, ind_2)
-        i_dep=np.mean(current[round(ind_min+0.1*length):round(ind_max-0.1*length)])
-        i_acc=np.mean(current[ind_2:])
-        i_inv=np.mean(current[:ind_1])
-        #print("I_dep:{x};  I_acc:{y}; I_inv:{z}".format(x=str(i_dep),y=str(i_acc),z=str(i_inv)))
+        # print(ind_1, ind_2)
+        i_dep = np.mean(current[round(ind_min+0.1*length):round(ind_max-0.1*length)])
+        i_acc = np.mean(current[ind_2:])
+        i_inv = np.mean(current[:ind_1])
+        # print("I_dep:{x};  I_acc:{y}; I_inv:{z}".format(x=str(i_dep),y=str(i_acc),z=str(i_inv)))
 
-        if i_inv>=i_acc:
-            k=round(0.1*length)
+        if i_inv >= i_acc:
+            k = round(0.1 * length)
             i_inv = current[ind_min-k]
-        #suface and bulk current
-        i_surf = abs(i_inv-i_dep)
-        i_bulk = (abs(i_acc)-abs(i_inv))
-        #print(i_surf,i_bulk)
+        # suface and bulk current
+        i_surf = abs(i_inv - i_dep)
+        i_bulk = (abs(i_acc) - abs(i_inv))
+        # print(i_surf, i_bulk)
 
 
-        #detect whether the measurement was good:
+        # detect whether the measurement was good:
         i_max = np.max(np.abs([i_dep, i_inv, i_acc]))
 
         i_acc_relstd = np.std(i_acc)/i_max
@@ -421,12 +432,11 @@ def analyse_gcd_num(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.0
 
     return i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, i_acc_relstd, i_dep_relstd, i_inv_relstd, spl_dev, status
 
-#initial code for gcd analysis
-@params('i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, i_acc_relstd, i_dep_relstd, i_inv_relstd, spl_dev, status')
-def backup_analyse_gcd(v, i, cut_param=0.01, debug=False, maxreldev=0.01):#initial code
 
+@params('i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, i_acc_relstd, i_dep_relstd, i_inv_relstd, spl_dev, status')
+def analyse_gcd_legacy(v, i, cut_param=0.01, debug=False, maxreldev=0.01):
     """
-    Gate Controlled Diode: Generation currents.
+    Gate Controlled Diode: Generation currents (legacy version).
 
     Parameters:
     v ... voltage
@@ -438,10 +448,10 @@ def backup_analyse_gcd(v, i, cut_param=0.01, debug=False, maxreldev=0.01):#initi
     i_surf ... surface generation current
     i_bulk ... bulk generation current
     """
-
-    # init
+    # initialize defaults
     i_surf = i_bulk = np.nan
     i_acc = i_dep = i_inv = spl_dev = np.nan
+    i_acc_relstd = i_dep_relstd = i_inv_relstd = np.nan
     status = STATUS_NONE
     v_acc = []
     v_dep = []
@@ -456,7 +466,6 @@ def backup_analyse_gcd(v, i, cut_param=0.01, debug=False, maxreldev=0.01):#initi
     i_acc_relstd = np.nan
     i_dep_relstd = np.nan
     i_inv_relstd = np.nan
-
 
     # get regions for indexing
     try:
@@ -481,8 +490,8 @@ def backup_analyse_gcd(v, i, cut_param=0.01, debug=False, maxreldev=0.01):#initi
             v_inv = v[-5:]
             i_inv = i[-5:]
 
-        #the selection above is not stable
-        #until this is fixed stay with a simpler selection
+        # the selection above is not stable
+        # until this is fixed stay with a simpler selection
         v_acc = v[1:6]
         i_acc = i[1:6]
         v_dep = v[np.argmin(i):(np.argmin(i) + 5)]
@@ -522,18 +531,29 @@ def backup_analyse_gcd(v, i, cut_param=0.01, debug=False, maxreldev=0.01):#initi
 
     return i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, i_acc_relstd, i_dep_relstd, i_inv_relstd, spl_dev, status
 
-#symbolical analysis function
+
 @params('i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, i_acc_relstd, i_dep_relstd, i_inv_relstd, spl_dev, status')
-def analyse_gcd_sym(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.01):#symbolic test
+def analyse_gcd_sym(v, i, cut_param=0.01, debug=False, maxreldev=0.01):
     """
+    Gate Controlled Diode: Generation currents (symbolical test).
+
     Parameters:
-        voltage: voltage range of the analysis, as an array
-        current: measured current, as an array
+        v ... voltage range of the analysis, as an array
+        i ... measured current, as an array
 
     Return:
         surface current, bulk generation current
     """
+    voltage = v
+    current = i
+    # initialize defaults
+    i_surf = i_bulk = np.nan
+    i_acc = i_dep = i_inv = spl_dev = np.nan
+    i_acc_relstd = i_dep_relstd = i_inv_relstd = np.nan
     status = STATUS_NONE
+    v_acc = []
+    v_dep = []
+    v_inv = []
     try:
         # Choose the degree of the polynomial, e.g., 2 for a quadratic fit
         degree = 10
@@ -568,28 +588,28 @@ def analyse_gcd_sym(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.0
         der_max = max(derivative) #transition point from accumulation to depletion
         ind_min = int(np.where(derivative==der_min)[0][0])#for the normal data you only
         ind_max = int(np.where(derivative==der_max)[0][0])
-        print(der_min,der_max,ind_min,ind_max)
+        # print(der_min,der_max,ind_min,ind_max)
 
-        #move points more precisely
+        # move points more precisely
         l_all = len(current)
         l_dep = ind_max-ind_min
         ind_1 = round(ind_min - 0.15*l_all)
         ind_2 = round(ind_max + 0.2*l_all)
-        print(ind_1, ind_2)
-        i_dep=np.mean(i_middle[round(ind_min+0.2*l_dep):round(ind_max-0.2*l_dep)])
-        i_acc=np.mean(current[ind_2:])
-        i_inv=np.mean(current[:ind_1])
-        print("I_dep:{x};  I_acc:{y}; I_inv:{z}".format(x=str(i_dep),y=str(i_acc),z=str(i_inv)))
+        # print(ind_1, ind_2)
+        i_dep = np.mean(i_middle[round(ind_min+0.2*l_dep):round(ind_max-0.2*l_dep)])
+        i_acc = np.mean(current[ind_2:])
+        i_inv = np.mean(current[:ind_1])
+        # print("I_dep:{x};  I_acc:{y}; I_inv:{z}".format(x=str(i_dep),y=str(i_acc),z=str(i_inv)))
 
-        if i_inv>=i_acc:
-            k=round(0.1*l_all)
+        if i_inv >= i_acc:
+            k = round(0.1 * l_all)
             i_inv = current[ind_min-k]
-            # while i_inv <=i_acc:
+            # while i_inv <= i_acc:
             #     index = ind_min-k
             #     i_inv = current[index]
             #     k+1
 
-        #detect whether the measurement was good:
+        # detect whether the measurement was good:
         i_max = np.max(np.abs([i_dep, i_inv, i_acc]))
 
         i_acc_relstd = np.std(i_acc)/i_max
@@ -599,7 +619,7 @@ def analyse_gcd_sym(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.0
         i_surf = abs(i_inv-i_dep)
         i_bulk = abs(i_acc-i_inv)
 
-        print(i_surf,i_bulk)
+        # print(i_surf, i_bulk)
 
         if (np.array([i_acc_relstd, i_dep_relstd, i_inv_relstd]) > maxreldev).any():
             i_surf = np.nan
@@ -622,24 +642,12 @@ def analyse_gcd_sym(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.0
     v_inv = voltage[-5:]
     spl_dev= "norm"
 
-    # this can be commented out later just here to make sure what i am doing is not complete bullshit
-
-    # plt.scatter(voltage,current)
-    # plt.plot(v_middle, i_fit_middle)
-    # plt.plot(v_middle,derivative)
-    # plt.plot(v_middle,derv_2)
-    # plt.scatter(v_middle[ind_min],i_middle[ind_min],label="index_min")
-    # plt.scatter(v_middle[ind_max],i_middle[ind_max],label="index_max")
-    # plt.scatter(v_middle[ind_min],i_inv,label="i_inv")
-    # plt.scatter(v_middle[ind_max],i_acc,label="i_acc")
-    # plt.scatter(np.mean(v_middle[ind_min:ind_max]),i_dep,label="i_dep")
-    # plt.legend()
-    # plt.show()
-
     return i_surf, i_bulk, i_acc, i_dep, i_inv, v_acc, v_dep, v_inv, i_acc_relstd, i_dep_relstd, i_inv_relstd, spl_dev, status
 
-#here you can switch between analysis versions
+
+# alias for backward compatibility
 analyse_gcd = analyse_gcd_num
+
 
 @params('v_th, a, b, spl_dev, status')
 def analyse_fet(v, i, debug=False, numDev=6, thrMultDev=0.33):
