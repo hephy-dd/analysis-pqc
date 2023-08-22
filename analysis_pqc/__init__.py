@@ -11,7 +11,7 @@ from scipy.interpolate import interp1d
 from scipy.stats import linregress
 import scipy.signal
 
-__version__ = '0.7.1'
+__version__ = '0.8.0'
 
 __all__ = [
     'STATUS_NONE',
@@ -23,6 +23,8 @@ __all__ = [
     'analyse_cv',
     'analyse_mos',
     'analyse_gcd',
+    'analyse_gcd_num',
+    'analyse_gcd_sym',
     'analyse_fet',
     'analyse_van_der_pauw',
     'analyse_cross',
@@ -357,7 +359,7 @@ def analyse_gcd_num(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.0
     Parameters:
         voltage: voltage range of the analysis, as an array
         current: measured current, as an array
-    
+
     Return:
         surface current, bulk generation current
     """
@@ -369,8 +371,8 @@ def analyse_gcd_num(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.0
         ind_min = int(np.where(derivative==der_min)[0])
         ind_max = int(np.where(derivative==der_max)[0])
         #print(der_min,der_max,ind_min,ind_max)
-        
-        #move points more precisely 
+
+        #move points more precisely
         length = len(current)
         ind_1 = round(ind_min - 0.25*length)
         ind_2 = round(ind_max + 0.25*length)
@@ -387,7 +389,7 @@ def analyse_gcd_num(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.0
         i_surf = abs(i_inv-i_dep)
         i_bulk = (abs(i_acc)-abs(i_inv))
         #print(i_surf,i_bulk)
-        
+
 
         #detect whether the measurement was good:
         i_max = np.max(np.abs([i_dep, i_inv, i_acc]))
@@ -410,7 +412,7 @@ def analyse_gcd_num(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.0
         status = STATUS_FAILED
         i_surf = np.nan
         i_bulk = np.nan
-    
+
     #parameters that were needed before and technically are not needed anymore:
     v_acc = voltage[1:6]
     v_dep = voltage[np.argmin(current):(np.argmin(current) + 5)]
@@ -527,7 +529,7 @@ def analyse_gcd_sym(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.0
     Parameters:
         voltage: voltage range of the analysis, as an array
         current: measured current, as an array
-    
+
     Return:
         surface current, bulk generation current
     """
@@ -543,7 +545,7 @@ def analyse_gcd_sym(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.0
         derivative_all = polynomial_fit.deriv()(voltage)
         derv_two_all = polynomial_fit.deriv(2)(voltage)
         # Specify the relative percentage of the data you want to extract from the center
-        middle_percentage = 0.7  
+        middle_percentage = 0.7
 
         # Calculate the number of points to extract based on the percentage
         num_points_to_extract = int(len(voltage) * middle_percentage)
@@ -568,7 +570,7 @@ def analyse_gcd_sym(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.0
         ind_max = int(np.where(derivative==der_max)[0][0])
         print(der_min,der_max,ind_min,ind_max)
 
-        #move points more precisely 
+        #move points more precisely
         l_all = len(current)
         l_dep = ind_max-ind_min
         ind_1 = round(ind_min - 0.15*l_all)
@@ -586,17 +588,17 @@ def analyse_gcd_sym(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.0
             #     index = ind_min-k
             #     i_inv = current[index]
             #     k+1
-        
+
         #detect whether the measurement was good:
         i_max = np.max(np.abs([i_dep, i_inv, i_acc]))
 
         i_acc_relstd = np.std(i_acc)/i_max
         i_dep_relstd = np.std(i_dep)/i_max
         i_inv_relstd = np.std(i_inv)/i_max
-        
+
         i_surf = abs(i_inv-i_dep)
         i_bulk = abs(i_acc-i_inv)
-        
+
         print(i_surf,i_bulk)
 
         if (np.array([i_acc_relstd, i_dep_relstd, i_inv_relstd]) > maxreldev).any():
@@ -613,7 +615,7 @@ def analyse_gcd_sym(voltage, current,cut_param=0.01 , debug=False, maxreldev=0.0
         status = STATUS_FAILED
         i_surf = np.nan
         i_bulk = np.nan
-    
+
     #parameters that were needed before and technically are not needed anymore:
     v_acc = voltage[1:6]
     v_dep = voltage[np.argmin(current):(np.argmin(current) + 5)]
