@@ -95,7 +95,7 @@ pqc_values:
     label: Surface current
     expected_value: 8.0
     unit: pA
-    show_multiplier: -1e12
+    show_multiplier: 1e12
     stray: 1
   s0:
     name: s0
@@ -216,7 +216,7 @@ pqc_values:
     label: Surface current 05
     expected_value: 11.0
     unit: pA
-    show_multiplier: -1e12
+    show_multiplier: 1e12
     stray: 1
     max_allowed: 25.0
   s0_gcd05:
@@ -230,13 +230,15 @@ pqc_values:
     label: Bulk current 05
     expected_value: 0.7
     unit: pA
-    show_multiplier: -1e12
+    show_multiplier: 1e12
     stray: 1
   r_contact_n:
     name: r_cont_n
     label: Rcontact N+
     expected_value: 27.0
     unit: Ohm
+    min_allowed: 50
+    max_allowed: 500
   r_contact_poly:
     name: r_cont_poly
     label: Rcontact polysilicon

@@ -104,7 +104,7 @@ class PQC_resultset:
             # =================================================== Flute 2 ===================================================
 
             self.dataseries["i_surf"] = PQC_Values(
-                "i_surf", "Surface current", 8.0, "pA", -1e12, stray=1
+                "i_surf", "Surface current", 8.0, "pA", 1e12, stray=1
             )
             self.dataseries["s0"] = PQC_Values(
                 "s0", "Surface generation velocity", 1.0, "cm/s", stray=1
@@ -190,7 +190,7 @@ class PQC_resultset:
                 "Surface current 05",
                 11.0,
                 "pA",
-                -1e12,
+                1e12,
                 stray=1,
                 max_allowed=25.0,
             )
@@ -442,14 +442,15 @@ class PQC_resultset:
 
         # =================================================== Flute 2 ===================================================
 
-        i_surf, _, rawdata = pqc.analyse_gcd_data(
+        i_surf, i_bulk, rawdata = pqc.analyse_gcd_data(
             pqc.find_most_recent_file(path, "gcd", whitelist=[]),
             options=options.pushPrefix("GCD"),
             config=config,
         )  # only i_surf valid
         self.dataseries["i_surf"].append(i_surf)
         # s0 = i_surf / q / ni[cm^-3] / Agate[cm^2]
-        s0 = -i_surf / 1.602e-19 / 7.01e9 / 0.505e-2
+        s0 = i_surf / 1.602e-19 / 7.01e9 / 0.505e-2
+        
         self.dataseries["s0"].append(s0)
         if rawdata is not None:
             rawdata.add_data({"s0": s0})
@@ -653,7 +654,8 @@ class PQC_resultset:
         )  # for i_bulk
         self.dataseries["i_surf05"].append(i_surf05)
         self.dataseries["i_bulk05"].append(i_bulk05)
-        s0_gcd05 = -i_surf05 / 1.602e-19 / 7.01e9 / 0.732e-2
+        s0_gcd05 = i_surf05 / 1.602e-19 / 7.01e9 / 0.732e-2
+        
         self.dataseries["s0_gcd05"].append(s0_gcd05)
         if rawdata is not None:
             rawdata.add_data({"s0": s0_gcd05})

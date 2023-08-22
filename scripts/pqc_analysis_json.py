@@ -500,6 +500,7 @@ def analyse_gcd_data(path, options=None, config=None):
     lbl = assign_label(path, test)
 
     gcd_result = analyse_gcd(v, i_em, maxreldev=0.03, **kwargs)
+    
 
     if options.plot:
         fig, ax = plt.subplots(1, 1)
