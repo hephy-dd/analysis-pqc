@@ -101,7 +101,7 @@ pqc_values:
     label: Surface current
     expected_value: 39 
     unit: pA
-    show_multiplier: -1e12
+    show_multiplier: 1e12
     stray: 0.33
   s0:
     name: s0
@@ -229,7 +229,7 @@ pqc_values:
     label: Surface current 05
     expected_value: 50 
     unit: pA
-    show_multiplier: -1e12
+    show_multiplier: 1e12
     stray: 0.33
     max_allowed: 80 
   s0_gcd05:
@@ -243,7 +243,7 @@ pqc_values:
     label: Bulk current 05
     expected_value: 0.7
     unit: pA
-    show_multiplier: -1e12
+    show_multiplier: 1e12
     stray: 1
   r_contact_n:
     name: r_cont_n
