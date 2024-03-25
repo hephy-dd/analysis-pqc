@@ -11,7 +11,7 @@ from scipy.interpolate import interp1d
 from scipy.stats import linregress
 import scipy.signal
 
-__version__ = '0.8.1'
+__version__ = '0.8.2'
 
 __all__ = [
     'STATUS_NONE',
@@ -671,8 +671,11 @@ def analyse_fet(v, i, debug=False, numDev=6, thrMultDev=0.33):
     status = STATUS_NONE
 
     # get spline fit, requires strictlty increasing array
-    i = i - i[0]  # we are havng offset problems
-    y_norm = i / np.max(np.abs(i))
+    i = i - i[0]  # we are having offset problems
+    if np.all(i == 0):  # in case of all-equal out-of-range readings
+        y_norm = np.zeros_like(i)
+    else:
+        y_norm = i / np.max(np.abs(i))
     x_norm = np.arange(len(y_norm))
     spl = CubicSpline(x_norm, y_norm)
     spl_dev = spl(x_norm, 1)
